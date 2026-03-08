@@ -168,20 +168,24 @@ function LayerAnimation({ color, onDone }) {
         if (cancelled) return;
         setLayerNum(layer);
 
-        // Speed curve
+        // Speed curve — each value is time per sub-phase (attn or mlp)
+        // so total time per layer = delay * 2
         let delay;
-        if (layer <= 5) delay = 180;
-        else if (layer <= 10) delay = 100;
-        else if (layer <= 85) delay = 50;
-        else if (layer <= 92) delay = 100;
-        else delay = 200;
+        if (layer <= 4) delay = 400;       // slow start — let kids see the pattern
+        else if (layer <= 8) delay = 300;
+        else if (layer <= 15) delay = 200;
+        else if (layer <= 30) delay = 120;
+        else if (layer <= 70) delay = 80;   // cruising speed — still readable
+        else if (layer <= 85) delay = 120;
+        else if (layer <= 92) delay = 200;
+        else delay = 350;                   // slow finish
 
         // Attention sub-phase: show beams
         const beamPattern = BEAM_PATTERNS[layer % BEAM_PATTERNS.length];
         setScrollSub("attn");
         setActiveBeams(beamPattern);
         setMlpNodes([]);
-        await sleep(delay / 2);
+        await sleep(delay);
         if (cancelled) return;
 
         // MLP sub-phase: show nodes
@@ -189,7 +193,7 @@ function LayerAnimation({ color, onDone }) {
         setScrollSub("mlp");
         setActiveBeams([]);
         setMlpNodes(nodesForLayer);
-        await sleep(delay / 2);
+        await sleep(delay);
       }
 
       await sleep(400);
