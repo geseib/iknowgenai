@@ -37,6 +37,18 @@ const ATTENTION_PAIRS = [
   [0, 1], [1, 2], [3, 4], [2, 0], [4, 1], [1, 3],
 ];
 
+// Different beam patterns for variety during fast scroll
+const BEAM_PATTERNS = [
+  [[0, 1], [2, 4]],
+  [[1, 3], [0, 4]],
+  [[2, 3], [1, 0]],
+  [[4, 2], [3, 1]],
+  [[0, 3], [1, 4]],
+  [[3, 0], [4, 2]],
+  [[1, 2], [3, 4]],
+  [[0, 2], [1, 3]],
+];
+
 function ContinueButton({ onClick, color, label }) {
   return (
     <div style={{ textAlign: "center", marginTop: 28, marginBottom: 16 }}>
@@ -99,10 +111,12 @@ function LayerCard({ layer, color }) {
 
 /* ─── The big animated layer visualization ─── */
 function LayerAnimation({ color, onDone }) {
+  // scrollSub: "attn" or "mlp" — which half of the layer we're showing during scroll
   const [phase, setPhase] = useState("idle"); // idle | attention | mlp | scrolling | output
   const [layerNum, setLayerNum] = useState(1);
   const [activeBeams, setActiveBeams] = useState([]);
   const [mlpNodes, setMlpNodes] = useState([]);
+  const [scrollSub, setScrollSub] = useState("attn"); // which sub-phase during scrolling
   const [started, setStarted] = useState(false);
   const animRef = useRef(null);
   const wordRefs = useRef([]);
@@ -126,7 +140,7 @@ function LayerAnimation({ color, onDone }) {
     }
 
     async function runAnimation() {
-      // Phase 1: Show attention beams one by one
+      // Phase 1: Show attention beams one by one (layer 1)
       setPhase("attention");
       for (let i = 0; i < ATTENTION_PAIRS.length; i++) {
         if (cancelled) return;
@@ -135,7 +149,7 @@ function LayerAnimation({ color, onDone }) {
       }
       await sleep(600);
 
-      // Phase 2: MLP thinking
+      // Phase 2: MLP thinking (layer 1)
       if (cancelled) return;
       setPhase("mlp");
       setActiveBeams([]);
@@ -146,29 +160,44 @@ function LayerAnimation({ color, onDone }) {
       }
       await sleep(600);
 
-      // Phase 3: Fast scroll through layers 2-96
+      // Phase 3: Fast scroll through layers 2-96 with visible attention/MLP alternation
       if (cancelled) return;
       setPhase("scrolling");
-      setMlpNodes([]);
 
-      // Accelerate through layers: slow at start, fast in middle, slow at end
       for (let layer = 2; layer <= 96; layer++) {
         if (cancelled) return;
         setLayerNum(layer);
-        // Speed curve: slow for first 5, fast for middle, slow for last 5
+
+        // Speed curve
         let delay;
-        if (layer <= 5) delay = 200;
+        if (layer <= 5) delay = 180;
         else if (layer <= 10) delay = 100;
-        else if (layer <= 85) delay = 30;
+        else if (layer <= 85) delay = 50;
         else if (layer <= 92) delay = 100;
-        else delay = 250;
-        await sleep(delay);
+        else delay = 200;
+
+        // Attention sub-phase: show beams
+        const beamPattern = BEAM_PATTERNS[layer % BEAM_PATTERNS.length];
+        setScrollSub("attn");
+        setActiveBeams(beamPattern);
+        setMlpNodes([]);
+        await sleep(delay / 2);
+        if (cancelled) return;
+
+        // MLP sub-phase: show nodes
+        const nodesForLayer = [0, 1, 2, 3, 4].filter((_, idx) => ((layer + idx) % 3) !== 0);
+        setScrollSub("mlp");
+        setActiveBeams([]);
+        setMlpNodes(nodesForLayer);
+        await sleep(delay / 2);
       }
 
       await sleep(400);
 
       // Phase 4: Output word
       if (cancelled) return;
+      setActiveBeams([]);
+      setMlpNodes([]);
       setPhase("output");
       await sleep(2000);
       if (onDone) onDone();
@@ -191,9 +220,13 @@ function LayerAnimation({ color, onDone }) {
     };
   };
 
+  const showBeams = phase === "attention" || (phase === "scrolling" && scrollSub === "attn");
+  const showMlp = phase === "mlp" || (phase === "scrolling" && scrollSub === "mlp");
+
   const phaseLabel = phase === "attention" ? "Attention — words talk to each other"
     : phase === "mlp" ? "MLP — the thinking layer"
-    : phase === "scrolling" ? "Processing..."
+    : phase === "scrolling" && scrollSub === "attn" ? "Attention"
+    : phase === "scrolling" && scrollSub === "mlp" ? "MLP"
     : phase === "output" ? "Done!"
     : "Ready";
 
@@ -256,7 +289,7 @@ function LayerAnimation({ color, onDone }) {
             zIndex: 1,
           }}
         >
-          {phase === "attention" && activeBeams.map(([a, b], i) => {
+          {showBeams && activeBeams.map(([a, b], i) => {
             const from = getWordCenter(a);
             const to = getWordCenter(b);
             if (!from.x && !to.x) return null;
@@ -301,15 +334,15 @@ function LayerAnimation({ color, onDone }) {
                 fontFamily: "'Fredoka',sans-serif",
                 fontSize: 22,
                 fontWeight: 600,
-                color: (phase === "attention" && activeBeams.some(([a, b]) => a === i || b === i))
+                color: (showBeams && activeBeams.some(([a, b]) => a === i || b === i))
                   ? color : "white",
                 padding: "10px 16px",
                 borderRadius: 12,
-                background: (phase === "attention" && activeBeams.some(([a, b]) => a === i || b === i))
+                background: (showBeams && activeBeams.some(([a, b]) => a === i || b === i))
                   ? `${color}20` : "rgba(255,255,255,.08)",
                 transition: "all .3s ease",
                 border: `2px solid ${
-                  (phase === "attention" && activeBeams.some(([a, b]) => a === i || b === i))
+                  (showBeams && activeBeams.some(([a, b]) => a === i || b === i))
                     ? `${color}50` : "rgba(255,255,255,.1)"
                 }`,
               }}
@@ -320,7 +353,7 @@ function LayerAnimation({ color, onDone }) {
         </div>
       </div>
 
-      {/* Attention visualization */}
+      {/* Attention label (initial slow phase only) */}
       {phase === "attention" && (
         <div style={{
           display: "flex",
@@ -340,24 +373,26 @@ function LayerAnimation({ color, onDone }) {
         </div>
       )}
 
-      {/* MLP visualization */}
-      {phase === "mlp" && (
-        <div style={{ animation: "fadeUp .3s ease" }}>
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 8,
-            marginBottom: 16,
-          }}>
-            <Brain size={24} weight="duotone" color={color} />
-            <span style={{
-              fontFamily: "'Fredoka',sans-serif",
-              fontSize: 16,
-              color: "rgba(255,255,255,.5)",
+      {/* MLP nodes — visible during mlp phase AND scrolling mlp sub-phase */}
+      {showMlp && (
+        <div>
+          {phase === "mlp" && (
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 8,
+              marginBottom: 16,
             }}>
-              Thinking about what it all means...
-            </span>
-          </div>
+              <Brain size={24} weight="duotone" color={color} />
+              <span style={{
+                fontFamily: "'Fredoka',sans-serif",
+                fontSize: 16,
+                color: "rgba(255,255,255,.5)",
+              }}>
+                Thinking about what it all means...
+              </span>
+            </div>
+          )}
           <div style={{
             display: "flex",
             justifyContent: "center",
@@ -372,7 +407,7 @@ function LayerAnimation({ color, onDone }) {
                   borderRadius: "50%",
                   background: mlpNodes.includes(i) ? `${color}40` : "rgba(255,255,255,.06)",
                   border: `2px solid ${mlpNodes.includes(i) ? color : "rgba(255,255,255,.1)"}`,
-                  transition: "all .3s ease",
+                  transition: "all .08s ease",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -380,7 +415,7 @@ function LayerAnimation({ color, onDone }) {
                 }}
               >
                 {mlpNodes.includes(i) && (
-                  <Lightning size={18} weight="fill" color={color} style={{ animation: "popIn .3s ease" }} />
+                  <Lightning size={18} weight="fill" color={color} />
                 )}
               </div>
             ))}
@@ -388,15 +423,14 @@ function LayerAnimation({ color, onDone }) {
         </div>
       )}
 
-      {/* Scrolling fast-forward visualization */}
+      {/* Progress bar — during scrolling phase */}
       {phase === "scrolling" && (
-        <div style={{ animation: "fadeUp .3s ease" }}>
-          {/* Progress bar */}
+        <div style={{ marginTop: 16 }}>
           <div style={{
             height: 8,
             borderRadius: 4,
             background: "rgba(255,255,255,.08)",
-            margin: "0 20px 12px",
+            margin: "0 20px 8px",
             overflow: "hidden",
           }}>
             <div style={{
@@ -404,22 +438,20 @@ function LayerAnimation({ color, onDone }) {
               width: `${(layerNum / 96) * 100}%`,
               background: color,
               borderRadius: 4,
-              transition: "width .05s linear",
+              transition: "width .03s linear",
             }} />
           </div>
-          {/* Alternating attention/mlp indicators */}
           <div style={{
             display: "flex",
             justifyContent: "center",
             gap: 16,
-            opacity: 0.5,
           }}>
             <div style={{
               display: "flex",
               alignItems: "center",
               gap: 6,
-              opacity: layerNum % 2 === 0 ? 1 : 0.3,
-              transition: "opacity .1s",
+              opacity: scrollSub === "attn" ? 1 : 0.25,
+              transition: "opacity .08s",
             }}>
               <ChatCircleDots size={20} weight="duotone" color={color} />
               <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)" }}>Attention</span>
@@ -428,8 +460,8 @@ function LayerAnimation({ color, onDone }) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              opacity: layerNum % 2 === 1 ? 1 : 0.3,
-              transition: "opacity .1s",
+              opacity: scrollSub === "mlp" ? 1 : 0.25,
+              transition: "opacity .08s",
             }}>
               <Brain size={20} weight="duotone" color={color} />
               <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)" }}>MLP</span>
