@@ -153,7 +153,11 @@ export default function SectionAttention({ color, mode }) {
     const handleKey = (e) => {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        advance();
+        if (canAdvance()) {
+          advance();
+        } else if (step >= 4) {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+        }
       }
     };
     window.addEventListener("keydown", handleKey);

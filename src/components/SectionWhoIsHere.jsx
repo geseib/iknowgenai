@@ -66,9 +66,13 @@ export default function SectionWhoIsHere({ color, mode }) {
   // Keyboard: down arrow advances steps
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 2) {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
-        advance();
+        if (step < 2) {
+          advance();
+        } else {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+        }
       }
     };
     window.addEventListener("keydown", handleKey);

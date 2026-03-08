@@ -59,9 +59,13 @@ export default function SectionTheBridge({ color, mode }) {
   // Keyboard: down arrow advances steps
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 1) {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
-        advance();
+        if (step < 1) {
+          advance();
+        } else {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+        }
       }
     };
     window.addEventListener("keydown", handleKey);

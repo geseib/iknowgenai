@@ -99,8 +99,9 @@ export default function SectionMLP({ color, mode }) {
           run();
         } else if (step === 0 && hasRun) {
           advance();
+        } else if (step >= 1) {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
         }
-        // step 1 is the last step, no further advance
       }
     };
     window.addEventListener("keydown", handleKey);

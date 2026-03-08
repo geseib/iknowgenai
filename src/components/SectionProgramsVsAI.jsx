@@ -51,25 +51,30 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-function ScenarioCard({ scenario, color }) {
+function ScenarioCard({ scenario, color, revealed, onReveal }) {
   const isAI = scenario.answer === "ai";
   return (
-    <div style={{
-      borderRadius: 18,
-      overflow: "hidden",
-      border: `2px solid ${isAI ? color : "rgba(255,255,255,.35)"}`,
-      background: "rgba(255,255,255,.04)",
-      padding: "24px 28px",
-      display: "flex",
-      flexDirection: "column",
-      gap: 14,
-    }}>
+    <div
+      onClick={!revealed ? onReveal : undefined}
+      style={{
+        borderRadius: 18,
+        overflow: "hidden",
+        border: `2px solid ${revealed ? (isAI ? color : "rgba(255,255,255,.35)") : "rgba(255,255,255,.15)"}`,
+        background: "rgba(255,255,255,.04)",
+        padding: "24px 28px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        cursor: revealed ? "default" : "pointer",
+        transition: "border-color .3s ease",
+      }}>
       {/* Icon + Label */}
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <scenario.Icon
           size={40}
           weight="duotone"
-          color={isAI ? color : "rgba(255,255,255,.6)"}
+          color={revealed ? (isAI ? color : "rgba(255,255,255,.6)") : "rgba(255,255,255,.4)"}
+          style={{ transition: "color .3s ease" }}
         />
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
@@ -79,59 +84,107 @@ function ScenarioCard({ scenario, color }) {
         }}>
           {scenario.label}
         </div>
-        {/* Answer badge */}
+        {/* Answer badge — hidden until revealed */}
+        {revealed ? (
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: isAI ? color : "rgba(255,255,255,.7)",
+            padding: "6px 16px",
+            borderRadius: 24,
+            background: isAI ? `${color}20` : "rgba(255,255,255,.08)",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexShrink: 0,
+            animation: "fadeUp .4s ease",
+          }}>
+            {isAI
+              ? <><Robot size={20} weight="duotone" /> AI</>
+              : <><ClipboardText size={20} weight="duotone" /> Regular</>}
+          </div>
+        ) : (
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            color: "rgba(255,255,255,.35)",
+            padding: "6px 16px",
+            borderRadius: 24,
+            background: "rgba(255,255,255,.06)",
+            flexShrink: 0,
+          }}>
+            ?
+          </div>
+        )}
+      </div>
+      {/* Why text — only after reveal */}
+      {revealed && (
         <div style={{
-          fontFamily: "'Fredoka',sans-serif",
           fontSize: 18,
-          fontWeight: 700,
-          color: isAI ? color : "rgba(255,255,255,.7)",
-          padding: "6px 16px",
-          borderRadius: 24,
-          background: isAI ? `${color}20` : "rgba(255,255,255,.08)",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          flexShrink: 0,
+          color: "rgba(255,255,255,.6)",
+          lineHeight: 1.55,
+          paddingLeft: 56,
+          animation: "fadeUp .4s ease",
         }}>
-          {isAI
-            ? <><Robot size={20} weight="duotone" /> AI</>
-            : <><ClipboardText size={20} weight="duotone" /> Regular</>}
+          {scenario.why}
         </div>
-      </div>
-      {/* Why text */}
-      <div style={{
-        fontSize: 18,
-        color: "rgba(255,255,255,.6)",
-        lineHeight: 1.55,
-        paddingLeft: 56,
-      }}>
-        {scenario.why}
-      </div>
+      )}
     </div>
   );
 }
 
 export default function SectionProgramsVsAI({ color, mode }) {
   const [step, setStep] = useState(0);
+  const [revealed, setRevealed] = useState(new Set());
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
   const step3Ref = useRef(null);
 
-  const advance = () => {
-    if (step < 3) setStep(s => s + 1);
+  const revealCard = (idx) => {
+    setRevealed(prev => new Set(prev).add(idx));
   };
 
-  // Keyboard: down arrow advances steps
+  // Which cards are in the current step group?
+  const currentGroupStart = step * 2; // 0→[0,1], 1→[2,3], 2→[4,5]
+  const currentGroupEnd = currentGroupStart + 2;
+  const allCurrentRevealed = step >= 3 ||
+    scenarios.slice(currentGroupStart, currentGroupEnd).every((_, i) => revealed.has(currentGroupStart + i));
+
+  const advance = () => {
+    if (step < 3) {
+      // Auto-reveal any unrevealed cards in current group before advancing
+      for (let i = currentGroupStart; i < currentGroupEnd; i++) {
+        if (!revealed.has(i)) revealCard(i);
+      }
+      setTimeout(() => setStep(s => s + 1), 300);
+    }
+  };
+
+  // Keyboard: down arrow reveals next unrevealed card in group, or advances step
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 3) {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
+        if (step >= 3) {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+          return;
+        }
+        // Find first unrevealed card in current group
+        for (let i = currentGroupStart; i < currentGroupEnd; i++) {
+          if (!revealed.has(i)) {
+            revealCard(i);
+            return;
+          }
+        }
+        // All revealed — advance to next step
         advance();
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [step]);
+  }, [step, revealed]);
 
   // Auto-scroll to newly revealed step
   useEffect(() => {
@@ -169,14 +222,17 @@ export default function SectionProgramsVsAI({ color, mode }) {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {scenarios.slice(0, 2).map((s, i) => (
-            <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
-              <ScenarioCard scenario={s} color={color} />
-            </div>
-          ))}
+          {scenarios.slice(0, 2).map((s, i) => {
+            const gi = i;
+            return (
+              <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
+                <ScenarioCard scenario={s} color={color} revealed={revealed.has(gi)} onReveal={() => revealCard(gi)} />
+              </div>
+            );
+          })}
         </div>
 
-        {step === 0 && (
+        {step === 0 && revealed.has(0) && revealed.has(1) && (
           <ContinueButton onClick={advance} color={color} label="Next two" />
         )}
       </div>
@@ -195,14 +251,17 @@ export default function SectionProgramsVsAI({ color, mode }) {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {scenarios.slice(2, 4).map((s, i) => (
-              <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
-                <ScenarioCard scenario={s} color={color} />
-              </div>
-            ))}
+            {scenarios.slice(2, 4).map((s, i) => {
+              const gi = 2 + i;
+              return (
+                <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
+                  <ScenarioCard scenario={s} color={color} revealed={revealed.has(gi)} onReveal={() => revealCard(gi)} />
+                </div>
+              );
+            })}
           </div>
 
-          {step === 1 && (
+          {step === 1 && revealed.has(2) && revealed.has(3) && (
             <ContinueButton onClick={advance} color={color} label="Last two" />
           )}
         </div>
@@ -222,14 +281,17 @@ export default function SectionProgramsVsAI({ color, mode }) {
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {scenarios.slice(4, 6).map((s, i) => (
-              <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
-                <ScenarioCard scenario={s} color={color} />
-              </div>
-            ))}
+            {scenarios.slice(4, 6).map((s, i) => {
+              const gi = 4 + i;
+              return (
+                <div key={i} style={{ animation: `fadeUp .5s ${i * 0.15}s ease both` }}>
+                  <ScenarioCard scenario={s} color={color} revealed={revealed.has(gi)} onReveal={() => revealCard(gi)} />
+                </div>
+              );
+            })}
           </div>
 
-          {step === 2 && (
+          {step === 2 && revealed.has(4) && revealed.has(5) && (
             <ContinueButton onClick={advance} color={color} label="The big idea" />
           )}
         </div>

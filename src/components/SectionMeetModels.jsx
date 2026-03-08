@@ -134,9 +134,13 @@ export default function SectionMeetModels({ color, mode }) {
   // Keyboard: down arrow advances steps
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 3) {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
-        advance();
+        if (step < 3) {
+          advance();
+        } else {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+        }
       }
     };
     window.addEventListener("keydown", handleKey);

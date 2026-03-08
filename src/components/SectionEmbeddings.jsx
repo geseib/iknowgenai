@@ -229,7 +229,14 @@ export default function SectionEmbeddings({ color, mode }) {
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 1) { e.preventDefault(); advance(); }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (step < 1) {
+          advance();
+        } else {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
+        }
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);

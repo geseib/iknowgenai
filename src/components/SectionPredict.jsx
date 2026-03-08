@@ -85,6 +85,8 @@ export default function SectionPredict({ color, mode }) {
           pick();
         } else if (step === 0 && done) {
           advance();
+        } else if (step >= 1) {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
         }
       }
     };

@@ -58,13 +58,17 @@ export default function SectionWhatIsAI({ color, mode }) {
   // Keyboard: down arrow advances steps
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === "ArrowDown" && step < 2) {
+      if (e.key === "ArrowDown") {
         e.preventDefault();
-        if (step === 0 && !picked) {
-          // Default to first choice if none picked
-          setPicked("robot");
+        if (step < 2) {
+          if (step === 0 && !picked) {
+            // Default to first choice if none picked
+            setPicked("robot");
+          }
+          advance();
+        } else {
+          window.dispatchEvent(new Event("sectionFullyRevealed"));
         }
-        advance();
       }
     };
     window.addEventListener("keydown", handleKey);

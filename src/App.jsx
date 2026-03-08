@@ -34,6 +34,9 @@ const SECTIONS = [
   SectionPredict,
 ];
 
+// Custom event for sections to signal they're fully revealed
+const SECTION_DONE_EVENT = "sectionFullyRevealed";
+
 export default function App() {
   const [mode, setMode] = useState(null);
   const [sec, setSec] = useState(0);
@@ -62,6 +65,14 @@ export default function App() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [mode, next, prev]);
+
+  // Listen for sections signaling they're fully revealed — next ArrowDown goes to next section
+  useEffect(() => {
+    if (!mode) return;
+    const handleDone = () => next();
+    window.addEventListener(SECTION_DONE_EVENT, handleDone);
+    return () => window.removeEventListener(SECTION_DONE_EVENT, handleDone);
+  }, [mode, next]);
 
   if (!mode) return <ModeSelect onSelect={setMode} allCss={ALL_CSS} />;
 
