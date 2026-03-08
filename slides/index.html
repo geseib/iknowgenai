@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How AI Thinks — Interactive Lesson</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+    :root {
+      --r-background-color: #050512;
+      --r-main-font: 'Fredoka', sans-serif;
+      --r-main-font-size: 36px;
+      --r-heading-font: 'Fredoka', sans-serif;
+      --r-heading-color: #fff;
+      --r-heading-text-transform: none;
+      --r-main-color: rgba(255,255,255,.85);
+      --r-link-color: #00f5d4;
+      --r-selection-background-color: #00f5d466;
+    }
+
+    .reveal { font-family: 'Fredoka', sans-serif; }
+    .reveal h1 { font-size: 2.8em; font-weight: 700; margin-bottom: 0.3em; }
+    .reveal h2 { font-size: 2.2em; font-weight: 700; margin-bottom: 0.3em; }
+    .reveal h3 { font-size: 1.5em; font-weight: 600; margin-bottom: 0.3em; }
+    .reveal p { font-size: 1.1em; line-height: 1.5; }
+    .reveal li { font-size: 1.05em; line-height: 1.6; margin-bottom: 0.3em; }
+
+    /* Section labels */
+    .label {
+      font-size: 0.55em;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 0.6em;
+      opacity: 0.6;
+    }
+
+    /* Color accents for each group */
+    .accent-teal { color: #00f5d4; }
+    .accent-blue { color: #00bbf9; }
+    .accent-yellow { color: #fee440; }
+    .accent-pink { color: #f15bb5; }
+    .accent-purple { color: #9b5de5; }
+    .accent-orange { color: #fb5607; }
+    .accent-green { color: #06d6a0; }
+
+    .bg-teal { background: #00f5d420; border: 2px solid #00f5d450; }
+    .bg-blue { background: #00bbf920; border: 2px solid #00bbf950; }
+    .bg-yellow { background: #fee44020; border: 2px solid #fee44050; }
+    .bg-pink { background: #f15bb520; border: 2px solid #f15bb550; }
+    .bg-purple { background: #9b5de520; border: 2px solid #9b5de550; }
+    .bg-orange { background: #fb560720; border: 2px solid #fb560750; }
+    .bg-green { background: #06d6a020; border: 2px solid #06d6a050; }
+
+    /* Big word display */
+    .big-word {
+      font-size: 4em;
+      font-weight: 700;
+      padding: 0.2em 0.6em;
+      border-radius: 24px;
+      display: inline-block;
+      margin: 0.3em 0;
+    }
+
+    /* Comparison cards */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 0.5em 0;
+    }
+    .compare-card {
+      padding: 28px 24px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    .compare-card h3 { margin: 0 0 12px 0; font-size: 1.3em; }
+    .compare-card p { margin: 0; font-size: 0.9em; opacity: 0.75; }
+
+    /* Badge/pill */
+    .badge {
+      display: inline-block;
+      padding: 8px 24px;
+      border-radius: 50px;
+      font-size: 0.7em;
+      font-weight: 600;
+    }
+
+    /* Icon circles */
+    .icon-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      margin: 0 auto 16px;
+    }
+
+    /* Grid for examples */
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 0.5em 0;
+    }
+    .example-card {
+      padding: 20px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      text-align: center;
+      font-size: 0.7em;
+    }
+    .example-card .emoji { font-size: 2.2em; display: block; margin-bottom: 8px; }
+
+    /* LLM letter boxes */
+    .llm-boxes {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin: 0.5em 0;
+    }
+    .llm-box {
+      padding: 24px 36px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.15);
+      text-align: center;
+    }
+    .llm-box .letter {
+      font-size: 3em;
+      font-weight: 700;
+      opacity: 0.4;
+    }
+    .llm-box .word { font-size: 1em; opacity: 0.6; margin-top: 4px; }
+    .llm-box.active { border-color: currentColor; }
+    .llm-box.active .letter { opacity: 1; }
+    .llm-box.active .word { opacity: 1; font-weight: 600; }
+
+    /* Model cards */
+    .model-card {
+      padding: 28px 32px;
+      border-radius: 20px;
+      text-align: left;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .model-card h3 { margin: 0 0 4px; font-size: 1.5em; }
+    .model-card .maker { font-size: 0.7em; opacity: 0.5; margin-bottom: 12px; }
+    .model-card .tagline { font-size: 0.9em; font-style: italic; opacity: 0.8; margin-bottom: 12px; }
+    .model-card .facts { font-size: 0.75em; opacity: 0.7; }
+    .model-card .facts li { margin-bottom: 4px; }
+
+    /* Brain vs AI table */
+    .brain-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      font-size: 0.8em;
+    }
+    .brain-table th {
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    .brain-table td {
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.05);
+      text-align: center;
+    }
+    .brain-table td:first-child {
+      border-radius: 12px 0 0 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    .brain-table td:last-child { border-radius: 0 12px 12px 0; }
+    .match-yes { color: #06d6a0; }
+    .match-no { color: #f15bb5; }
+
+    /* Number stream */
+    .number-stream {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .number-stream span {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.65em;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* Scatter plot */
+    .scatter-plot {
+      position: relative;
+      width: 750px;
+      height: 450px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      margin: 0 auto;
+    }
+    .scatter-word {
+      position: absolute;
+      font-size: 0.65em;
+      font-weight: 600;
+      transform: translate(-50%, -50%);
+      padding: 4px 12px;
+      border-radius: 24px;
+      white-space: nowrap;
+    }
+    .scatter-label {
+      position: absolute;
+      font-size: 0.5em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      opacity: 0.35;
+    }
+
+    /* Dimension bars */
+    .dim-grid {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px 16px;
+      align-items: center;
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: 0.8em;
+    }
+    .dim-grid .name { text-align: right; font-weight: 600; }
+    .dim-bar {
+      height: 28px;
+      border-radius: 14px;
+      transition: width 0.5s ease;
+    }
+
+    /* Sentence attention */
+    .sentence-display {
+      font-size: 1.4em;
+      line-height: 2;
+      text-align: center;
+    }
+    .sentence-display .highlight-baseball {
+      color: #fb5607;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-color: #fb560760;
+      text-underline-offset: 6px;
+    }
+    .sentence-display .highlight-animal {
+      color: #9b5de5;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-color: #9b5de560;
+      text-underline-offset: 6px;
+    }
+
+    /* Layer stack */
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      margin: 0.3em 0;
+    }
+    .layer-block {
+      padding: 10px 40px;
+      border-radius: 12px;
+      font-size: 0.7em;
+      font-weight: 600;
+      width: 500px;
+      text-align: center;
+    }
+
+    /* Temperature scale */
+    .temp-scale {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 0.4em 0;
+    }
+    .temp-level {
+      padding: 14px 16px;
+      border-radius: 14px;
+      text-align: center;
+      font-size: 0.6em;
+      width: 140px;
+    }
+    .temp-level .temp-icon { font-size: 2em; margin-bottom: 4px; }
+    .temp-level .temp-name { font-weight: 700; margin-bottom: 2px; }
+
+    /* Wow fact box */
+    .wow-box {
+      max-width: 650px;
+      margin: 0.4em auto;
+      padding: 24px 28px;
+      border-radius: 16px;
+      text-align: left;
+    }
+    .wow-box .wow-label {
+      font-size: 0.5em;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+    .wow-box .wow-number {
+      font-size: 2em;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .wow-box .wow-desc { font-size: 0.7em; opacity: 0.7; }
+
+    /* MLP diagram */
+    .mlp-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin: 0.3em 0;
+    }
+    .mlp-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    .mlp-node {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .mlp-arrow {
+      font-size: 2em;
+      opacity: 0.3;
+    }
+    .mlp-label {
+      font-size: 0.6em;
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+
+    /* Progress bar override */
+    .reveal .progress { height: 5px; }
+    .reveal .progress span { background: #00f5d4; }
+
+    /* Slide number styling */
+    .reveal .slide-number { font-family: 'Fredoka', sans-serif; font-size: 14px; right: 16px; bottom: 16px; left: auto; }
+
+    /* Override fragment visibility for cleaner builds */
+    .reveal .fragment { transition: all 0.3s ease; }
+
+    /* Fix list styling */
+    .reveal ul, .reveal ol { display: block; margin: 0 auto; text-align: left; max-width: 700px; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================================ -->
+      <!-- TITLE SLIDE -->
+      <!-- ============================================================ -->
+      <section data-background-color="#050512">
+        <div style="font-size:4em; margin-bottom:16px;">&#129302;</div>
+        <h1>How AI Thinks</h1>
+        <p style="opacity:0.5; font-size:0.8em;">An interactive lesson for 3rd &amp; 4th graders</p>
+        <p style="opacity:0.3; font-size:0.55em; margin-top:2em;">13 sections &middot; ~45 minutes &middot; Ages 8&ndash;11<br>Press <kbd style="background:rgba(255,255,255,.15); padding:2px 10px; border-radius:6px;">&#8594;</kbd> or <kbd style="background:rgba(255,255,255,.15); padding:2px 10px; border-radius:6px;">&#8595;</kbd> to advance</p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- PART 1: INTRODUCTION -->
+      <!-- ============================================================ -->
+
+      <!-- Section 1: Who's Used AI? -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-teal">Introduction &middot; Warm Up</p>
+          <h1>Who's Already <span class="accent-teal">Used AI</span>?</h1>
+          <p class="fragment" style="font-size:1.4em; margin-top:0.8em;">Have <strong class="accent-teal">YOU</strong> ever used AI?</p>
+          <p class="fragment" style="opacity:0.5; font-style:italic;">Raise your hand if you think you have!</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Surprise &mdash; you <span class="accent-teal">probably have!</span></h2>
+          <div class="example-grid" style="margin-top:0.5em;">
+            <div class="example-card fragment"><span class="emoji">&#128483;&#65039;</span>Siri / Alexa</div>
+            <div class="example-card fragment"><span class="emoji">&#128250;</span>YouTube suggestions</div>
+            <div class="example-card fragment"><span class="emoji">&#127918;</span>Video game enemies</div>
+            <div class="example-card fragment"><span class="emoji">&#128247;</span>Phone camera<br>face detection</div>
+            <div class="example-card fragment"><span class="emoji">&#128172;</span>ChatGPT / Claude</div>
+            <div class="example-card fragment"><span class="emoji">&#127925;</span>Spotify picks<br>your next song</div>
+            <div class="example-card fragment"><span class="emoji">&#128269;</span>Google Search<br>predictions</div>
+            <div class="example-card fragment"><span class="emoji">&#127909;</span>Snapchat &amp;<br>TikTok filters</div>
+          </div>
+          <p class="fragment" style="margin-top:0.6em;"><strong class="accent-teal">AI is already everywhere!</strong></p>
+        </section>
+      </section>
+
+      <!-- Section 2: What IS AI? -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-blue">Introduction &middot; The Big Question</p>
+          <h1>What <span class="accent-blue">IS</span> AI?</h1>
+          <p style="margin-top:0.6em;">What do you think AI is? Pick your best guess:</p>
+          <div class="compare-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top:0.6em;">
+            <div class="compare-card bg-blue fragment" style="font-size:0.8em;">
+              <div style="font-size:2.5em;">&#129302;</div>
+              <h3>A robot</h3>
+            </div>
+            <div class="compare-card bg-blue fragment" style="font-size:0.8em;">
+              <div style="font-size:2.5em;">&#128187;</div>
+              <h3>A really smart program</h3>
+            </div>
+            <div class="compare-card bg-blue fragment" style="font-size:0.8em;">
+              <div style="font-size:2.5em;">&#129504;</div>
+              <h3>A digital brain</h3>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2>The real answer:</h2>
+          <p class="fragment" style="font-size:1.2em;">Normal programs follow <strong>rules someone wrote</strong></p>
+          <p class="fragment" style="font-size:1.2em;">like a recipe &#127859;</p>
+          <br>
+          <p class="fragment" style="font-size:1.3em;"><strong class="accent-blue">AI learns from examples</strong></p>
+          <p class="fragment" style="font-size:1.1em;">like learning to talk by <em>hearing</em> people talk &#128483;&#65039;</p>
+          <br>
+          <p class="fragment" style="font-size:1.1em; opacity:0.7;">Nobody wrote the rules &mdash; <span class="accent-blue">it figured them out</span> from millions of examples.</p>
+        </section>
+      </section>
+
+      <!-- Section 3: Rules vs Learning -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-yellow">Introduction &middot; How AI Is Different</p>
+          <h1><span class="accent-yellow">Rules</span> vs Learning</h1>
+          <p>Can you tell which is <strong class="accent-yellow">AI</strong> and which is a <strong>regular program</strong>?</p>
+        </section>
+        <section data-background-color="#050512">
+          <div class="compare-grid">
+            <div class="compare-card fragment" style="background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.15); border-radius:20px;">
+              <div style="font-size:2em;">&#129518;</div>
+              <h3>A calculator adds 2+2</h3>
+              <p><span class="badge" style="background:rgba(255,255,255,.1);">Regular</span></p>
+              <p style="font-size:0.75em; margin-top:8px;">The rule "2+2=4" was written by a programmer.</p>
+            </div>
+            <div class="compare-card fragment" style="background:#fee44015; border:2px solid #fee44040; border-radius:20px;">
+              <div style="font-size:2em;">&#128049;</div>
+              <h3>An app tells a cat from a dog</h3>
+              <p><span class="badge" style="background:#fee44030; color:#fee440;">AI</span></p>
+              <p style="font-size:0.75em; margin-top:8px;">It looked at millions of photos and figured it out.</p>
+            </div>
+          </div>
+          <div class="compare-grid fragment">
+            <div class="compare-card" style="background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.15); border-radius:20px;">
+              <div style="font-size:2em;">&#128678;</div>
+              <h3>Traffic lights change on a timer</h3>
+              <p><span class="badge" style="background:rgba(255,255,255,.1);">Regular</span></p>
+            </div>
+            <div class="compare-card" style="background:#fee44015; border:2px solid #fee44040; border-radius:20px;">
+              <div style="font-size:2em;">&#127925;</div>
+              <h3>Spotify picks your next song</h3>
+              <p><span class="badge" style="background:#fee44030; color:#fee440;">AI</span></p>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2>The Big Idea</h2>
+          <p style="font-size:1.3em;">Regular programs need someone to <strong>write every rule</strong>.</p>
+          <p class="fragment" style="font-size:1.3em;"><span class="accent-yellow">AI learns the rules itself</span><br>just by looking at enough examples.</p>
+          <p class="fragment" style="font-size:0.9em; opacity:0.5; margin-top:1em;">Like learning to ride a bike &mdash;<br>you can't learn from reading instructions. You learn by <em>doing</em>.</p>
+        </section>
+      </section>
+
+      <!-- Section 4: Brain vs AI -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-pink">Introduction &middot; Comparison</p>
+          <h1><span class="accent-pink">Brain</span> vs AI</h1>
+          <p style="font-size:1.2em;">&#129504; vs &#129302;</p>
+          <p style="opacity:0.6;">How similar are they, really?</p>
+        </section>
+        <section data-background-color="#050512">
+          <table class="brain-table">
+            <tr>
+              <th></th>
+              <th>&#129504; Brain</th>
+              <th>&#129302; AI</th>
+              <th>Same?</th>
+            </tr>
+            <tr class="fragment">
+              <td>How it learns</td>
+              <td>Experience &amp; practice</td>
+              <td>Millions of examples</td>
+              <td class="match-yes">&#10003;</td>
+            </tr>
+            <tr class="fragment">
+              <td>Makes mistakes</td>
+              <td>Yes!</td>
+              <td>Yes!</td>
+              <td class="match-yes">&#10003;</td>
+            </tr>
+            <tr class="fragment">
+              <td>Has emotions</td>
+              <td>Fear, joy, love</td>
+              <td>No &mdash; just processes text</td>
+              <td class="match-no">&#10007;</td>
+            </tr>
+            <tr class="fragment">
+              <td>Gets tired</td>
+              <td>Needs sleep!</td>
+              <td>Runs 24/7</td>
+              <td class="match-no">&#10007;</td>
+            </tr>
+            <tr class="fragment">
+              <td>Can be creative</td>
+              <td>Art, music, stories</td>
+              <td>Sort of &mdash; remixes patterns</td>
+              <td class="match-yes">&#10003;</td>
+            </tr>
+          </table>
+          <p class="fragment" style="margin-top:0.5em; font-size:0.9em;">AI is something genuinely <strong class="accent-pink">new</strong> &mdash; not a brain, not a calculator.</p>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- PART 2: MEET THE LLMs -->
+      <!-- ============================================================ -->
+
+      <!-- Section 5: What's an LLM? -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-purple">Meet the LLMs &middot; What Is It?</p>
+          <h1>What's an <span class="accent-purple">LLM</span>?</h1>
+          <div class="llm-boxes" style="margin-top:0.8em;">
+            <div class="llm-box fragment active" style="color:#9b5de5;">
+              <div class="letter">L</div>
+              <div class="word">Large</div>
+            </div>
+            <div class="llm-box fragment active" style="color:#9b5de5;">
+              <div class="letter">L</div>
+              <div class="word">Language</div>
+            </div>
+            <div class="llm-box fragment active" style="color:#9b5de5;">
+              <div class="letter">M</div>
+              <div class="word">Model</div>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2><span class="accent-purple">L</span> = Large</h2>
+          <p style="font-size:1.2em;">Trained on more text than you could read in <strong class="accent-purple">10,000 lifetimes</strong></p>
+          <div class="wow-box bg-purple fragment">
+            <div class="wow-label accent-purple">Wow Fact</div>
+            <div class="wow-number accent-purple">Trillions of words</div>
+            <div class="wow-desc">All of English Wikipedia = 4 billion words. These models read <strong>hundreds of Wikipedias</strong>.</div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2><span class="accent-purple">L</span> = Language</h2>
+          <p style="font-size:1.2em;">Works specifically with <strong class="accent-purple">words and sentences</strong></p>
+          <p class="fragment" style="font-size:1.1em;">Reads text in &#8594; Writes text back out</p>
+          <p class="fragment" style="opacity:0.5; font-size:0.9em;">Other AI types work with images, audio, or video &mdash;<br>LLMs specialize in <em>language</em>.</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2><span class="accent-purple">M</span> = Model</h2>
+          <p style="font-size:1.1em;">A mathematical structure with <strong class="accent-purple">billions of numbers</strong><br>that captures <em>patterns in language</em></p>
+          <p class="fragment" style="font-size:1em; opacity:0.7; margin-top:0.6em;">Hearing enough songs builds a <em>model</em> of what music sounds like in your brain.</p>
+          <p class="fragment" style="font-size:1em; opacity:0.7;">LLMs build a <strong class="accent-purple">mathematical model</strong> of what language sounds like.</p>
+        </section>
+      </section>
+
+      <!-- Section 6: Meet the Models -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-orange">Meet the LLMs &middot; The Players</p>
+          <h1>Meet the <span class="accent-orange">Models</span></h1>
+          <p style="opacity:0.6;">Several companies have built their own AI.<br>Each one works a little differently.</p>
+        </section>
+        <section data-background-color="#050512">
+          <div class="model-card bg-green" style="border-color:#06d6a0;">
+            <h3 class="accent-green">ChatGPT</h3>
+            <div class="maker">OpenAI &middot; San Francisco</div>
+            <div class="tagline">"The one that started the chatbot craze"</div>
+            <ul class="facts">
+              <li class="fragment">Launched November 2022 &mdash; <strong>1 million users in 5 days</strong></li>
+              <li class="fragment">GPT = <strong>G</strong>enerative <strong>P</strong>re-trained <strong>T</strong>ransformer</li>
+            </ul>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <div class="model-card bg-orange" style="border-color:#fb5607;">
+            <h3 class="accent-orange">Claude</h3>
+            <div class="maker">Anthropic &middot; Built with safety first</div>
+            <div class="tagline">"The one focused on being safe and helpful"</div>
+            <ul class="facts">
+              <li class="fragment">Made by Anthropic &mdash; a company focused on <strong>safe, honest AI</strong></li>
+              <li class="fragment">Fun fact: <strong>Claude helped build this lesson!</strong></li>
+            </ul>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <div class="compare-grid">
+            <div class="compare-card bg-blue" style="border-radius:20px; font-size:0.8em;">
+              <div style="font-size:2em;">&#129433;</div>
+              <h3 class="accent-blue">Llama</h3>
+              <div style="font-size:0.75em; opacity:0.5;">Meta (Facebook)</div>
+              <p class="fragment" style="font-size:0.8em;">"The one anyone can build with" &mdash; <strong>open source</strong>, like sharing the recipe</p>
+            </div>
+            <div class="compare-card bg-teal" style="border-radius:20px; font-size:0.8em;">
+              <div style="font-size:2em;">&#9938;</div>
+              <h3 class="accent-teal">Gemini</h3>
+              <div style="font-size:0.75em; opacity:0.5;">Google DeepMind</div>
+              <p class="fragment" style="font-size:0.8em;">"The one built into Google" &mdash; Search, Gmail, Docs &mdash; designed to be <strong>multi-talented</strong></p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Section 7: The Bridge -->
+      <section data-background-color="#050512">
+        <p class="label accent-green">Meet the LLMs &middot; The Bridge</p>
+        <h1>The Big <span class="accent-green">Question</span></h1>
+        <p class="fragment" style="font-size:1.3em; margin-top:0.5em;">These models read<br><strong style="font-size:1.5em;" class="accent-green">BILLIONS</strong> of words...</p>
+        <p class="fragment" style="font-size:1.4em; margin-top:0.4em;">...but <strong>HOW</strong> did that teach them to <span class="accent-green">write back</span>?</p>
+        <p class="fragment" style="font-size:0.8em; opacity:0.4; margin-top:1.5em;">Let's open the hood and look at the engine. &#128270;</p>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- PART 3: HOW AI THINKS -->
+      <!-- ============================================================ -->
+
+      <!-- Section 8: The Secret: Numbers -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-teal">How AI Thinks &middot; Step 1</p>
+          <h1>The Secret: <span class="accent-teal">Numbers</span></h1>
+          <div class="big-word bg-teal accent-teal" style="margin-top:0.4em;">cat</div>
+          <p class="fragment" style="font-size:1.3em; margin-top:0.5em;">When you see this word,<br>what happens in your brain?</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Your brain sees...</h2>
+          <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin:0.5em 0;">
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Soft fur</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Purring</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Cuddly</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Whiskers</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Pointy ears</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Playful</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Warm &amp; sleepy</span>
+            <span class="fragment badge bg-teal" style="font-size:0.9em;">Sneezy if allergic!</span>
+          </div>
+          <p class="fragment" style="font-size:1.1em; margin-top:0.6em;">
+            Your brain floods with <strong class="accent-teal">memories, images, and feelings</strong><br>&mdash; all at once, instantly.
+          </p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>But AI can't do <em>any</em> of that.</h2>
+          <p class="fragment" style="font-size:1.1em; opacity:0.7;">It can't picture a cat. It can't feel fur. It can't hear purring.</p>
+          <p class="fragment" style="font-size:1.3em; margin-top:0.5em;">All it sees is <strong class="accent-teal">numbers</strong>:</p>
+          <div class="fragment">
+            <div style="display:flex; align-items:center; justify-content:center; gap:18px; margin:0.5em 0;">
+              <span class="big-word bg-teal accent-teal" style="font-size:1.5em;">"cat"</span>
+              <span style="font-size:2em; opacity:0.3;">&#8594;</span>
+              <span style="font-size:1.2em; opacity:0.6;">12,288 numbers</span>
+            </div>
+          </div>
+          <div class="number-stream fragment">
+            <span>0.382</span><span>-0.741</span><span>0.156</span><span>-0.893</span>
+            <span>0.524</span><span>-0.067</span><span>0.918</span><span>-0.445</span>
+            <span>0.271</span><span>-0.632</span><span>0.089</span><span>-0.553</span>
+            <span>0.716</span><span>-0.182</span><span>0.447</span><span>...</span>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <div class="wow-box bg-teal">
+            <div class="wow-label accent-teal">Wow Fact</div>
+            <div class="wow-number accent-teal">12,288</div>
+            <div class="wow-desc" style="font-size:0.85em;">numbers per word</div>
+            <br>
+            <p style="font-size:0.85em; opacity:0.7;">Imagine covering an entire <strong>basketball court</strong> with tennis balls, packed side by side. That's about 12,000 balls &mdash; almost exactly how many numbers AI uses for a single word like "cat".</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- Section 9: Words in Space -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-yellow">How AI Thinks &middot; Step 2</p>
+          <h1>Words in <span class="accent-yellow">Space</span></h1>
+          <p style="font-size:1.1em;">Those 12,288 numbers act like <strong class="accent-yellow">coordinates</strong>,<br>placing each word in a giant space.</p>
+          <p class="fragment" style="font-size:1.2em;">Similar words end up <em class="accent-yellow">close together</em>.</p>
+        </section>
+        <section data-background-color="#050512">
+          <div class="scatter-plot">
+            <span class="scatter-label" style="left:4%; top:5%; color:#06d6a0;">&#128062; Animals</span>
+            <span class="scatter-label" style="left:58%; top:4%; color:#fee440;">&#128081; Royalty</span>
+            <span class="scatter-label" style="left:30%; top:60%; color:#fb5607;">&#127834; Food</span>
+            <span class="scatter-label" style="left:73%; top:55%; color:#00bbf9;">&#128187; Tech</span>
+
+            <span class="scatter-word fragment" style="left:18%; top:28%; color:#06d6a0;">cat</span>
+            <span class="scatter-word fragment" style="left:22%; top:22%; color:#06d6a0;">dog</span>
+            <span class="scatter-word fragment" style="left:15%; top:40%; color:#06d6a0;">bird</span>
+            <span class="scatter-word fragment" style="left:10%; top:52%; color:#06d6a0;">fish</span>
+
+            <span class="scatter-word fragment" style="left:68%; top:18%; color:#fee440;">king</span>
+            <span class="scatter-word fragment" style="left:76%; top:24%; color:#fee440;">queen</span>
+            <span class="scatter-word fragment" style="left:72%; top:32%; color:#fee440;">prince</span>
+
+            <span class="scatter-word fragment" style="left:38%; top:70%; color:#fb5607;">pizza</span>
+            <span class="scatter-word fragment" style="left:48%; top:76%; color:#fb5607;">burger</span>
+            <span class="scatter-word fragment" style="left:42%; top:64%; color:#fb5607;">sushi</span>
+
+            <span class="scatter-word fragment" style="left:82%; top:62%; color:#00bbf9;">computer</span>
+            <span class="scatter-word fragment" style="left:78%; top:70%; color:#00bbf9;">robot</span>
+            <span class="scatter-word fragment" style="left:85%; top:78%; color:#00bbf9;">phone</span>
+          </div>
+          <p class="fragment" style="font-size:0.9em; margin-top:0.4em; opacity:0.7;">Similar ideas <strong>cluster together</strong> in vector space!</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Inside the <span class="accent-yellow">Dimensions</span></h2>
+          <p style="font-size:1em; opacity:0.7;">Each word is measured on <strong class="accent-yellow">thousands of dimensions</strong> at once.</p>
+          <div class="dim-grid" style="margin-top:0.5em;">
+            <div class="name fragment">Is Animal?</div>
+            <div class="fragment">
+              <div class="dim-bar" style="width:95%; background:#06d6a0;">
+                <span style="padding:4px 12px; font-size:0.7em;">cat &#9608;&#9608;&#9608;&#9608;&#9608;</span>
+              </div>
+            </div>
+            <div class="name fragment">Has Fur?</div>
+            <div class="fragment">
+              <div class="dim-bar" style="width:90%; background:#00bbf9;">
+                <span style="padding:4px 12px; font-size:0.7em;">cat &#9608;&#9608;&#9608;&#9608;&#9608;</span>
+              </div>
+            </div>
+            <div class="name fragment">Has Wings?</div>
+            <div class="fragment">
+              <div class="dim-bar" style="width:8%; background:#f15bb5; min-width:50px;">
+                <span style="padding:4px 12px; font-size:0.7em;">cat</span>
+              </div>
+            </div>
+            <div class="name fragment">Rideable?</div>
+            <div class="fragment">
+              <div class="dim-bar" style="width:5%; background:#fee440; min-width:50px;">
+                <span style="padding:4px 12px; font-size:0.7em;">cat</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2>The Surprise: <span class="accent-yellow">Has Wings</span></h2>
+          <div class="compare-grid" style="max-width:500px; margin:0.4em auto;">
+            <div class="compare-card fragment" style="background:#9b5de520; border:2px solid #9b5de550; border-radius:16px;">
+              <div style="font-size:2.5em;">&#128038;</div>
+              <h3>Bird</h3>
+              <p class="accent-purple" style="font-size:1.2em; font-weight:700;">HIGH</p>
+            </div>
+            <div class="compare-card fragment" style="background:#9b5de520; border:2px solid #9b5de550; border-radius:16px;">
+              <div style="font-size:2.5em;">&#9992;&#65039;</div>
+              <h3>Plane</h3>
+              <p class="accent-purple" style="font-size:1.2em; font-weight:700;">HIGH</p>
+            </div>
+          </div>
+          <p class="fragment" style="font-size:1.1em; margin-top:0.4em;">Different groups, but AI discovered this <strong class="accent-yellow">cross-group similarity</strong> on its own!</p>
+          <p class="fragment" style="opacity:0.5; font-size:0.85em;">Nobody programmed it. It learned from training data.</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>The Payoff</h2>
+          <p style="font-size:1em;">Every word = a mix of <strong class="accent-yellow">ALL</strong> dimensions at once:</p>
+          <div class="fragment" style="font-family:'JetBrains Mono',monospace; font-size:0.7em; background:rgba(255,255,255,.06); padding:20px 28px; border-radius:14px; margin:0.4em auto; max-width:650px; text-align:left; line-height:1.8;">
+            cat = [<span class="accent-green">animal: high</span>, <span class="accent-blue">fur: high</span>, <span class="accent-pink">wings: zero</span>, <span class="accent-yellow">rideable: zero</span>, ...]
+          </div>
+          <p class="fragment" style="font-size:1.1em;">&times; <strong class="accent-yellow">12,288 dimensions</strong></p>
+          <div class="wow-box bg-yellow fragment" style="margin-top:0.4em;">
+            <div class="wow-label accent-yellow">Wow Fact</div>
+            <div class="wow-number accent-yellow">~100,000 tokens</div>
+            <div class="wow-desc">in AI's vocabulary &mdash; roughly 3&times; more than the average adult's 20,000&ndash;35,000 words. Every single token gets its own 12,288 coordinates.</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Section 10: Attention -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-pink">How AI Thinks &middot; Step 3</p>
+          <h1 class="accent-pink">Attention!</h1>
+          <div class="big-word bg-pink" style="color:white; margin-top:0.3em;">bat</div>
+          <p class="fragment" style="font-size:1.3em; margin-top:0.4em;">What does this word mean?</p>
+          <div class="compare-grid fragment" style="max-width:500px; margin:0.4em auto;">
+            <div class="compare-card" style="background:#fb560720; border:2px solid #fb560750; border-radius:16px;">
+              <div style="font-size:2.5em;">&#129359;</div>
+              <h3>Baseball bat</h3>
+            </div>
+            <div class="compare-card" style="background:#9b5de520; border:2px solid #9b5de550; border-radius:16px;">
+              <div style="font-size:2.5em;">&#129415;</div>
+              <h3>Flying animal</h3>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Trick question &mdash; <span class="accent-pink">both are right!</span></h2>
+          <p style="font-size:1.1em; opacity:0.7;">AI's solution: pay attention to the <strong class="accent-pink">surrounding words</strong>.</p>
+          <p class="fragment" style="font-size:1em; opacity:0.6;">Context is everything.</p>
+        </section>
+        <section data-background-color="#050512">
+          <h3 style="opacity:0.5;">Sentence 1:</h3>
+          <div class="sentence-display">
+            <span class="fragment">I </span>
+            <span class="fragment highlight-baseball">swung </span>
+            <span class="fragment">the </span>
+            <span class="fragment"><strong class="accent-orange" style="font-size:1.2em;">bat</strong> </span>
+            <span class="fragment">and </span>
+            <span class="fragment highlight-baseball">hit </span>
+            <span class="fragment">the </span>
+            <span class="fragment highlight-baseball">ball!</span>
+          </div>
+          <p class="fragment" style="margin-top:0.5em; font-size:1.1em;">
+            &#129359; <span class="accent-orange">Baseball bat!</span><br>
+            <span style="font-size:0.8em; opacity:0.6;">"Swung," "hit," "ball" &mdash; all baseball words.</span>
+          </p>
+        </section>
+        <section data-background-color="#050512">
+          <h3 style="opacity:0.5;">Sentence 2:</h3>
+          <div class="sentence-display">
+            <span class="fragment">The </span>
+            <span class="fragment"><strong class="accent-purple" style="font-size:1.2em;">bat</strong> </span>
+            <span class="fragment highlight-animal">flew </span>
+            <span class="fragment">out of </span>
+            <span class="fragment">the </span>
+            <span class="fragment highlight-animal">cave </span>
+            <span class="fragment">at </span>
+            <span class="fragment highlight-animal">dusk.</span>
+          </div>
+          <p class="fragment" style="margin-top:0.5em; font-size:1.1em;">
+            &#129415; <span class="accent-purple">Flying animal!</span><br>
+            <span style="font-size:0.8em; opacity:0.6;">"Flew," "cave," "dusk" &mdash; nature words.</span>
+          </p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Same word. Different <span class="accent-pink">spotlight</span>.</h2>
+          <p style="font-size:1em; opacity:0.7;">The meaning changes depending on which words<br>are <strong class="accent-pink">shining their spotlight</strong> on it.</p>
+          <div class="wow-box bg-pink fragment">
+            <div class="wow-label accent-pink">Wow Fact</div>
+            <div class="wow-number accent-pink">96 attention heads</div>
+            <div class="wow-desc">Claude runs 96 different spotlights simultaneously &mdash; each looking for different types of relationships. Like 96 readers, each hunting for something different in the same sentence.</div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Section 11: The Thinking Layer (MLP) -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-blue">How AI Thinks &middot; Step 4</p>
+          <h1>The Thinking <span class="accent-blue">Layer</span></h1>
+          <p style="font-size:1.1em; opacity:0.7;">Attention figured out which words relate.<br>Now the <strong class="accent-blue">MLP</strong> does the heavy thinking.</p>
+        </section>
+        <section data-background-color="#050512">
+          <div class="mlp-diagram">
+            <div class="mlp-column">
+              <div class="mlp-node" style="border-color:#00bbf9;"></div>
+              <div class="mlp-node" style="border-color:#00bbf9;"></div>
+              <div class="mlp-node" style="border-color:#00bbf9;"></div>
+              <div class="mlp-node" style="border-color:#00bbf9;"></div>
+              <div class="mlp-label">Input<br><span class="accent-blue">12,288</span></div>
+            </div>
+            <div class="mlp-arrow">&#8594;</div>
+            <div class="mlp-column">
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-node" style="border-color:#9b5de5; background:#9b5de530;"></div>
+              <div class="mlp-label">Hidden &mdash; <strong class="accent-purple">4&times; bigger!</strong><br><span class="accent-purple">49,152</span></div>
+            </div>
+            <div class="mlp-arrow">&#8594;</div>
+            <div class="mlp-column">
+              <div class="mlp-node" style="border-color:#06d6a0;"></div>
+              <div class="mlp-node" style="border-color:#06d6a0;"></div>
+              <div class="mlp-node" style="border-color:#06d6a0;"></div>
+              <div class="mlp-node" style="border-color:#06d6a0;"></div>
+              <div class="mlp-label">Output<br><span class="accent-green">12,288</span></div>
+            </div>
+          </div>
+          <p class="fragment" style="font-size:1em; margin-top:0.5em;">
+            <strong class="accent-blue">Attention</strong> = Reading the room<br>
+            <strong class="accent-purple">MLP</strong> = Flipping through your entire memory
+          </p>
+          <p class="fragment" style="font-size:0.85em; opacity:0.5;">Like breathing in deeply before answering a hard question.<br>"Expand then compress" gives the model <em>room to think</em>.</p>
+        </section>
+      </section>
+
+      <!-- Section 12: Rinse & Repeat (Layers) -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-green">How AI Thinks &middot; Step 5</p>
+          <h1>Rinse &amp; <span class="accent-green">Repeat</span></h1>
+          <p style="font-size:1.3em;">One round of Attention + MLP isn't enough.</p>
+          <p class="fragment" style="font-size:2em; font-weight:700;" class="accent-green">
+            The model does it <span class="accent-green">96 TIMES</span>.
+          </p>
+        </section>
+        <section data-background-color="#050512">
+          <h3>What each layer range learns:</h3>
+          <div class="layer-stack">
+            <div class="layer-block fragment" style="background:#00bbf925; border:2px solid #00bbf960; color:#00bbf9;">
+              Layers 1&ndash;16: Letters &amp; Spelling
+            </div>
+            <div class="layer-block fragment" style="background:#9b5de525; border:2px solid #9b5de560; color:#9b5de5;">
+              Layers 17&ndash;32: Words &amp; Grammar
+            </div>
+            <div class="layer-block fragment" style="background:#fee44025; border:2px solid #fee44060; color:#fee440;">
+              Layers 33&ndash;48: Facts &amp; Knowledge
+            </div>
+            <div class="layer-block fragment" style="background:#fb560725; border:2px solid #fb560760; color:#fb5607;">
+              Layers 49&ndash;64: Context &amp; Tone
+            </div>
+            <div class="layer-block fragment" style="background:#06d6a025; border:2px solid #06d6a060; color:#06d6a0;">
+              Layers 65&ndash;80: Logic &amp; Reasoning
+            </div>
+            <div class="layer-block fragment" style="background:#f15bb525; border:2px solid #f15bb560; color:#f15bb5;">
+              Layers 81&ndash;96: Deep Understanding
+            </div>
+          </div>
+          <p class="fragment" style="font-size:0.8em; opacity:0.5; margin-top:0.3em;">From mechanical (letters) to abstract (metaphor, nuance) &mdash;<br>each layer builds on the last.</p>
+        </section>
+      </section>
+
+      <!-- Section 13: Predict! -->
+      <section>
+        <section data-background-color="#050512">
+          <p class="label accent-orange">How AI Thinks &middot; Step 6</p>
+          <h1><span class="accent-orange">Predict!</span></h1>
+          <p style="font-size:1.2em;">All those 96 layers &mdash;<br>just to pick <strong class="accent-orange">one word</strong>.</p>
+          <p class="fragment" style="font-size:1.1em; opacity:0.7;">Then it does it all over again for the next word,<br>and the next, and the next...</p>
+        </section>
+        <section data-background-color="#050512">
+          <h2>The <span class="accent-orange">Temperature</span> Dial</h2>
+          <p style="font-size:0.9em; opacity:0.6;">Controls how adventurous or safe the AI is:</p>
+          <div class="temp-scale">
+            <div class="temp-level fragment" style="background:#00bbf920; border:2px solid #00bbf950;">
+              <div class="temp-icon">&#10052;&#65039;</div>
+              <div class="temp-name accent-blue">Frozen</div>
+              <div>Always picks the top word. Perfectly predictable.</div>
+            </div>
+            <div class="temp-level fragment" style="background:#06d6a020; border:2px solid #06d6a050;">
+              <div class="temp-icon">&#9878;&#65039;</div>
+              <div class="temp-name accent-green">Balanced</div>
+              <div>Mostly sensible, occasionally creative.</div>
+            </div>
+            <div class="temp-level fragment" style="background:#fee44020; border:2px solid #fee44050;">
+              <div class="temp-icon">&#128293;</div>
+              <div class="temp-name accent-yellow">Warm</div>
+              <div>Getting adventurous! Surprises start appearing.</div>
+            </div>
+            <div class="temp-level fragment" style="background:#f15bb520; border:2px solid #f15bb550;">
+              <div class="temp-icon">&#127754;</div>
+              <div class="temp-name accent-pink">Wild</div>
+              <div>Full chaos &mdash; literally anything could come next!</div>
+            </div>
+          </div>
+        </section>
+        <section data-background-color="#050512">
+          <h2>Example</h2>
+          <p style="font-size:1.3em; margin-bottom:0.4em;">
+            "The sleepy cat sat on a warm <span class="accent-orange" style="font-size:1.2em; text-decoration:underline; text-underline-offset:6px;">___</span>"
+          </p>
+          <div style="display:flex; gap:16px; justify-content:center; margin:0.5em 0;">
+            <div class="fragment badge bg-green" style="font-size:1.1em; padding:12px 28px;">mat (72%)</div>
+            <div class="fragment badge bg-blue" style="font-size:1.1em; padding:12px 28px;">cushion (18%)</div>
+            <div class="fragment badge bg-purple" style="font-size:1.1em; padding:12px 28px;">rug (6%)</div>
+            <div class="fragment badge bg-pink" style="font-size:1.1em; padding:12px 28px;">volcano (0.1%)</div>
+          </div>
+          <p class="fragment" style="font-size:0.9em; opacity:0.6; margin-top:0.4em;">
+            Low temperature &#10052;&#65039; &rarr; always "mat"<br>
+            High temperature &#128293; &rarr; maybe "volcano" &#128516;
+          </p>
+          <p class="fragment" style="font-size:1em; margin-top:0.5em;">
+            This is why AI gives a <strong class="accent-orange">different answer</strong> every time!
+          </p>
+        </section>
+        <section data-background-color="#050512">
+          <div class="wow-box bg-orange">
+            <div class="wow-label accent-orange">Wow Fact</div>
+            <div class="wow-number accent-orange">5,760+</div>
+            <div class="wow-desc" style="font-size:0.85em;">layer passes for a typical 60-word paragraph</div>
+            <br>
+            <p style="font-size:0.85em; opacity:0.7;">
+              Running all 96 layers, 60 times over.<br>
+              A 9-word sentence = <strong>864 layer passes</strong>.<br>
+              All just to say "good morning."
+            </p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- FINALE -->
+      <!-- ============================================================ -->
+      <section data-background-color="#050512">
+        <h1>&#127881; You did it!</h1>
+        <p style="font-size:1.1em; opacity:0.7;">Now you know how AI thinks:</p>
+        <div style="text-align:left; max-width:650px; margin:0.5em auto; font-size:0.9em; line-height:2;">
+          <p class="fragment"><span class="accent-teal">1.</span> Words become <strong class="accent-teal">12,288 numbers</strong></p>
+          <p class="fragment"><span class="accent-yellow">2.</span> Numbers place words in <strong class="accent-yellow">meaning space</strong></p>
+          <p class="fragment"><span class="accent-pink">3.</span> <strong class="accent-pink">Attention</strong> figures out context</p>
+          <p class="fragment"><span class="accent-blue">4.</span> The <strong class="accent-blue">thinking layer</strong> connects everything</p>
+          <p class="fragment"><span class="accent-green">5.</span> <strong class="accent-green">96 layers</strong> deep, from letters to understanding</p>
+          <p class="fragment"><span class="accent-orange">6.</span> Then it <strong class="accent-orange">predicts the next word</strong></p>
+        </div>
+        <p class="fragment" style="font-size:1.2em; margin-top:0.5em;">
+          Now that you know how AI works &mdash;<br>
+          does it change how you think about <strong>using</strong> it? &#129300;
+        </p>
+      </section>
+
+    </div><!-- /slides -->
+  </div><!-- /reveal -->
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      width: 1200,
+      height: 800,
+      margin: 0.08,
+      transition: 'slide',
+      transitionSpeed: 'default',
+      backgroundTransition: 'fade',
+      center: true,
+      controlsTutorial: true,
+      progress: true,
+      controls: true,
+      keyboard: true,
+      overview: true,
+      touch: true,
+    });
+  </script>
+</body>
+</html>

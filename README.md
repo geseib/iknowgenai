@@ -33,7 +33,17 @@ The lesson walks students through 13 sections across three groups:
 | ![Cat Feelings](docs/screenshots/07-cat-feelings.png) | ![Words in Space](docs/screenshots/08-words-in-space.png) |
 | ![Attention](docs/screenshots/09-attention.png) | ![Who's Used AI?](docs/screenshots/02-who-used-ai.png) |
 
-## Two Modes
+## Two Versions
+
+### Interactive React App
+
+The full interactive experience with clickable elements, animations, and two audience modes. Best for solo exploration or when you want students to interact directly.
+
+### Reveal.js Slide Deck
+
+A streamlined presentation version at [`/slides`](slides/) — just press the arrow keys to advance. Same content, same big fonts, but optimized for a teacher driving a projector. No clicks needed from students. Available at `/slides/` when deployed.
+
+## Two Modes (React App)
 
 - **Classroom Mode** — The teacher controls the pace. Each section includes collapsible "Talking Points" with discussion prompts and teaching tips.
 - **Solo Mode** — Students explore at their own pace with interactive elements guiding the way.
