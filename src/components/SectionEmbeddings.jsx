@@ -233,14 +233,16 @@ export default function SectionEmbeddings({ color, mode }) {
         e.preventDefault();
         if (step < 1) {
           advance();
-        } else {
+        } else if (part2Done) {
+          // Only advance to next section after DimensionExplorer is complete
           window.dispatchEvent(new Event("sectionFullyRevealed"));
         }
+        // Otherwise, DimensionExplorer's own handler will process the ArrowDown
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [step]);
+  }, [step, part2Done]);
 
   useEffect(() => {
     if (step === 1 && step1Ref.current) {
