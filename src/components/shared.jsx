@@ -55,10 +55,10 @@ export function Body({ children }) {
   return (
     <p style={{
       color: "rgba(255,255,255,.62)",
-      fontSize: 16,
+      fontSize: 18,
       lineHeight: 1.65,
-      marginBottom: 18,
-      maxWidth: 500,
+      marginBottom: 20,
+      maxWidth: 660,
     }}>
       {children}
     </p>

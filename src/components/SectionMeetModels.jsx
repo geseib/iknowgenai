@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SealCheck,
   Lightbulb,
+  ArrowDown,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, Body, TeacherNote } from "./shared";
+import { Label, H1, TeacherNote } from "./shared";
 
 const models = [
   {
     name: "ChatGPT", org: "OpenAI", tagline: "The one that started the chatbot craze", color: "#00f5d4",
     facts: [
-      "Launched in November 2022 \u2014 1 million users in 5 days",
+      "Launched in November 2022 — 1 million users in 5 days",
       "Made by OpenAI, founded in San Francisco",
       "GPT stands for Generative Pre-trained Transformer",
     ],
@@ -17,17 +18,17 @@ const models = [
   {
     name: "Claude", org: "Anthropic", tagline: "The one built with safety first", color: "#fb5607",
     facts: [
-      "Made by Anthropic \u2014 the company that made THIS lesson!",
+      "Made by Anthropic — the company behind Claude, the AI that helped build this lesson!",
       "Founded by researchers focused on making AI safe and honest",
-      "Claude is the name of the AI \u2014 Anthropic is the company",
+      "Claude is the name of the AI — Anthropic is the company",
     ],
   },
   {
     name: "Llama", org: "Meta", tagline: "The one anyone can build with", color: "#00bbf9",
     facts: [
-      "Made by Meta \u2014 the company behind Facebook and Instagram",
-      "It's 'open source' \u2014 like sharing the recipe, so anyone can use or modify it",
-      "Named after the animal \u2014 yes, seriously",
+      "Made by Meta — the company behind Facebook and Instagram",
+      "It's 'open source' — like sharing the recipe, so anyone can use or modify it",
+      "Named after the animal — yes, seriously",
     ],
   },
   {
@@ -35,75 +36,253 @@ const models = [
     facts: [
       "Made by Google DeepMind",
       "Built into Google Search, Gmail, and Google Docs",
-      "Named after the twin stars \u2014 it was designed to be multi-talented",
+      "Named after the zodiac twins — it was designed to be multi-talented",
     ],
   },
 ];
 
-const MODEL_DOTS = {
-  ChatGPT: "#00f5d4",
-  Claude:  "#fb5607",
-  Llama:   "#00bbf9",
-  Gemini:  "#f15bb5",
-};
-
 const notes = [
-  "Ask the class: 'Has anyone heard of any of these?' before tapping the cards. Hands will go up \u2014 great engagement moment.",
-  "ChatGPT: emphasize the speed of adoption. 1 million users in 5 days is faster than any product in history. Why do you think that is?",
+  "Ask the class: 'Has anyone heard of any of these?' before revealing the cards. Hands will go up — great engagement moment.",
+  "ChatGPT: emphasize the speed of adoption. 1 million users in 5 days was one of the fastest product launches ever. Why do you think that is?",
   "Claude: this is a great moment to tell the class they're effectively interacting with Anthropic's work right now through this app.",
   "Llama: 'open source' is worth explaining. Imagine if the recipe for your favorite food was secret vs. if the chef shared it with everyone. What are the pros and cons?",
   "Great discussion: 'If these companies are all building AI, are they competing? Why would they all make their own version?'",
 ];
 
+function ContinueButton({ onClick, color, label }) {
+  return (
+    <div style={{ textAlign: "center", marginTop: 28, marginBottom: 16 }}>
+      <button
+        onClick={onClick}
+        className="cta-btn"
+        style={{
+          background: color,
+          color: "#000",
+          fontSize: 20,
+          padding: "14px 32px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        {label} <ArrowDown size={20} weight="bold" />
+      </button>
+    </div>
+  );
+}
+
+function ModelCard({ model }) {
+  return (
+    <div
+      style={{
+        borderRadius: 16,
+        overflow: "hidden",
+        background: `${model.color}15`,
+        border: `2px solid ${model.color}`,
+        padding: "24px 20px",
+        maxWidth: 480,
+        width: "100%",
+      }}
+    >
+      <div style={{ textAlign: "center", marginBottom: 16 }}>
+        <SealCheck size={48} weight="duotone" color={model.color} style={{ marginBottom: 8 }} />
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 28,
+          color: "white",
+          marginBottom: 4,
+        }}>
+          {model.name}
+        </div>
+        <div style={{ fontSize: 16, color: "rgba(255,255,255,.4)", marginBottom: 10 }}>
+          {model.org}
+        </div>
+        <div style={{ fontSize: 18, color: model.color, lineHeight: 1.4 }}>
+          {model.tagline}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        {model.facts.map((fact, fi) => (
+          <div key={fi} style={{
+            display: "flex",
+            gap: 10,
+            marginBottom: 10,
+            fontSize: 18,
+            color: "rgba(255,255,255,.75)",
+            lineHeight: 1.5,
+          }}>
+            <span style={{ color: model.color, flexShrink: 0, fontSize: 18 }}>&rarr;</span>
+            {fact}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SectionMeetModels({ color, mode }) {
-  const [flipped, setFlipped] = useState(new Set());
+  const [step, setStep] = useState(0);
+  const step1Ref = useRef(null);
+  const step2Ref = useRef(null);
+  const step3Ref = useRef(null);
+
+  const advance = () => {
+    if (step < 3) setStep(s => s + 1);
+  };
+
+  // Keyboard: down arrow advances steps
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "ArrowDown" && step < 3) {
+        e.preventDefault();
+        advance();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [step]);
+
+  // Auto-scroll to newly revealed step
+  useEffect(() => {
+    const refs = [null, step1Ref, step2Ref, step3Ref];
+    const target = refs[step]?.current;
+    if (target) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  }, [step]);
 
   return (
     <div className="fade-up">
-      <Label color={color} text="MEET THE LLMS \u00b7 THE PLAYERS" />
+      <Label color={color} text="MEET THE LLMS · THE PLAYERS" />
       <H1>Meet the Models</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
-      <Body>Several companies have built their own large language models. Tap each card to find out who made it and what makes it special.</Body>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-        {models.map((m, i) => {
-          const f = flipped.has(i);
-          return (
-            <div key={i}
-              onClick={() => setFlipped(p => { const n = new Set(p); f ? n.delete(i) : n.add(i); return n; })}
-              style={{
-                borderRadius: 16, overflow: "hidden", cursor: "pointer", transition: "all .25s ease",
-                background: f ? `${m.color}15` : "rgba(255,255,255,.05)",
-                border: `2px solid ${f ? m.color : "rgba(255,255,255,.1)"}`,
-                transform: f ? "scale(1.02)" : "scale(1)",
-              }}>
-              {!f ? (
-                <div style={{ padding: "20px 16px", textAlign: "center" }}>
-                  <SealCheck size={40} weight="duotone" color={MODEL_DOTS[m.name] || m.color} style={{ marginBottom: 8 }} />
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 22, color: "white", marginBottom: 4 }}>{m.name}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)", marginBottom: 10 }}>{m.org}</div>
-                  <div style={{ fontSize: 13, color: m.color, lineHeight: 1.4 }}>{m.tagline}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.25)", marginTop: 12 }}>tap to learn more &darr;</div>
-                </div>
-              ) : (
-                <div style={{ padding: "16px 14px" }}>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 18, color: m.color, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                    <SealCheck size={20} weight="duotone" color={m.color} /> {m.name}
-                  </div>
-                  {m.facts.map((fact, fi) => (
-                    <div key={fi} style={{ display: "flex", gap: 8, marginBottom: 7, fontSize: 13, color: "rgba(255,255,255,.7)", lineHeight: 1.5 }}>
-                      <span style={{ color: m.color, flexShrink: 0 }}>&rarr;</span>{fact}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+
+      {/* ── Step 0: Intro + ChatGPT ── */}
+      <div style={{
+        minHeight: "50vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}>
+        <div style={{
+          fontSize: 22,
+          color: "rgba(255,255,255,.7)",
+          textAlign: "center",
+          lineHeight: 1.6,
+          marginBottom: 32,
+          maxWidth: 600,
+        }}>
+          Several companies have built their own AI.
+          Each one works a little differently — let's meet them.
+        </div>
+
+        <ModelCard model={models[0]} />
+
+        {step === 0 && (
+          <ContinueButton onClick={advance} color={color} label="Next model" />
+        )}
       </div>
-      {flipped.size === 4 && (
-        <div className="wow-reveal" style={{ padding: "14px 18px", background: `${color}12`, border: `1px solid ${color}35`, borderRadius: 12, fontSize: 15, color: "rgba(255,255,255,.7)", lineHeight: 1.6, display: "flex", gap: 10, alignItems: "flex-start" }}>
-          <Lightbulb size={22} weight="duotone" color={color} style={{ flexShrink: 0, marginTop: 2 }} />
-          <span>All of these models learned by reading <strong style={{ color }}>enormous amounts of text</strong>. But HOW does reading teach a computer to write back? That's what the rest of this lesson is about!</span>
+
+      {/* ── Step 1: Claude ── */}
+      {step >= 1 && (
+        <div
+          ref={step1Ref}
+          style={{
+            animation: "fadeUp .5s ease",
+            minHeight: "60vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingTop: 24,
+          }}
+        >
+          <ModelCard model={models[1]} />
+
+          {step === 1 && (
+            <ContinueButton onClick={advance} color={color} label="Next models" />
+          )}
+        </div>
+      )}
+
+      {/* ── Step 2: Llama + Gemini ── */}
+      {step >= 2 && (
+        <div
+          ref={step2Ref}
+          style={{
+            animation: "fadeUp .5s ease",
+            minHeight: "60vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingTop: 24,
+          }}
+        >
+          <div style={{
+            display: "flex",
+            gap: 16,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            width: "100%",
+          }}>
+            <ModelCard model={models[2]} />
+            <ModelCard model={models[3]} />
+          </div>
+
+          {step === 2 && (
+            <ContinueButton onClick={advance} color={color} label="The big takeaway" />
+          )}
+        </div>
+      )}
+
+      {/* ── Step 3: Insight ── */}
+      {step >= 3 && (
+        <div
+          ref={step3Ref}
+          style={{
+            animation: "fadeUp .5s ease",
+            minHeight: "50vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingTop: 24,
+          }}
+        >
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            justifyContent: "center",
+            marginBottom: 20,
+          }}>
+            <Lightbulb size={36} weight="duotone" color={color} />
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 26,
+              color: "white",
+            }}>
+              Here's what they all have in common...
+            </div>
+          </div>
+
+          <div style={{
+            fontSize: 22,
+            color: "rgba(255,255,255,.7)",
+            textAlign: "center",
+            lineHeight: 1.6,
+            maxWidth: 600,
+          }}>
+            All of these models learned by reading{" "}
+            <strong style={{ color }}>enormous amounts of text</strong>.
+            But HOW does reading teach a computer to write back?
+            That's what the rest of this lesson is about!
+          </div>
         </div>
       )}
     </div>

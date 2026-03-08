@@ -28,9 +28,9 @@ export function sampleWord(dist) {
 }
 
 export function tempMeta(t) {
-  if (t < .12) return { name: "Frozen",   bar: "#a0d8ef", desc: "Always picks the top word. Perfectly predictable \u2014 no surprises." };
+  if (t < .12) return { name: "Frozen",   bar: "#a0d8ef", desc: "Always picks the top word. Perfectly predictable — no surprises." };
   if (t < .45) return { name: "Cold",     bar: "#00f5d4", desc: "Sticks closely to likely words. Safe and sensible." };
-  if (t < .85) return { name: "Balanced", bar: "#fee440", desc: "A nice mix \u2014 mostly sensible, occasionally creative." };
+  if (t < .85) return { name: "Balanced", bar: "#fee440", desc: "A nice mix — mostly sensible, occasionally creative." };
   if (t < 1.3) return { name: "Warm",     bar: "#fb5607", desc: "Getting adventurous! Surprising words start appearing." };
-  return                { name: "Wild",     bar: "#f15bb5", desc: "Full chaos mode \u2014 literally anything could come next!" };
+  return                { name: "Wild",     bar: "#f15bb5", desc: "Full chaos mode — literally anything could come next!" };
 }

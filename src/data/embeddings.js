@@ -31,12 +31,12 @@ export const P2_VEHICLES = ["plane", "train", "car", "boat"];
 export const P2_STEPS = [
   {
     title: "Two neighbourhoods",
-    body: "These 8 words live in totally different parts of vector space. Animals over here \u2014 vehicles over there.",
+    body: "These 8 words live in totally different parts of vector space. Animals over here — vehicles over there.",
     dimLabel: null, scores: null, focusGroup: null,
   },
   {
     title: "Let's zoom in on cat and dog",
-    body: "They sit really close together. The AI thinks they're similar \u2014 but WHY? What's the same about them?",
+    body: "They sit really close together. The AI thinks they're similar — but WHY? What's the same about them?",
     dimLabel: null, scores: null, focusGroup: "cd",
   },
   {
@@ -55,9 +55,9 @@ export const P2_STEPS = [
   },
   {
     title: "Dimension: Has 4 Legs",
-    body: "Four legs each \u2014 confirmed. A bird has two. A fish has none. Each difference becomes different numbers!",
+    body: "Four legs each — confirmed. A bird has two. A fish has none. Each difference becomes different numbers!",
     dimLabel: "Has 4 Legs",
-    scores: { cat: 2, dog: 2, bird: 1, fish: 0, plane: 0, train: 0, car: 0, boat: 0 },
+    scores: { cat: 2, dog: 2, bird: 0, fish: 0, plane: 0, train: 0, car: 0, boat: 0 },
     focusGroup: "cd", dimColor: "#9b5de5",
   },
   {
@@ -74,14 +74,14 @@ export const P2_STEPS = [
   },
   {
     title: "But... would you ride a bird to school?",
-    body: "Plane scores HIGH on 'you can ride it'. Bird scores almost zero. Same wings \u2014 totally different purpose!",
+    body: "Plane scores HIGH on 'you can ride it'. Bird scores almost zero. Same wings — totally different purpose!",
     dimLabel: "You Can Ride It",
     scores: { cat: 0, dog: 0, bird: 0, fish: 0, plane: 2, train: 2, car: 2, boat: 2 },
     focusGroup: "veh", dimColor: "#f15bb5",
   },
   {
     title: "Every word is a mix of ALL dimensions",
-    body: "Cat = [animal:high, fur:high, legs:high, wings:zero, rideable:zero...] \u00d7 12,288 dimensions. That's what those numbers actually mean!",
+    body: "Cat = [animal:high, fur:high, legs:high, wings:zero, rideable:zero...] × 12,288 dimensions. That's what those numbers actually mean!",
     dimLabel: "All dimensions at once",
     scores: { cat: 2, dog: 2, bird: 1, fish: 1, plane: 2, train: 2, car: 2, boat: 2 },
     focusGroup: null, dimColor: "#fee440",

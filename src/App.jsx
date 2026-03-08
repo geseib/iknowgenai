@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Robot, ChalkboardTeacher, GameController, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { useState, useEffect, useCallback } from "react";
+import { Robot, ChalkboardTeacher, GameController, ArrowCounterClockwise, ArrowRight, ArrowLeft } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
 
@@ -39,11 +39,33 @@ export default function App() {
   const [sec, setSec] = useState(0);
   const [done, setDone] = useState(new Set());
 
+  const next = useCallback(() => {
+    setDone(p => new Set([...p, sec]));
+    setSec(s => Math.min(s + 1, TOTAL - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [sec]);
+
+  const prev = useCallback(() => {
+    setSec(s => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Keyboard navigation: arrow keys to move between sections
+  useEffect(() => {
+    if (!mode) return;
+    const handleKey = (e) => {
+      // Don't capture if user is in an input/textarea
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [mode, next, prev]);
+
   if (!mode) return <ModeSelect onSelect={setMode} allCss={ALL_CSS} />;
 
   const color = COLORS[sec % COLORS.length];
-  const next = () => { setDone(p => new Set([...p, sec])); setSec(s => Math.min(s + 1, TOTAL - 1)); };
-  const prev = () => setSec(s => Math.max(s - 1, 0));
   const currentGroup = GROUPS.find(g => sec >= g.start && sec <= g.end);
   const progressPct = Math.round(((sec + 1) / TOTAL) * 100);
 
@@ -99,7 +121,7 @@ export default function App() {
               {mode === "classroom"
                 ? <><ChalkboardTeacher size={12} weight="duotone" /> Classroom</>
                 : <><GameController size={12} weight="duotone" /> Solo</>}
-              {" \u00b7 "}{currentGroup?.name}
+              {" · "}{currentGroup?.name}
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -110,7 +132,7 @@ export default function App() {
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 620, margin: "0 auto", padding: "88px 22px 96px", position: "relative", zIndex: 10 }} key={sec}>
+      <div style={{ maxWidth: 780, margin: "0 auto", padding: "88px 28px 96px", position: "relative", zIndex: 10 }} key={sec}>
         <SectionComponent color={color} mode={mode} />
       </div>
 
@@ -121,13 +143,17 @@ export default function App() {
         background: "rgba(5,5,18,.9)", backdropFilter: "blur(12px)",
         borderTop: "1px solid rgba(255,255,255,.06)", zIndex: 100,
       }}>
-        <button onClick={prev} disabled={sec === 0} className="ghost-btn">&larr; Back</button>
+        <button onClick={prev} disabled={sec === 0} className="ghost-btn">
+          <ArrowLeft size={18} weight="bold" /> Back
+        </button>
         <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 13, color: "rgba(255,255,255,.38)", textAlign: "center", maxWidth: 200, lineHeight: 1.3 }}>
           {TITLES[sec]}
         </div>
         {sec < TOTAL - 1
-          ? <button onClick={next} className="cta-btn" style={{ background: color, color: "#000" }}>Next &rarr;</button>
-          : <button onClick={() => { setSec(0); setDone(new Set()); }} className="cta-btn" style={{ background: color, color: "#000", display: "flex", alignItems: "center", gap: 6 }}>
+          ? <button onClick={next} className="cta-btn" style={{ background: color, color: "#000" }}>
+              Next <ArrowRight size={18} weight="bold" />
+            </button>
+          : <button onClick={() => { setSec(0); setDone(new Set()); window.scrollTo({ top: 0 }); }} className="cta-btn" style={{ background: color, color: "#000", display: "flex", alignItems: "center", gap: 6 }}>
               <ArrowCounterClockwise size={18} weight="bold" /> Restart
             </button>
         }

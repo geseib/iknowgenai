@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   TextAa,
   PencilLine,
@@ -6,18 +6,17 @@ import {
   MaskHappy,
   PuzzlePiece,
   Sparkle,
-  CaretUp,
-  CaretDown,
+  ArrowDown,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote } from "./shared";
 
 const LAYER_CARDS = [
-  { range: "1\u201316",  label: "Letters & Spelling",    desc: "Recognizes individual letters, punctuation, and simple character patterns.", Icon: TextAa },
-  { range: "17\u201332", label: "Words & Grammar",       desc: "Parts of speech, verb tenses, plural rules \u2014 the skeleton of language.", Icon: PencilLine },
-  { range: "33\u201348", label: "Facts & Knowledge",     desc: "Countries, history, science, names \u2014 all the stuff from its training books.", Icon: Books },
-  { range: "49\u201364", label: "Context & Tone",        desc: "Is this sarcastic? Formal? A joke? Emotional? Context shapes everything here.", Icon: MaskHappy },
-  { range: "65\u201380", label: "Logic & Reasoning",     desc: "Cause and effect, plans, comparisons, basic math, arguments.", Icon: PuzzlePiece },
-  { range: "81\u201396", label: "Deep Understanding",    desc: "Nuance, metaphor, wisdom \u2014 the things that are hardest to explain but feel right.", Icon: Sparkle },
+  { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
+  { range: "17–32", label: "Words & Grammar",       desc: "Parts of speech, verb tenses, plural rules tend to emerge here — the skeleton of language.", Icon: PencilLine },
+  { range: "33–48", label: "Facts & Knowledge",     desc: "Around here, facts from training start showing up — countries, history, science, names.", Icon: Books },
+  { range: "49–64", label: "Context & Tone",        desc: "Is this sarcastic? Formal? A joke? Middle layers start picking up on context and mood.", Icon: MaskHappy },
+  { range: "65–80", label: "Logic & Reasoning",     desc: "Deeper layers handle cause and effect, comparisons, and basic reasoning.", Icon: PuzzlePiece },
+  { range: "81–96", label: "Deep Understanding",    desc: "The final layers refine nuance, metaphor, and the subtle things that are hardest to explain.", Icon: Sparkle },
 ];
 
 const notes = [
@@ -27,47 +26,223 @@ const notes = [
   "The 96-layer count is the wow moment here. Ask: 'What do you think happens between the first and ninety-sixth layer that makes the answer so much better?'",
 ];
 
-export default function SectionLayers({ color, mode }) {
-  const [open, setOpen] = useState(null);
-  const [opened, setOpened] = useState(new Set());
+function ContinueButton({ onClick, color, label }) {
+  return (
+    <div style={{ textAlign: "center", marginTop: 28, marginBottom: 16 }}>
+      <button
+        onClick={onClick}
+        className="cta-btn"
+        style={{
+          background: color,
+          color: "#000",
+          fontSize: 20,
+          padding: "14px 32px",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        {label} <ArrowDown size={20} weight="bold" />
+      </button>
+    </div>
+  );
+}
 
-  const handleOpen = (i) => {
-    setOpen(open === i ? null : i);
-    setOpened(s => new Set([...s, i]));
+function LayerCard({ layer, color }) {
+  const { Icon, label, range, desc } = layer;
+  return (
+    <div style={{
+      background: "rgba(255,255,255,.06)",
+      border: `1.5px solid ${color}30`,
+      borderRadius: 16,
+      padding: "20px 24px",
+      marginBottom: 14,
+      animation: "fadeUp .4s ease both",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+        <Icon size={28} weight="duotone" color={color} />
+        <div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 20,
+            color,
+          }}>
+            {label}
+          </div>
+          <div style={{ fontSize: 14, color: "rgba(255,255,255,.4)", marginTop: 2 }}>
+            Layers {range}
+          </div>
+        </div>
+      </div>
+      <div style={{
+        fontSize: 18,
+        color: "rgba(255,255,255,.7)",
+        lineHeight: 1.5,
+        paddingLeft: 40,
+      }}>
+        {desc}
+      </div>
+    </div>
+  );
+}
+
+export default function SectionLayers({ color, mode }) {
+  const [step, setStep] = useState(0);
+  const step1Ref = useRef(null);
+  const step2Ref = useRef(null);
+
+  const advance = () => {
+    if (step < 2) setStep(s => s + 1);
   };
+
+  // Keyboard: down arrow advances steps
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "ArrowDown" && step < 2) {
+        e.preventDefault();
+        advance();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [step]);
+
+  // Auto-scroll to newly revealed step
+  useEffect(() => {
+    const target = step === 1 ? step1Ref.current : step === 2 ? step2Ref.current : null;
+    if (target) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  }, [step]);
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS \u00b7 STEP 5" />
+      <Label color={color} text="HOW AI THINKS · STEP 5" />
       <H1>Rinse & Repeat</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
-      <Body>One round of Attention + MLP isn't enough. So the model does it <strong style={{ color }}>96 times in a row</strong>. Each pass makes the understanding richer. Tap to explore what each group of layers learns.</Body>
-      <div style={{ marginBottom: 16 }}>
-        {LAYER_CARDS.map((l, i) => (
-          <div key={i}
-            className={`layer-row${open === i ? " open" : ""}`}
-            onClick={() => handleOpen(i)}
-            style={{ borderColor: open === i ? `${color}50` : undefined }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <l.Icon size={22} weight="duotone" color={open === i ? color : "rgba(255,255,255,.5)"} />
-                <div>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 16, color: open === i ? color : "white", transition: "color .2s" }}>{l.label}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)", marginTop: 1 }}>Layers {l.range}</div>
-                </div>
-              </div>
-              {open === i
-                ? <CaretUp size={18} weight="bold" color={color} />
-                : <CaretDown size={18} weight="bold" color="rgba(255,255,255,.3)" />}
-            </div>
-            {open === i && (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,.08)", fontSize: 14, color: "rgba(255,255,255,.68)", lineHeight: 1.5, animation: "fadeUp .2s ease" }}>{l.desc}</div>
-            )}
-          </div>
-        ))}
+
+      {/* ── Step 0: Big intro ── */}
+      <div style={{ minHeight: "50vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 28,
+          color: "white",
+          textAlign: "center",
+          lineHeight: 1.4,
+          marginBottom: 16,
+        }}>
+          One round of Attention + MLP isn't enough.
+        </div>
+
+        <div style={{
+          textAlign: "center",
+          marginBottom: 20,
+        }}>
+          <span style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 22,
+            color: "rgba(255,255,255,.6)",
+          }}>
+            The model does it{" "}
+          </span>
+          <span style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 48,
+            fontWeight: 700,
+            color,
+          }}>
+            96
+          </span>
+          <span style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 22,
+            color: "rgba(255,255,255,.6)",
+          }}>
+            {" "}TIMES
+          </span>
+        </div>
+
+        <div style={{
+          fontSize: 20,
+          color: "rgba(255,255,255,.45)",
+          textAlign: "center",
+          lineHeight: 1.5,
+          fontStyle: "italic",
+        }}>
+          Each pass makes the understanding richer.
+        </div>
+
+        {step === 0 && (
+          <ContinueButton onClick={advance} color={color} label="See the first layers" />
+        )}
       </div>
-      <TriviaBox visible={opened.size >= 3} color={color} number="96" label="transformer layers"
-        fact="Each layer is its own full Attention + MLP block. Run 96 of them in sequence and you go from raw letters to nuanced, reasoned understanding." />
+
+      {/* ── Step 1: Layer groups 1-3 ── */}
+      {step >= 1 && (
+        <div
+          ref={step1Ref}
+          style={{
+            animation: "fadeUp .5s ease",
+            minHeight: "60vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            paddingTop: 24,
+          }}
+        >
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 22,
+            color: "rgba(255,255,255,.5)",
+            textAlign: "center",
+            marginBottom: 20,
+          }}>
+            The early layers build the basics...
+          </div>
+
+          {LAYER_CARDS.slice(0, 3).map((layer, i) => (
+            <LayerCard key={i} layer={layer} color={color} />
+          ))}
+
+          {step === 1 && (
+            <ContinueButton onClick={advance} color={color} label="See the deeper layers" />
+          )}
+        </div>
+      )}
+
+      {/* ── Step 2: Layer groups 4-6 + Trivia ── */}
+      {step >= 2 && (
+        <div
+          ref={step2Ref}
+          style={{
+            animation: "fadeUp .5s ease",
+            minHeight: "60vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            paddingTop: 24,
+          }}
+        >
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 22,
+            color: "rgba(255,255,255,.5)",
+            textAlign: "center",
+            marginBottom: 20,
+          }}>
+            ...then the deeper layers add meaning.
+          </div>
+
+          {LAYER_CARDS.slice(3, 6).map((layer, i) => (
+            <LayerCard key={i + 3} layer={layer} color={color} />
+          ))}
+
+          <TriviaBox visible={true} color={color} number="96" label="transformer layers"
+            fact="Each layer is its own full Attention + MLP block. Run 96 of them in sequence and you go from raw letters to nuanced, reasoned understanding." />
+        </div>
+      )}
     </div>
   );
 }
