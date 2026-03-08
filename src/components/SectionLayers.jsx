@@ -714,6 +714,11 @@ export default function SectionLayers({ color, mode }) {
 
           <TriviaBox visible={true} color={color} number="96" label="transformer layers"
             fact="Each layer is its own full Attention + MLP block. Run 96 of them in sequence and you go from raw letters to nuanced, reasoned understanding." />
+
+          <div style={{ height: 16 }} />
+
+          <TriviaBox visible={true} color={color} number="400,000,000,000" label="calculations per word"
+            fact="The biggest AI models perform over 400 billion math calculations just to predict a single word. A person doing one calculation per second would need over 12,000 years to do what the model does in a fraction of a second." />
         </div>
       )}
     </div>
