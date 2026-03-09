@@ -4,6 +4,8 @@ import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
 
 import ModeSelect from "./components/ModeSelect";
+import Glossary from "./components/Glossary";
+import KnowledgeCheck from "./components/KnowledgeCheck";
 import SectionWhoIsHere from "./components/SectionWhoIsHere";
 import SectionWhatIsAI from "./components/SectionWhatIsAI";
 import SectionProgramsVsAI from "./components/SectionProgramsVsAI";
@@ -75,6 +77,8 @@ export default function App() {
   }, [mode, next]);
 
   if (!mode) return <ModeSelect onSelect={setMode} allCss={ALL_CSS} />;
+  if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
+  if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
 
   const color = COLORS[sec % COLORS.length];
   const currentGroup = GROUPS.find(g => sec >= g.start && sec <= g.end);

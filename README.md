@@ -48,6 +48,13 @@ A streamlined presentation version at [`/slides`](slides/) — just press the ar
 - **Classroom Mode** — The teacher controls the pace. Each section includes collapsible "Talking Points" with discussion prompts and teaching tips.
 - **Solo Mode** — Students explore at their own pace with interactive elements guiding the way.
 
+## Resources
+
+Accessible from the main mode-select screen:
+
+- **Glossary** — 18 key AI terms with kid-friendly definitions, organized into 4 topic groups (Introduction, Words & Numbers, How AI Thinks, Output & Beyond)
+- **Knowledge Check** — A 10-question multiple choice quiz testing core concepts. Answer all 10, then see color-coded results with explanations for any wrong answers. Retake anytime.
+
 ## Navigation
 
 - **Down Arrow** or click the button — advance within a section (progressive reveal)
@@ -115,6 +122,8 @@ src/
     SectionMLP.jsx         # Section 11: The Thinking Layer
     SectionLayers.jsx      # Section 12: Rinse & Repeat
     SectionPredict.jsx     # Section 13: Predict!
+    Glossary.jsx           # Scrollable glossary of 18 key AI terms
+    KnowledgeCheck.jsx     # 10-question multiple choice quiz with results
   data/
     constants.js           # Colors, section titles, group definitions
     embeddings.js          # Word map coordinates, dimension explorer steps

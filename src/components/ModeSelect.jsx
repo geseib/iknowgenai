@@ -2,6 +2,8 @@ import {
   Robot,
   ChalkboardTeacher,
   GameController,
+  Book,
+  Exam,
 } from "@phosphor-icons/react";
 
 const modes = [
@@ -69,7 +71,18 @@ export default function ModeSelect({ onSelect, allCss }) {
             </div>
           ))}
         </div>
-        <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 28 }}>13 sections &middot; ~45 minutes &middot; Ages 8&ndash;11</p>
+
+        {/* Resource buttons */}
+        <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 28 }}>
+          <button onClick={() => onSelect("glossary")} className="ghost-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px" }}>
+            <Book size={18} weight="duotone" /> Glossary
+          </button>
+          <button onClick={() => onSelect("quiz")} className="ghost-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px" }}>
+            <Exam size={18} weight="duotone" /> Knowledge Check
+          </button>
+        </div>
+
+        <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>13 sections &middot; ~45 minutes &middot; Ages 8&ndash;11</p>
       </div>
     </div>
   );
