@@ -88,7 +88,7 @@ export default function SectionWhatIsLLM({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="MEET THE LLMS · WHAT IS IT?" />
+      <Label color={color} mode={mode} text="MEET THE LLMS · WHAT IS IT?" />
       <H1>What's an LLM?</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

@@ -106,7 +106,7 @@ export default function SectionPredict({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 6" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 6" />
       <H1>Predict!</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
@@ -224,7 +224,7 @@ export default function SectionPredict({ color, mode }) {
             </div>
           </div>
 
-          <TriviaBox visible={true} color={color}
+          <TriviaBox mode={mode} visible={true} color={color}
             number={layerCount > 0 ? layerCount.toLocaleString() : "5,760+"}
             label="layer passes so far"
             fact="A typical 60-word paragraph means running all 96 layers 60 times — over 5,760 layer passes just to say 'good morning'!" />

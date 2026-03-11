@@ -87,7 +87,7 @@ export default function SectionWhatIsAI({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="INTRODUCTION · THE BIG QUESTION" />
+      <Label color={color} mode={mode} text="INTRODUCTION · THE BIG QUESTION" />
       <H1>What IS AI?</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

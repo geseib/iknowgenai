@@ -2,6 +2,7 @@ import {
   Robot,
   ChalkboardTeacher,
   GameController,
+  Eye,
   Book,
   Exam,
 } from "@phosphor-icons/react";
@@ -22,6 +23,14 @@ const modes = [
     desc: "Students explore at their own pace with interactive quizzes guiding the way.",
     color: "#fee440",
     detail: "Best for: individual learning",
+  },
+  {
+    id: "minimal",
+    Icon: Eye,
+    title: "Focus Mode",
+    desc: "One idea at a time. No extras, no distractions.",
+    color: "#ffffff",
+    detail: "Best for: maximum clarity",
   },
 ];
 

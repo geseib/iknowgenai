@@ -84,7 +84,7 @@ export default function SectionTheBridge({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="MEET THE LLMS · THE BRIDGE" />
+      <Label color={color} mode={mode} text="MEET THE LLMS · THE BRIDGE" />
       <H1>The Big Question</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

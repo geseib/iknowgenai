@@ -5,8 +5,9 @@ import {
   Bird,
   Lightbulb,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, Body, TriviaBox, TeacherNote } from "./shared";
+import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote } from "./shared";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
+import BatIllustration from "./BatIllustration";
 
 /* ── AttentionSentence sub-component ────────────────────────────────────────── */
 function AttentionSentence({ words, attnMap, color, label, LabelIcon, meaning, MeaningIcon }) {
@@ -177,7 +178,7 @@ export default function SectionAttention({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 3" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 3" />
       <H1>Attention!</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
@@ -284,6 +285,21 @@ export default function SectionAttention({ color, mode }) {
             </div>
           </div>
 
+          {/* Funny bat illustration — embedding = all meanings at once */}
+          <div style={{ textAlign: "center", margin: "24px 0 8px" }}>
+            <BatIllustration color={color} size={180} />
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 17,
+              color: `${color}bb`,
+              marginTop: 8,
+              lineHeight: 1.4,
+            }}>
+              Before context, the AI's "bat" is <em>everything at once</em> —<br />
+              a baseball bat... with wings and fangs!
+            </div>
+          </div>
+
           <div style={{
             fontSize: 22,
             color: "rgba(255,255,255,.65)",
@@ -292,7 +308,7 @@ export default function SectionAttention({ color, mode }) {
             maxWidth: 600,
             margin: "0 auto",
           }}>
-            <strong style={{ color }}>"bat"</strong> can mean both things! But here's the AI's problem — it only sees text. No picture, no voice. It has to figure out the right meaning from the{" "}
+            <strong style={{ color }}>"bat"</strong> can mean both things! When the AI first turns it into numbers, it captures <em>all</em> the meanings jumbled together. It has to figure out the right one from the{" "}
             <strong style={{ color }}>other words around it</strong>.
           </div>
 
@@ -445,8 +461,13 @@ export default function SectionAttention({ color, mode }) {
         </div>
       )}
 
-      <TriviaBox visible={step === 4} color={color} number="96" label="attention heads at once"
+      <TriviaBox mode={mode} visible={step === 4} color={color} number="96" label="attention heads at once"
         fact="Claude runs 96 different spotlights at the same time — each one looking for different types of relationships. It's like 96 readers, each hunting for something different in the same sentence." />
+      {step === 4 && (
+        <ModelNote color={color} mode={mode}>
+          Different models use different numbers of attention heads — some use 32, some 96, some even more. The idea is the same: multiple spotlights working together.
+        </ModelNote>
+      )}
     </div>
   );
 }

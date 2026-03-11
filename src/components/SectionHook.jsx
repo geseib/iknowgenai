@@ -3,7 +3,7 @@ import {
   ArrowDown,
   Lightbulb,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote } from "./shared";
 import CatIllustration from "./CatIllustration";
 
 const notes = [
@@ -172,7 +172,7 @@ export default function SectionHook({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 1" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 1" />
       <H1>The Secret: Numbers</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
@@ -394,8 +394,11 @@ export default function SectionHook({ color, mode }) {
             <VectorTicker color={color} />
           </div>
 
-          <TriviaBox visible={true} color={color} number="12,288" label="numbers per word"
+          <TriviaBox mode={mode} visible={true} color={color} number="12,288" label="numbers per word"
             fact="Imagine covering an entire basketball court with tennis balls, packed side by side. That's about 12,000 balls — almost exactly how many numbers the AI uses for a single word like 'cat'." />
+          <ModelNote color={color} mode={mode}>
+            The numbers in this lesson (like 12,288 and 96 layers) come from one specific large model. Every AI model uses different numbers — some smaller, some bigger. And as AI keeps getting better, these numbers keep changing! The <strong style={{ color: "rgba(255,255,255,.55)" }}>ideas</strong> stay the same though.
+          </ModelNote>
         </div>
       )}
     </div>

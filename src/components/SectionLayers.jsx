@@ -11,7 +11,7 @@ import {
   Brain,
   Lightning,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote } from "./shared";
 
 const LAYER_CARDS = [
   { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
@@ -571,7 +571,7 @@ export default function SectionLayers({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 5" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 5" />
       <H1>Rinse & Repeat</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
@@ -712,13 +712,17 @@ export default function SectionLayers({ color, mode }) {
             <LayerCard key={i + 3} layer={layer} color={color} />
           ))}
 
-          <TriviaBox visible={true} color={color} number="96" label="transformer layers"
+          <TriviaBox mode={mode} visible={true} color={color} number="96" label="transformer layers"
             fact="Each layer is its own full Attention + MLP block. Run 96 of them in sequence and you go from raw letters to nuanced, reasoned understanding." />
 
           <div style={{ height: 16 }} />
 
-          <TriviaBox visible={true} color={color} number="400,000,000,000" label="calculations per word"
+          <TriviaBox mode={mode} visible={true} color={color} number="400,000,000,000" label="calculations per word"
             fact="The biggest AI models perform over 400 billion math calculations just to predict a single word. A person doing one calculation per second would need over 12,000 years to do what the model does in a fraction of a second." />
+
+          <ModelNote color={color} mode={mode}>
+            Some models have 32 layers, some have 96, some have even more. The exact number changes as researchers find better designs — it's not always bigger! But the idea of stacking layers to build deeper understanding is how all these models work.
+          </ModelNote>
         </div>
       )}
     </div>

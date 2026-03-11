@@ -126,7 +126,7 @@ export default function SectionMLP({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 4" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 4" />
       <H1>The Thinking Layer</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
@@ -194,7 +194,7 @@ export default function SectionMLP({ color, mode }) {
             </p>
           </Card>
 
-          <TriviaBox visible={true} color={color} number="49,152" label="neurons in the hidden layer"
+          <TriviaBox mode={mode} visible={true} color={color} number="49,152" label="neurons in the hidden layer"
             fact="The MLP hidden layer is 4× the size of the input — giving the model enormous room to think before passing signals on to the next layer." />
         </div>
       )}

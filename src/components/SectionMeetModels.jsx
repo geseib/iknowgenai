@@ -160,7 +160,7 @@ export default function SectionMeetModels({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="MEET THE LLMS · THE PLAYERS" />
+      <Label color={color} mode={mode} text="MEET THE LLMS · THE PLAYERS" />
       <H1>Meet the Models</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

@@ -180,7 +180,7 @@ export default function SectionBrainVsAI({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="INTRODUCTION · BRAIN VS AI" />
+      <Label color={color} mode={mode} text="INTRODUCTION · BRAIN VS AI" />
       <H1>Brain vs AI</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

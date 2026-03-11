@@ -268,7 +268,7 @@ export default function SectionEmbeddings({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="HOW AI THINKS · STEP 2" />
+      <Label color={color} mode={mode} text="HOW AI THINKS · STEP 2" />
       <TeacherNote notes={notes} color={color} mode={mode} />
 
       {/* ── Step 0: Scatter plot ── */}
@@ -372,7 +372,7 @@ export default function SectionEmbeddings({ color, mode }) {
         </div>
       )}
 
-      <TriviaBox visible={part2Done} color={color} number="~100,000" label="tokens in AI's vocabulary"
+      <TriviaBox mode={mode} visible={part2Done} color={color} number="~100,000" label="tokens in AI's vocabulary"
         fact="Large language models like Claude know around 100,000 word-pieces (tokens). That's roughly 3× more than the average adult's vocabulary of about 20,000–35,000 words — and every single token gets its own unique set of 12,288 coordinates in meaning space." />
     </div>
   );

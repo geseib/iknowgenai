@@ -91,7 +91,7 @@ export default function SectionWhoIsHere({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="INTRODUCTION · WARM UP" />
+      <Label color={color} mode={mode} text="INTRODUCTION · WARM UP" />
       <H1>Who's Already Used AI?</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 

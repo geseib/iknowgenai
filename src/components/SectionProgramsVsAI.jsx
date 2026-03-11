@@ -199,7 +199,7 @@ export default function SectionProgramsVsAI({ color, mode }) {
 
   return (
     <div className="fade-up">
-      <Label color={color} text="INTRODUCTION · HOW AI IS DIFFERENT" />
+      <Label color={color} mode={mode} text="INTRODUCTION · HOW AI IS DIFFERENT" />
       <H1>Rules vs Learning</H1>
       <TeacherNote notes={notes} color={color} mode={mode} />
 
