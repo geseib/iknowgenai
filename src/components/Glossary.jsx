@@ -30,7 +30,7 @@ const GLOSSARY_GROUPS = [
       { term: "Attention", def: "The step where words look at other words to understand context." },
       { term: "Context", def: "The surrounding words that help figure out what a word means." },
       { term: "MLP (Multi-Layer Perceptron)", def: 'The "thinking layer" that processes meaning after attention.' },
-      { term: "Layer", def: "One full round of attention + MLP — the model has 96 of these stacked up." },
+      { term: "Layer", def: "One full round of attention + MLP. Models stack many of these — some have 32, some have 96 or more — to build deeper understanding." },
     ],
   },
   {
