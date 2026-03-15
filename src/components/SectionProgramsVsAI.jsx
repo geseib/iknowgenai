@@ -11,7 +11,7 @@ import {
   ClipboardText,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Label, H1, TeacherNote } from "./shared";
+import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const scenarios = [
   { Icon: Calculator,     label: "A calculator adds 2+2",              answer: "regular", why: "The rule '2+2=4' was written in by a programmer. It never learned — it just follows instructions." },
@@ -51,7 +51,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-function ScenarioCard({ scenario, color, revealed, onReveal }) {
+function ScenarioCard({ scenario, color, revealed, onReveal, pres }) {
   const isAI = scenario.answer === "ai";
   return (
     <div
@@ -71,14 +71,14 @@ function ScenarioCard({ scenario, color, revealed, onReveal }) {
       {/* Icon + Label */}
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <scenario.Icon
-          size={40}
+          size={pres ? 48 : 40}
           weight="duotone"
           color={revealed ? (isAI ? color : "rgba(255,255,255,.6)") : "rgba(255,255,255,.4)"}
           style={{ transition: "color .3s ease" }}
         />
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: 22,
+          fontSize: pres ? 26 : 22,
           color: "white",
           flex: 1,
         }}>
@@ -88,7 +88,7 @@ function ScenarioCard({ scenario, color, revealed, onReveal }) {
         {revealed ? (
           <div style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 18,
+            fontSize: pres ? 22 : 18,
             fontWeight: 700,
             color: isAI ? color : "rgba(255,255,255,.7)",
             padding: "6px 16px",
@@ -122,10 +122,10 @@ function ScenarioCard({ scenario, color, revealed, onReveal }) {
       {/* Why text — only after reveal */}
       {revealed && (
         <div style={{
-          fontSize: 18,
+          fontSize: pres ? 20 : 18,
           color: "rgba(255,255,255,.6)",
           lineHeight: 1.55,
-          paddingLeft: 56,
+          paddingLeft: pres ? 64 : 56,
           animation: "fadeUp .4s ease",
         }}>
           {scenario.why}
@@ -135,7 +135,7 @@ function ScenarioCard({ scenario, color, revealed, onReveal }) {
   );
 }
 
-export default function SectionProgramsVsAI({ color, mode }) {
+export default function SectionProgramsVsAI({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState(new Set());
   const step1Ref = useRef(null);
@@ -196,6 +196,72 @@ export default function SectionProgramsVsAI({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  // ── Presentation Mode ──
+  // Pattern: show pair unrevealed (audience guesses) → next press reveals answers
+  if (mode === "presentation") {
+    const pairs = [[0, 1], [2, 3], [4, 5]];
+
+    // Slide 0: Intro question
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <PresText size={48} color="white">
+            <strong style={{ color }}>AI</strong> or Regular Program?
+          </PresText>
+          <PresText size={30} color="rgba(255,255,255,.45)">
+            Can you tell which is which?
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    // Slides 1-6: pairs of scenarios, alternating unrevealed → revealed
+    // slide 1 = pair 0 unrevealed, slide 2 = pair 0 revealed
+    // slide 3 = pair 1 unrevealed, slide 4 = pair 1 revealed
+    // slide 5 = pair 2 unrevealed, slide 6 = pair 2 revealed
+    if (slide >= 1 && slide <= 6) {
+      const pairIdx = Math.floor((slide - 1) / 2);    // 0, 0, 1, 1, 2, 2
+      const isRevealed = (slide - 1) % 2 === 1;       // false, true, false, true...
+      const [a, b] = pairs[pairIdx];
+      return (
+        <PresSlide>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 700 }}>
+            {[scenarios[a], scenarios[b]].map((s, i) => (
+              <div key={i} style={{ animation: `fadeUp .4s ${i * 0.12}s ease both` }}>
+                <ScenarioCard scenario={s} color={color} revealed={isRevealed} onReveal={() => {}} pres />
+              </div>
+            ))}
+          </div>
+          {!isRevealed && (
+            <PresText size={22} color="rgba(255,255,255,.3)">
+              What do you think? AI or regular program?
+            </PresText>
+          )}
+        </PresSlide>
+      );
+    }
+
+    // Slide 7: The big insight
+    if (slide === 7) {
+      return (
+        <PresSlide>
+          <Lightbulb size={48} weight="duotone" color={color} />
+          <PresText size={36} color={color}>
+            The big difference:
+          </PresText>
+          <PresText size={32} color="white">
+            Regular programs follow <strong style={{ color }}>RULES</strong> someone wrote.
+          </PresText>
+          <PresText size={32} color="white">
+            AI <strong style={{ color }}>LEARNS</strong> the rules itself — from examples.
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    return null;
+  }
 
   return (
     <div className="fade-up">

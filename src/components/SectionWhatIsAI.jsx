@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Robot, Desktop, Brain, Lightbulb, ArrowDown } from "@phosphor-icons/react";
-import { Card, Label, H1, TeacherNote } from "./shared";
+import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const choices = [
   { id: "robot",   Icon: Robot,   label: "A robot",                response: "Great guess! But AI doesn't need a body. It can live entirely inside a computer — no arms, no legs required." },
   { id: "program", Icon: Desktop, label: "A really smart program", response: "You're onto something! It IS a program — but there's one important twist that makes it different from all other programs." },
-  { id: "brain",   Icon: Brain,   label: "A digital brain",        response: "Interesting! AI was inspired by how brains work — but it doesn't have feelings, memories between chats, or consciousness." },
+  { id: "brain",   Icon: Brain,   label: "A digital brain",        response: "Interesting! AI was inspired by how brains work — it can even sound emotional, but it's predicting what to say, not actually feeling anything." },
 ];
 
 const notes = [
@@ -38,7 +38,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionWhatIsAI({ color, mode }) {
+export default function SectionWhatIsAI({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState(null);
   const step1Ref = useRef(null);
@@ -84,6 +84,98 @@ export default function SectionWhatIsAI({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  if (mode === "presentation") {
+    // Slide 0: The big question + 3 options
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <PresText size={48} color="white">What do you think AI is?</PresText>
+          <div style={{ display: "flex", gap: 32, justifyContent: "center", flexWrap: "wrap" }}>
+            {choices.map(c => (
+              <div key={c.id} style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+                padding: "24px 32px", borderRadius: 20,
+                background: "rgba(255,255,255,.06)", border: "2px solid rgba(255,255,255,.15)",
+              }}>
+                <c.Icon size={56} weight="duotone" color={color} />
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 26, color: "white" }}>{c.label}</div>
+              </div>
+            ))}
+          </div>
+        </PresSlide>
+      );
+    }
+    // Slide 1: "A robot?" — lean positive, then pivot
+    if (slide === 1) {
+      const c = choices[0];
+      return (
+        <PresSlide>
+          <c.Icon size={72} weight="duotone" color={color} />
+          <PresText size={44} color="white">
+            Is AI a <span style={{ color }}>robot</span>?
+          </PresText>
+          <PresText size={28} color="rgba(255,255,255,.65)">
+            AI was inspired by sci-fi robots — and it CAN control robots!<br />
+            But AI doesn't need a body. It lives inside a computer.
+          </PresText>
+        </PresSlide>
+      );
+    }
+    // Slide 2: "A smart program?" — positive, build
+    if (slide === 2) {
+      const c = choices[1];
+      return (
+        <PresSlide>
+          <c.Icon size={72} weight="duotone" color={color} />
+          <PresText size={44} color="white">
+            Is AI a <span style={{ color }}>smart program</span>?
+          </PresText>
+          <PresText size={28} color="rgba(255,255,255,.65)">
+            Yes! AI IS a program. But there's one big twist —<br />
+            nobody wrote the rules. It figured them out on its own.
+          </PresText>
+        </PresSlide>
+      );
+    }
+    // Slide 3: "A digital brain?" — positive, build
+    if (slide === 3) {
+      const c = choices[2];
+      return (
+        <PresSlide>
+          <c.Icon size={72} weight="duotone" color={color} />
+          <PresText size={44} color="white">
+            Is AI a <span style={{ color }}>digital brain</span>?
+          </PresText>
+          <PresText size={28} color="rgba(255,255,255,.65)">
+            AI was inspired by how brains connect neurons!<br />
+            It can even sound emotional — but it's predicting words, not feeling things.
+          </PresText>
+        </PresSlide>
+      );
+    }
+    // Slide 4: The real answer — what makes AI different from ALL of those
+    if (slide === 4) {
+      return (
+        <PresSlide>
+          <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI" style={{ width: 120, height: "auto" }} />
+          <PresText size={44} color="white">
+            What makes AI <span style={{ color }}>special</span>?
+          </PresText>
+          <PresText size={32} color="rgba(255,255,255,.7)">
+            Regular programs follow <strong style={{ color }}>rules someone wrote</strong>.
+          </PresText>
+          <PresText size={32} color="rgba(255,255,255,.7)">
+            AI <strong style={{ color }}>learns the rules itself</strong> — from millions of examples.
+          </PresText>
+          <PresText size={24} color="rgba(255,255,255,.4)">
+            Just like you learned to talk by hearing people talk.
+          </PresText>
+        </PresSlide>
+      );
+    }
+    return <PresSlide />;
+  }
 
   return (
     <div className="fade-up">

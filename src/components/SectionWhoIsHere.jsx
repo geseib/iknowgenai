@@ -11,12 +11,12 @@ import {
   Sparkle,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TeacherNote } from "./shared";
+import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const examples = [
   { Icon: SpeakerHigh,     label: "Siri or Alexa",       desc: "Voice assistants" },
   { Icon: FilmSlate,       label: "Netflix / YouTube",   desc: "Video suggestions" },
-  { Icon: GameController,  label: "Video games",         desc: "Enemy AI & NPCs" },
+  { Icon: GameController,  label: "Video games",         desc: "Opponent AI & NPCs" },
   { Icon: Camera,          label: "Phone camera",        desc: "Face recognition" },
   { Icon: ChatCircleDots,  label: "ChatGPT / Claude",    desc: "Chatbots" },
   { Icon: MusicNotes,      label: "Spotify",             desc: "Music suggestions" },
@@ -54,7 +54,113 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionWhoIsHere({ color, mode }) {
+export default function SectionWhoIsHere({ color, mode, slide }) {
+  /* ── Presentation mode ── */
+  if (mode === "presentation") {
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <div className="fade-up">
+            <PresText size={52}>
+              Have <span style={{ color }}>YOU</span> ever used AI?
+            </PresText>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 30,
+              color: "rgba(255,255,255,.4)",
+              fontStyle: "italic",
+              textAlign: "center",
+              lineHeight: 1.5,
+              marginTop: 16,
+            }}>
+              Raise your hand if you've ever used AI — or think you might have!
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+    if (slide === 1) {
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ width: "100%", maxWidth: 800 }}>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 36,
+              color: "white",
+              textAlign: "center",
+              marginBottom: 28,
+            }}>
+              Surprise — look at everything that already uses AI:
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                gap: 16,
+                width: "100%",
+              }}
+            >
+              {examples.map((e, i) => (
+                <Card
+                  key={i}
+                  style={{
+                    padding: "20px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 10,
+                    textAlign: "center",
+                    animation: `fadeUp .4s ${i * 0.08}s ease both`,
+                  }}
+                >
+                  <e.Icon size={44} weight="duotone" color={color} />
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: "white",
+                  }}>
+                    {e.label}
+                  </div>
+                  <div style={{
+                    fontSize: 20,
+                    color: "rgba(255,255,255,.4)",
+                  }}>
+                    {e.desc}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+    if (slide === 2) {
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ textAlign: "center" }}>
+            <Sparkle size={52} weight="duotone" color={color} style={{ marginBottom: 16 }} />
+            <PresText size={48} color={color}>
+              AI is already everywhere!
+            </PresText>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 28,
+              color: "rgba(255,255,255,.4)",
+              lineHeight: 1.6,
+              marginTop: 16,
+              maxWidth: 700,
+            }}>
+              In your phone, your TV, your games. And today you're going to find out{" "}
+              <strong style={{ color }}>exactly how it works!</strong>
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+    return null;
+  }
+
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);

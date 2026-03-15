@@ -1,15 +1,15 @@
 export const COLORS = [
   "#00f5d4","#00bbf9","#fee440","#f15bb5","#9b5de5",
   "#fb5607","#06d6a0","#00f5d4","#fee440","#f15bb5",
-  "#9b5de5","#00bbf9","#fb5607"
+  "#9b5de5","#00bbf9","#fb5607","#06d6a0"
 ];
 
-export const TOTAL = 13;
+export const TOTAL = 14;
 
 export const GROUPS = [
   { name: "Introduction",  start: 0, end: 2  },
   { name: "Meet the LLMs", start: 3, end: 6  },
-  { name: "How AI Thinks", start: 7, end: 12 },
+  { name: "How AI Thinks", start: 7, end: 13 },
 ];
 
 export const TITLES = [
@@ -20,6 +20,7 @@ export const TITLES = [
   "What's an LLM?",
   "Meet the Models",
   "The Big Question",
+  "How AI Learns",
   "Numbers & Words",
   "Words in Space",
   "Attention!",

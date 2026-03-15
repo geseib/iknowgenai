@@ -6,6 +6,8 @@ export const ALL_CSS = `
   @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
   @keyframes blobPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
   @keyframes probIn { from{width:0!important} }
+  @keyframes dialSpin { 0%{transform:scaleY(1)} 30%{transform:scaleY(0.3)} 60%{transform:scaleY(1.4)} 100%{transform:scaleY(1)} }
+  @keyframes gearSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
   @keyframes wowReveal {
     0%{opacity:0;transform:translateY(18px) scale(.95)}
     65%{transform:translateY(-3px) scale(1.02)}

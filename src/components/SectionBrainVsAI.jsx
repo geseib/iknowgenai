@@ -7,12 +7,12 @@ import {
   Lightbulb,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Label, H1, TeacherNote } from "./shared";
+import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const rows = [
   { topic: "How it learns",       brain: "From experience and practice",          ai: "From millions of training examples",     match: true },
   { topic: "Can make mistakes",   brain: "Yes — humans get things wrong",    ai: "Yes — AI gets things wrong too!",    match: true },
-  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "No — it just processes text",         match: false },
+  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "It can act like it — but doesn't actually feel",  match: false },
   { topic: "Gets tired",          brain: "Yes — needs sleep and rest",        ai: "No — it can run 24/7",               match: false },
   { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Only what it was trained on",             match: false },
   { topic: "Understands meaning", brain: "Deeply — we live in the world",    ai: "Sort of — in a very different way",   match: false },
@@ -21,6 +21,7 @@ const rows = [
 
 const notes = [
   "Kids often ask 'does AI think like us?' — it's worth being honest: we don't fully know. What we do know is that it processes differently from a human brain.",
+  "The 'has emotions' row is tricky. AI can say 'I'm excited!' or 'That makes me sad' — and it feels real. But it learned those words from human writing. It's predicting what an emotional response looks like, not actually feeling anything. A good analogy: an actor can cry on cue without being sad.",
   "The 'can be creative' row often sparks good debate. AI combines and remixes patterns from training data. Is that 'real' creativity? Great open question for the class.",
   "Key point: AI was inspired by neurons and how brains connect, but an AI model is ultimately a giant math function — billions of multiplication operations happening in sequence.",
   "Avoid saying AI 'knows' or 'understands' things the way humans do. Safer phrasing: 'it processes' or 'it was trained on' to avoid overclaiming.",
@@ -49,7 +50,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-function ComparisonCard({ row, color }) {
+function ComparisonCard({ row, color, pres }) {
   return (
     <div
       style={{
@@ -97,7 +98,7 @@ function ComparisonCard({ row, color }) {
         <div style={{ padding: "14px 18px", background: "rgba(255,255,255,.03)" }}>
           <div
             style={{
-              fontSize: 14,
+              fontSize: pres ? 18 : 14,
               color: "rgba(255,255,255,.4)",
               fontFamily: "'Fredoka',sans-serif",
               marginBottom: 6,
@@ -108,7 +109,7 @@ function ComparisonCard({ row, color }) {
               letterSpacing: 1,
             }}
           >
-            <Brain size={18} weight="duotone" /> BRAIN
+            <Brain size={pres ? 24 : 18} weight="duotone" /> BRAIN
           </div>
           <div style={{ fontSize: 20, color: "rgba(255,255,255,.8)", lineHeight: 1.5 }}>
             {row.brain}
@@ -117,7 +118,7 @@ function ComparisonCard({ row, color }) {
         <div style={{ padding: "14px 18px", background: `${color}08` }}>
           <div
             style={{
-              fontSize: 14,
+              fontSize: pres ? 18 : 14,
               color: `${color}99`,
               fontFamily: "'Fredoka',sans-serif",
               marginBottom: 6,
@@ -128,7 +129,7 @@ function ComparisonCard({ row, color }) {
               letterSpacing: 1,
             }}
           >
-            <Robot size={18} weight="duotone" /> AI
+            <Robot size={pres ? 24 : 18} weight="duotone" /> AI
           </div>
           <div style={{ fontSize: 20, color: "rgba(255,255,255,.8)", lineHeight: 1.5 }}>
             {row.ai}
@@ -139,7 +140,7 @@ function ComparisonCard({ row, color }) {
   );
 }
 
-export default function SectionBrainVsAI({ color, mode }) {
+export default function SectionBrainVsAI({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -177,6 +178,164 @@ export default function SectionBrainVsAI({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  /* ── Presentation mode ── */
+  /* Slide 0: intro
+     Slides 1-14: 7 comparisons × 2 (question → reveal)
+     Slide 15: insight */
+  if (mode === "presentation") {
+    /* Slide 0: Big intro */
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <div style={{ display: "flex", alignItems: "center", gap: 36, marginBottom: 32 }}>
+            <Brain size={80} weight="duotone" color="rgba(255,255,255,.7)" />
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 44, color: "rgba(255,255,255,.3)" }}>vs</div>
+            <Robot size={80} weight="duotone" color={color} />
+          </div>
+          <PresText size={44}>How similar are they?</PresText>
+          <PresText size={26} color="rgba(255,255,255,.4)">
+            Let's go through them one at a time.
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    /* Slides 1-14: One comparison per two slides (question → reveal) */
+    if (slide >= 1 && slide <= 14) {
+      const rowIdx = Math.floor((slide - 1) / 2);
+      const isRevealed = (slide - 1) % 2 === 1;
+      const row = rows[rowIdx];
+
+      /* Question slide — just the topic, let kids think */
+      if (!isRevealed) {
+        return (
+          <PresSlide>
+            {/* Topic as big question */}
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 48,
+              fontWeight: 700,
+              color: "white",
+              lineHeight: 1.3,
+              marginBottom: 12,
+            }}>
+              {row.topic}
+            </div>
+
+            {/* Two icons as "sides" hint */}
+            <div style={{ display: "flex", alignItems: "center", gap: 28, marginBottom: 20 }}>
+              <Brain size={56} weight="duotone" color="rgba(255,255,255,.35)" />
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 32, color: "rgba(255,255,255,.15)" }}>vs</div>
+              <Robot size={56} weight="duotone" color={`${color}55`} />
+            </div>
+
+            <PresText size={28} color="rgba(255,255,255,.4)">
+              What do you think? Same or different?
+            </PresText>
+
+            {/* Skip button */}
+
+          </PresSlide>
+        );
+      }
+
+      /* Reveal slide — show both answers side by side, big and clear */
+      const matchIcon = row.match
+        ? <Handshake size={44} weight="duotone" color="rgba(255,255,255,.55)" />
+        : <Shuffle size={44} weight="duotone" color={color} />;
+      const matchLabel = row.match ? "Similar!" : "Different!";
+      const matchColor = row.match ? "rgba(255,255,255,.55)" : color;
+
+      return (
+        <PresSlide>
+          {/* Topic */}
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 36,
+            fontWeight: 700,
+            color: "white",
+            marginBottom: 4,
+          }}>
+            {row.topic}
+          </div>
+
+          {/* Match badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            {matchIcon}
+            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, color: matchColor, fontWeight: 600 }}>
+              {matchLabel}
+            </span>
+          </div>
+
+          {/* Side by side answers */}
+          <div style={{ display: "flex", gap: 24, width: "100%", maxWidth: 820 }}>
+            {/* Brain side */}
+            <div style={{
+              flex: 1, padding: "28px 24px", borderRadius: 20,
+              background: "rgba(255,255,255,.05)", border: "2px solid rgba(255,255,255,.15)",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center",
+            }}>
+              <Brain size={56} weight="duotone" color="rgba(255,255,255,.6)" />
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "rgba(255,255,255,.4)",
+                textTransform: "uppercase", letterSpacing: 2,
+              }}>Brain</div>
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 26,
+                color: "rgba(255,255,255,.85)", lineHeight: 1.4,
+              }}>
+                {row.brain}
+              </div>
+            </div>
+
+            {/* AI side */}
+            <div style={{
+              flex: 1, padding: "28px 24px", borderRadius: 20,
+              background: `${color}10`, border: `2px solid ${color}40`,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 14, textAlign: "center",
+            }}>
+              <Robot size={56} weight="duotone" color={color} />
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: `${color}99`,
+                textTransform: "uppercase", letterSpacing: 2,
+              }}>AI</div>
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 26,
+                color: "rgba(255,255,255,.85)", lineHeight: 1.4,
+              }}>
+                {row.ai}
+              </div>
+            </div>
+          </div>
+
+        </PresSlide>
+      );
+    }
+
+    /* Slide 15: Insight */
+    if (slide === 15) {
+      return (
+        <PresSlide>
+          <Lightbulb size={48} weight="duotone" color={color} />
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 40,
+            color: "rgba(255,255,255,.85)", lineHeight: 1.4, maxWidth: 700, textAlign: "center",
+          }}>
+            AI is something genuinely <strong style={{ color }}>NEW</strong>
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 28,
+            color: "rgba(255,255,255,.4)", lineHeight: 1.5, maxWidth: 600, textAlign: "center",
+          }}>
+            Inspired by brains, but not a brain. A powerful new kind of tool.
+          </div>
+        </PresSlide>
+      );
+    }
+
+    return null;
+  }
 
   return (
     <div className="fade-up">

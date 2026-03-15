@@ -5,8 +5,11 @@ import {
   ChatTeardropDots,
   HashStraight,
   Lightbulb,
+  Image,
+  SpeakerHigh,
+  VideoCamera,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TeacherNote } from "./shared";
+import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const ICON_MAP = {
   L0: Books,
@@ -49,7 +52,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionWhatIsLLM({ color, mode }) {
+export default function SectionWhatIsLLM({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -85,6 +88,184 @@ export default function SectionWhatIsLLM({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  /* ── Presentation mode ── */
+  if (mode === "presentation") {
+    /* Slide 0: All three letter boxes — muted / unlit */
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <div style={{ display: "flex", gap: 18, justifyContent: "center", marginBottom: 32, flexWrap: "wrap" }}>
+            {parts.map((p, i) => (
+              <div key={i} style={{
+                textAlign: "center",
+                padding: "20px 28px",
+                borderRadius: 18,
+                minWidth: 110,
+                background: "rgba(255,255,255,.04)",
+                border: "2.5px solid rgba(255,255,255,.12)",
+              }}>
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 56,
+                  fontWeight: 700,
+                  color: "rgba(255,255,255,.3)",
+                  lineHeight: 1,
+                }}>
+                  {p.letter}
+                </div>
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 20,
+                  color: "rgba(255,255,255,.3)",
+                  marginTop: 6,
+                }}>
+                  {p.word}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 32, color: "white", textAlign: "center", lineHeight: 1.5, marginBottom: 12 }}>
+            LLM stands for <strong style={{ color }}>Large Language Model</strong>
+          </div>
+          <div style={{ fontSize: 24, color: "rgba(255,255,255,.45)", textAlign: "center" }}>
+            Three words — let's unpack them.
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 1: L = Large */
+    if (slide === 1) {
+      const p = parts[0];
+      return (
+        <PresSlide>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 64,
+            fontWeight: 700,
+            color,
+            textAlign: "center",
+            lineHeight: 1,
+            marginBottom: 16,
+          }}>
+            {p.letter}
+          </div>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <Books size={28} weight="duotone" color={color} />
+          </div>
+          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
+            {p.word}
+          </div>
+          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
+            {p.reveal}
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 2: L = Language */
+    if (slide === 2) {
+      const p = parts[1];
+      return (
+        <PresSlide>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 64,
+            fontWeight: 700,
+            color,
+            textAlign: "center",
+            lineHeight: 1,
+            marginBottom: 16,
+          }}>
+            {p.letter}
+          </div>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <ChatTeardropDots size={28} weight="duotone" color={color} />
+          </div>
+          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
+            {p.word}
+          </div>
+          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
+            {p.reveal}
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 3: M = Model + Lightbulb insight */
+    if (slide === 3) {
+      const p = parts[2];
+      return (
+        <PresSlide>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 64,
+            fontWeight: 700,
+            color,
+            textAlign: "center",
+            lineHeight: 1,
+            marginBottom: 16,
+          }}>
+            {p.letter}
+          </div>
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            <HashStraight size={28} weight="duotone" color={color} />
+          </div>
+          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
+            {p.word}
+          </div>
+          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto", marginBottom: 28 }}>
+            {p.reveal}
+          </div>
+          <div style={{
+            display: "flex", gap: 12, alignItems: "flex-start", justifyContent: "center",
+            padding: "20px 24px", background: `${color}12`, border: `1px solid ${color}35`,
+            borderRadius: 12, maxWidth: 700, margin: "0 auto",
+          }}>
+            <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI" style={{ width: 56, height: "auto", flexShrink: 0 }} />
+            <span style={{ fontSize: 28, color, lineHeight: 1.5 }}>
+              <strong>A massive mathematical system that learned language by reading an enormous amount of text</strong>
+            </span>
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 4: Not just text — pictures & audio too */
+    if (slide === 4) {
+      return (
+        <PresSlide>
+          <PresText size={40} color="white">
+            But it's not <em>just</em> words...
+          </PresText>
+          <div style={{
+            display: "flex", gap: 28, justifyContent: "center", marginTop: 8, marginBottom: 8,
+          }}>
+            {[
+              { Icon: Image, label: "Pictures" },
+              { Icon: SpeakerHigh, label: "Audio" },
+              { Icon: VideoCamera, label: "Video" },
+            ].map(({ Icon, label }) => (
+              <div key={label} style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+                padding: "20px 28px", borderRadius: 18,
+                background: `${color}10`, border: `2px solid ${color}30`,
+              }}>
+                <Icon size={48} weight="duotone" color={color} />
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, color: "white" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+          <PresText size={26} color="rgba(255,255,255,.55)">
+            AI can also generate images, understand speech, and even create video — using a very similar approach.
+          </PresText>
+          <PresText size={28} color={color}>
+            But that's a lesson for another day!
+          </PresText>
+          <PresText size={24} color="rgba(255,255,255,.35)">
+            Today we're focusing on the <strong style={{ color: "white" }}>language</strong> part.
+          </PresText>
+        </PresSlide>
+      );
+    }
+  }
 
   return (
     <div className="fade-up">

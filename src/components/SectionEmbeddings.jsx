@@ -16,7 +16,7 @@ import {
   Confetti,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TriviaBox, TeacherNote } from "./shared";
+import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
 import {
   WORD_MAP,
   GROUP_COLORS as GC,
@@ -216,7 +216,7 @@ function DimensionExplorer({ color, onComplete }) {
 }
 
 /* ── Main Section ─────────────────────────────────────────────────────────── */
-export default function SectionEmbeddings({ color, mode }) {
+export default function SectionEmbeddings({ color, mode, slide }) {
   const [sel, setSel] = useState(null);
   const [step, setStep] = useState(0);
   const [part2Done, setPart2Done] = useState(false);
@@ -265,6 +265,328 @@ export default function SectionEmbeddings({ color, mode }) {
     { g: "tech",    x: 73, y: 53, Icon: Desktop,     label: "Tech" },
     { g: "action",  x: 26, y: 16, Icon: Lightning,   label: "Actions" },
   ];
+
+  if (mode === "presentation") {
+    /* Slide 0: Dimensions first — concrete examples */
+    if (slide === 0) return (
+      <PresSlide>
+        <PresText size={36}>
+          Each of those numbers tells AI something about a word.
+        </PresText>
+        <PresText size={36}>
+          These are called <span style={{ color }}>dimensions</span>.
+        </PresText>
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 14,
+          maxWidth: 700, width: "100%",
+        }}>
+          {[
+            { dim: "Has wings?", yes: "bat, bird, butterfly", no: "pizza, car" },
+            { dim: "Can you eat it?", yes: "pizza, burger, cake", no: "bat, car" },
+            { dim: "Is it alive?", yes: "bat, bird, dog", no: "pizza, car" },
+            { dim: "Is it furry?", yes: "dog, cat, bat", no: "pizza, bird" },
+          ].map((d, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 16,
+              padding: "12px 20px", borderRadius: 14,
+              background: "rgba(255,255,255,.05)",
+              border: "1px solid rgba(255,255,255,.1)",
+              animation: `fadeUp .4s ${i * 0.1}s ease both`,
+            }}>
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 24,
+                color, fontWeight: 700, minWidth: 200,
+              }}>
+                {d.dim}
+              </div>
+              <div style={{ fontSize: 20, color: "rgba(255,255,255,.5)" }}>
+                <span style={{ color: "white" }}>{d.yes}</span>
+                {" · "}
+                <span style={{ textDecoration: "line-through", opacity: 0.5 }}>{d.no}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <PresText size={22} color="rgba(255,255,255,.35)">
+          12,288 of these measurements per word!
+        </PresText>
+      </PresSlide>
+    );
+    /* Slide 1: Words in Space — the result of all those dimensions */
+    if (slide === 1) return (
+      <PresSlide>
+        <PresText size={40} color="white">
+          Similar words end up <span style={{ color }}>close together</span>
+        </PresText>
+        <Card style={{ padding: "18px 18px", width: "100%", maxWidth: 800 }}>
+          <div style={{
+            position: "relative", width: "100%", paddingTop: "65%",
+            background: "rgba(255,255,255,.03)", borderRadius: 14, overflow: "hidden",
+          }}>
+            {clusterLabels.map(cl => (
+              <div key={cl.g} style={{
+                position: "absolute", left: `${cl.x}%`, top: `${cl.y}%`,
+                fontSize: 18, fontFamily: "'Fredoka',sans-serif", fontWeight: 600,
+                letterSpacing: .8, pointerEvents: "none", transition: "color .3s",
+                color: selGroup === cl.g ? GC[cl.g] : "rgba(255,255,255,.2)",
+                display: "flex", alignItems: "center", gap: 4,
+              }}>
+                <cl.Icon size={20} weight="duotone" /> {cl.label}
+              </div>
+            ))}
+            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+              {selGroup && WORD_MAP.filter(w => w.g === selGroup && w.w !== sel).map(w => {
+                const from = WORD_MAP.find(x => x.w === sel);
+                return <line key={w.w} x1={`${from.x}%`} y1={`${from.y}%`} x2={`${w.x}%`} y2={`${w.y}%`} stroke={GC[selGroup]} strokeWidth={2} strokeOpacity={.5} strokeDasharray="5 4" />;
+              })}
+            </svg>
+            {WORD_MAP.map(w => {
+              const gc = GC[w.g];
+              const isMe = w.w === sel;
+              const sg = selGroup && w.g === selGroup;
+              return (
+                <div key={w.w} onClick={() => handleClick(w.w)} style={{
+                  position: "absolute", left: `${w.x}%`, top: `${w.y}%`,
+                  transform: "translate(-50%,-50%)", fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 20, fontWeight: isMe ? 700 : 600,
+                  color: (isMe || sg) ? gc : "rgba(255,255,255,.45)",
+                  padding: "4px 12px", borderRadius: 24,
+                  background: isMe ? `${gc}30` : sg ? `${gc}15` : "transparent",
+                  border: isMe ? `2px solid ${gc}80` : "2px solid transparent",
+                  cursor: "pointer", transition: "all .2s ease", whiteSpace: "nowrap",
+                  zIndex: isMe ? 10 : 1,
+                }}>{w.w}</div>
+              );
+            })}
+          </div>
+        </Card>
+      </PresSlide>
+    );
+    /* Slides 2-6: Key DimensionExplorer steps rendered as individual slides */
+    const PRES_DIM_STEPS = [0, 2, 5, 6, 7, 8]; // Two neighbourhoods, Animal, Bird+Plane, Has Wings, Rideable, All dimensions
+    const dimSlideIdx = slide - 2;
+    if (dimSlideIdx >= 0 && dimSlideIdx < PRES_DIM_STEPS.length) {
+      const stepIdx = PRES_DIM_STEPS[dimSlideIdx];
+      const s = P2_STEPS[stepIdx];
+      const dc = s.dimColor || color;
+
+      const inFocus = (w) => {
+        if (!s.focusGroup) return true;
+        if (s.focusGroup === "cd") return w === "cat" || w === "dog";
+        if (s.focusGroup === "bp") return w === "bird" || w === "plane";
+        if (s.focusGroup === "veh") return P2_VEHICLES.includes(w);
+        return true;
+      };
+      const scoreOf = (w) => s.scores ? (s.scores[w] ?? 0) : null;
+      const chipStyle = (w) => {
+        const sc = scoreOf(w);
+        const focused = inFocus(w);
+        if (sc === null) return {
+          opacity: focused ? 1 : .25,
+          background: focused ? "rgba(255,255,255,.1)" : "rgba(255,255,255,.03)",
+          border: `2px solid ${focused ? "rgba(255,255,255,.35)" : "rgba(255,255,255,.08)"}`,
+          color: focused ? "white" : "rgba(255,255,255,.35)",
+          transform: focused ? "scale(1.05)" : "scale(.95)",
+        };
+        if (sc === 2) return {
+          opacity: 1, background: `${dc}22`, border: `3px solid ${dc}`,
+          color: "white", transform: "scale(1.05)", boxShadow: `0 0 18px ${dc}60`,
+        };
+        if (sc === 1) return {
+          opacity: .8, background: `${dc}10`, border: `2px solid ${dc}55`,
+          color: "rgba(255,255,255,.7)", transform: "scale(1.0)",
+        };
+        return {
+          opacity: .7, background: "rgba(255,255,255,.03)",
+          border: "2px solid rgba(255,100,100,.2)", color: "rgba(255,255,255,.45)",
+          transform: "scale(1.0)",
+        };
+      };
+
+      /* Special case: last dim slide — show "cat" profile card */
+      if (dimSlideIdx === PRES_DIM_STEPS.length - 1) {
+        const catDims = [
+          { label: "Animal",        value: "0.92",  high: true,  dimColor: "#fee440" },
+          { label: "Has Fur",       value: "0.91",  high: true,  dimColor: "#fb5607" },
+          { label: "Has 4 Legs",    value: "0.88",  high: true,  dimColor: "#9b5de5" },
+          { label: "Has Wings",     value: "-0.81", high: false, dimColor: "#00bbf9" },
+          { label: "You Can Ride It", value: "-0.79", high: false, dimColor: "#f15bb5" },
+        ];
+        return (
+          <PresSlide>
+            <PresText size={32} color="rgba(255,255,255,.5)">
+              Every word is a mix of <strong style={{ color }}>ALL</strong> dimensions
+            </PresText>
+
+            {/* Cat profile card */}
+            <div style={{
+              padding: "32px 40px", borderRadius: 24,
+              background: "rgba(255,255,255,.04)", border: `2px solid ${color}40`,
+              maxWidth: 520, width: "100%",
+            }}>
+              {/* Cat header */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 16,
+                marginBottom: 28,
+              }}>
+                <Cat size={56} weight="duotone" color={color} />
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif", fontSize: 44, fontWeight: 700, color: "white",
+                }}>cat</div>
+              </div>
+
+              {/* Dimension rows */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {catDims.map((d, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "center", gap: 14,
+                  }}>
+                    {/* Score */}
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                      fontSize: 22, fontWeight: 700, letterSpacing: -0.5,
+                      width: 70, textAlign: "right", flexShrink: 0,
+                      color: d.high ? d.dimColor : "#ff6b6b",
+                    }}>
+                      {d.value}
+                    </div>
+                    {/* Bar */}
+                    <div style={{
+                      flex: 1, height: 10, borderRadius: 5,
+                      background: "rgba(255,255,255,.06)", overflow: "hidden",
+                    }}>
+                      <div style={{
+                        height: "100%", borderRadius: 5,
+                        width: d.high ? "92%" : "0%",
+                        background: d.high ? d.dimColor : "transparent",
+                        transition: "width .4s ease",
+                      }} />
+                    </div>
+                    {/* Label */}
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif", fontSize: 20,
+                      color: d.high ? "white" : "rgba(255,255,255,.35)",
+                      minWidth: 140, flexShrink: 0,
+                    }}>
+                      {d.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <PresText size={22} color="rgba(255,255,255,.35)">
+              ...and 12,283 more dimensions just like these!
+            </PresText>
+          </PresSlide>
+        );
+      }
+
+      return (
+        <PresSlide>
+          {/* Dimension badge */}
+          {s.dimLabel && (
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif", fontSize: 24, fontWeight: 600,
+              padding: "8px 28px", borderRadius: 24,
+              background: `${dc}20`, border: `2px solid ${dc}60`, color: dc,
+            }}>{s.dimLabel}</div>
+          )}
+
+          {/* Title + body */}
+          <PresText size={32} color="white">{s.title}</PresText>
+          <PresText size={22} color="rgba(255,255,255,.5)">{s.body}</PresText>
+
+          {/* Animal + Vehicle chips */}
+          <div style={{
+            display: "flex", gap: 40, justifyContent: "center",
+            flexWrap: "wrap", width: "100%", maxWidth: 800,
+          }}>
+            {/* Animals */}
+            <div>
+              <div style={{
+                fontSize: 18, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2,
+                color: "rgba(255,255,255,.3)", textTransform: "uppercase",
+                marginBottom: 12, textAlign: "center",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}>
+                <PawPrint size={20} weight="duotone" /> Animals
+              </div>
+              <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+                {P2_ANIMALS.map(w => {
+                  const Icon = P2_ICONS[w];
+                  const sc = scoreOf(w);
+                  const vec = sc === 2 ? "0.92" : sc === 1 ? "0.41" : sc === 0 ? "-0.81" : null;
+                  return (
+                    <div key={w} style={{
+                      display: "flex", flexDirection: "column", alignItems: "center",
+                      gap: 5, transition: "all .35s ease",
+                      padding: "10px 14px", borderRadius: 14, minWidth: 68,
+                      ...chipStyle(w),
+                    }}>
+                      <Icon size={40} weight="duotone" />
+                      <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, fontWeight: 600 }}>{w}</div>
+                      {vec !== null && (
+                        <div style={{
+                          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                          fontSize: 16, fontWeight: 700, letterSpacing: -0.5,
+                          color: sc === 2 ? dc : sc === 1 ? `${dc}aa` : "#ff6b6b",
+                          background: sc === 2 ? `${dc}15` : sc === 0 ? "rgba(255,100,100,.08)" : "transparent",
+                          padding: "2px 8px", borderRadius: 6,
+                        }}>
+                          {vec}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Vehicles */}
+            <div>
+              <div style={{
+                fontSize: 18, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2,
+                color: "rgba(255,255,255,.3)", textTransform: "uppercase",
+                marginBottom: 12, textAlign: "center",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}>
+                <Car size={20} weight="duotone" /> Vehicles
+              </div>
+              <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+                {P2_VEHICLES.map(w => {
+                  const Icon = P2_ICONS[w];
+                  const sc = scoreOf(w);
+                  const vec = sc === 2 ? "0.92" : sc === 1 ? "0.41" : sc === 0 ? "-0.81" : null;
+                  return (
+                    <div key={w} style={{
+                      display: "flex", flexDirection: "column", alignItems: "center",
+                      gap: 5, transition: "all .35s ease",
+                      padding: "10px 14px", borderRadius: 14, minWidth: 68,
+                      ...chipStyle(w),
+                    }}>
+                      <Icon size={40} weight="duotone" />
+                      <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, fontWeight: 600 }}>{w}</div>
+                      {vec !== null && (
+                        <div style={{
+                          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                          fontSize: 16, fontWeight: 700, letterSpacing: -0.5,
+                          color: sc === 2 ? dc : sc === 1 ? `${dc}aa` : "#ff6b6b",
+                          background: sc === 2 ? `${dc}15` : sc === 0 ? "rgba(255,100,100,.08)" : "transparent",
+                          padding: "2px 8px", borderRadius: 6,
+                        }}>
+                          {vec}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+  }
 
   return (
     <div className="fade-up">

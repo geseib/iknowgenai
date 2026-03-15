@@ -1,13 +1,174 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   ArrowDown,
   BaseballCap,
   Bird,
   Lightbulb,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote } from "./shared";
+import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
-import BatIllustration from "./BatIllustration";
+
+const BAT_IMG_BASE = `${import.meta.env.BASE_URL}bat-baseball.png`;
+const BAT_IMG_ANIMAL = `${import.meta.env.BASE_URL}bat-animal.png`;
+const BAT_IMG_HYBRID = `${import.meta.env.BASE_URL}bat-hybrid.png`;
+
+/* ── BatAttentionAnim: animated attention beams from "bat" to each word ─── */
+function BatAttentionAnim({ words, batIdx, clueIndices, winImg, winLabel, winColor, loseImg, loseLabel, color }) {
+  const [scanning, setScanning] = useState(-1);     // which word index beam is currently on
+  const [foundClues, setFoundClues] = useState([]);  // clue indices found so far
+  const [done, setDone] = useState(false);
+  const wordRefs = useRef([]);
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const order = words.map((_, i) => i).filter(i => i !== batIdx);
+
+    async function run() {
+      await new Promise(r => setTimeout(r, 600));
+      for (const idx of order) {
+        if (cancelled) return;
+        setScanning(idx);
+        const isClue = clueIndices.includes(idx);
+        await new Promise(r => setTimeout(r, isClue ? 700 : 350));
+        if (isClue) {
+          setFoundClues(prev => [...prev, idx]);
+        }
+      }
+      if (!cancelled) {
+        setScanning(-1);
+        setDone(true);
+      }
+    }
+    run();
+    return () => { cancelled = true; };
+  }, []);
+
+  const getCenter = (idx) => {
+    const el = wordRefs.current[idx];
+    const svg = svgRef.current;
+    if (!el || !svg) return { x: 0, y: 0 };
+    const er = el.getBoundingClientRect();
+    const sr = svg.getBoundingClientRect();
+    return { x: er.left - sr.left + er.width / 2, y: er.top - sr.top + er.height / 2 };
+  };
+
+  const clueCount = foundClues.length;
+  const fadeProgress = Math.min(clueCount / clueIndices.length, 1);
+  const loseOpacity = done ? 0.08 : Math.max(0.12, 1 - fadeProgress * 0.9);
+
+  return (
+    <div>
+      {/* Sentence with SVG beams */}
+      <div style={{ position: "relative", marginBottom: 28 }}>
+        <svg ref={svgRef} style={{
+          position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+          pointerEvents: "none", zIndex: 1,
+        }}>
+          {scanning >= 0 && (() => {
+            const from = getCenter(batIdx);
+            const to = getCenter(scanning);
+            if (!from.x && !to.x) return null;
+            const isClue = clueIndices.includes(scanning);
+            const midY = Math.min(from.y, to.y) - 28;
+            return (
+              <path
+                d={`M ${from.x} ${from.y} Q ${(from.x + to.x) / 2} ${midY} ${to.x} ${to.y}`}
+                fill="none"
+                stroke={isClue ? winColor : "rgba(255,255,255,.15)"}
+                strokeWidth={isClue ? 3 : 2}
+                opacity={isClue ? 0.8 : 0.4}
+              >
+                <animate attributeName="stroke-dasharray" from="0 300" to="300 0" dur="0.3s" fill="freeze" />
+              </path>
+            );
+          })()}
+          {/* Persistent beams to found clues */}
+          {foundClues.map(ci => {
+            const from = getCenter(batIdx);
+            const to = getCenter(ci);
+            if (!from.x && !to.x) return null;
+            const midY = Math.min(from.y, to.y) - 28;
+            return (
+              <path key={ci}
+                d={`M ${from.x} ${from.y} Q ${(from.x + to.x) / 2} ${midY} ${to.x} ${to.y}`}
+                fill="none" stroke={winColor} strokeWidth={2} opacity={0.35}
+                strokeDasharray="5 4"
+              />
+            );
+          })}
+        </svg>
+
+        {/* Words */}
+        <div style={{
+          display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center",
+          position: "relative", zIndex: 2,
+        }}>
+          {words.map((w, i) => {
+            const isBat = i === batIdx;
+            const isScanning = i === scanning;
+            const isClue = clueIndices.includes(i);
+            const isFound = foundClues.includes(i);
+            const lit = isScanning && isClue;
+            return (
+              <div key={i} ref={el => wordRefs.current[i] = el} style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 28, fontWeight: isBat || isFound ? 700 : 400,
+                color: isBat ? color : lit ? winColor : isFound ? winColor : isScanning ? "rgba(255,255,255,.6)" : "white",
+                background: isBat ? `${color}18` : lit ? `${winColor}25` : isFound ? `${winColor}10` : "transparent",
+                padding: "6px 14px", borderRadius: 10,
+                border: isBat ? `2px solid ${color}50` : lit ? `2px solid ${winColor}60` : "2px solid transparent",
+                boxShadow: lit ? `0 0 16px ${winColor}50` : "none",
+                transition: "all .25s ease",
+              }}>
+                {w}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Two bat images */}
+      <div style={{ display: "flex", gap: 36, justifyContent: "center", alignItems: "center" }}>
+        {/* Winner */}
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+          padding: "18px 24px", borderRadius: 20,
+          background: done ? `${winColor}12` : "transparent",
+          border: done ? `2px solid ${winColor}50` : "2px solid transparent",
+          opacity: done ? 1 : 0.5 + fadeProgress * 0.5,
+          transition: "all .5s ease",
+        }}>
+          <img src={winImg} alt={winLabel} style={{ width: 100, height: "auto" }} />
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 22,
+            color: done ? winColor : "rgba(255,255,255,.5)",
+            fontWeight: done ? 700 : 400,
+            transition: "all .5s ease",
+          }}>
+            {done ? `${winLabel}!` : winLabel}
+          </div>
+        </div>
+
+        {/* Loser — fades as clues are found */}
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+          padding: "18px 24px", borderRadius: 20,
+          opacity: loseOpacity,
+          filter: done ? "grayscale(1)" : `grayscale(${fadeProgress * 0.8})`,
+          transition: "all .6s ease",
+        }}>
+          <img src={loseImg} alt={loseLabel} style={{ width: 100, height: "auto" }} />
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 22,
+            color: "rgba(255,255,255,.4)", transition: "all .5s ease",
+          }}>
+            {loseLabel}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── AttentionSentence sub-component ────────────────────────────────────────── */
 function AttentionSentence({ words, attnMap, color, label, LabelIcon, meaning, MeaningIcon }) {
@@ -109,7 +270,7 @@ function ContinueButton({ onClick, color, label }) {
 }
 
 /* ── Main Section ───────────────────────────────────────────────────────────── */
-export default function SectionAttention({ color, mode }) {
+export default function SectionAttention({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const [guess, setGuess] = useState(null);
   const [s1words, setS1words] = useState(0);
@@ -176,6 +337,136 @@ export default function SectionAttention({ color, mode }) {
     }
   }, [step]);
 
+  if (mode === "presentation") {
+    /* Slide 0: Big "bat" — just the word, like the "cat" reveal */
+    if (slide === 0) return (
+      <PresSlide>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 96,
+          fontWeight: 700,
+          lineHeight: 1,
+          textAlign: "center",
+          padding: "24px 48px",
+          background: `${color}12`,
+          border: `2px solid ${color}35`,
+          borderRadius: 24,
+          color: "white",
+        }}>
+          bat
+        </div>
+        <PresText size={36}>
+          When you see this word — what do you picture?
+        </PresText>
+      </PresSlide>
+    );
+
+    /* Slide 1: Reveal — it means TWO things! */
+    if (slide === 1) return (
+      <PresSlide>
+        <PresText size={36} color="white">
+          It could be...
+        </PresText>
+        <div style={{ display: "flex", gap: 36, justifyContent: "center" }}>
+          {[
+            { img: BAT_IMG_BASE, label: "A baseball bat", clr: "#fee440" },
+            { img: BAT_IMG_ANIMAL, label: "A flying animal", clr: "#9b5de5" },
+          ].map(opt => (
+            <div key={opt.label} style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
+              padding: "24px 32px", borderRadius: 20,
+              background: `${opt.clr}10`, border: `2px solid ${opt.clr}40`,
+              minWidth: 200,
+            }}>
+              <img src={opt.img} alt={opt.label} style={{ width: 120, height: "auto" }} />
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 26, fontWeight: 600,
+                color: "white",
+              }}>
+                {opt.label}
+              </div>
+            </div>
+          ))}
+        </div>
+        <PresText size={28} color="rgba(255,255,255,.4)">
+          Both are right! One word, two completely different meanings.
+        </PresText>
+      </PresSlide>
+    );
+
+    /* Slide 2: AI sees BOTH at once */
+    if (slide === 2) return (
+      <PresSlide>
+        <img src={BAT_IMG_HYBRID} alt="Both meanings at once" style={{ width: 220, height: "auto" }} />
+        <PresText size={36} color="white">
+          AI sees <strong style={{ color }}>BOTH</strong> meanings at once
+        </PresText>
+        <PresText size={28} color="rgba(255,255,255,.4)">
+          It doesn't know which one you mean... <strong style={{ color }}>unless...</strong>
+        </PresText>
+      </PresSlide>
+    );
+
+    /* Slide 3: Title only — "it looks at the other words" */
+    if (slide === 3) return (
+      <PresSlide>
+        <PresText size={48} color="white">
+          ...it looks at the <strong style={{ color }}>other words</strong>
+        </PresText>
+      </PresSlide>
+    );
+
+    /* Slide 4: Sentence 1 — animated attention from bat, baseball wins */
+    if (slide === 4) return (
+      <PresSlide>
+        <BatAttentionAnim
+          words={BAT_S1}
+          batIdx={3}
+          clueIndices={[1, 5, 7]}
+          winImg={BAT_IMG_BASE}
+          winLabel="Baseball bat"
+          winColor="#fee440"
+          loseImg={BAT_IMG_ANIMAL}
+          loseLabel="Flying animal"
+          color={color}
+        />
+      </PresSlide>
+    );
+
+    /* Slide 5: Sentence 2 — animated attention from bat, animal wins */
+    if (slide === 5) return (
+      <PresSlide>
+        <BatAttentionAnim
+          words={BAT_S2}
+          batIdx={1}
+          clueIndices={[2, 6, 8]}
+          winImg={BAT_IMG_ANIMAL}
+          winLabel="Flying animal"
+          winColor="#9b5de5"
+          loseImg={BAT_IMG_BASE}
+          loseLabel="Baseball bat"
+          color={color}
+        />
+      </PresSlide>
+    );
+
+    /* Slide 6: That's ATTENTION! */
+    if (slide === 6) return (
+      <PresSlide>
+        <Lightbulb size={44} weight="duotone" color={color} />
+        <div style={{
+          fontSize: 48, textAlign: "center", fontFamily: "'Fredoka',sans-serif",
+          color: "white", marginBottom: 8,
+        }}>
+          That's <span style={{ color }}>ATTENTION</span>!
+        </div>
+        <PresText size={28} color="rgba(255,255,255,.55)">
+          Same word, completely different meaning — depending on which other words shine their spotlight on it.
+        </PresText>
+      </PresSlide>
+    );
+  }
+
   return (
     <div className="fade-up">
       <Label color={color} mode={mode} text="HOW AI THINKS · STEP 3" />
@@ -223,8 +514,8 @@ export default function SectionAttention({ color, mode }) {
 
         <div style={{ display: "flex", gap: 20, justifyContent: "center" }}>
           {[
-            { id: "bat",    Icon: BaseballCap, label: "Baseball bat" },
-            { id: "animal", Icon: Bird,        label: "Flying animal" },
+            { id: "bat",    img: BAT_IMG_BASE,   label: "Baseball bat" },
+            { id: "animal", img: BAT_IMG_ANIMAL, label: "Flying animal" },
           ].map(opt => (
             <button key={opt.id} onClick={() => { setGuess(opt.id); advance(); }}
               style={{
@@ -235,7 +526,7 @@ export default function SectionAttention({ color, mode }) {
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
                 transition: "all .15s ease", minWidth: 150,
               }}>
-              <opt.Icon size={52} weight="duotone" color={color} />
+              <img src={opt.img} alt={opt.label} style={{ width: 80, height: "auto" }} />
               {opt.label}
             </button>
           ))}
@@ -271,23 +562,19 @@ export default function SectionAttention({ color, mode }) {
 
           <div style={{ display: "flex", justifyContent: "center", gap: 28, marginBottom: 28 }}>
             <div style={{ textAlign: "center" }}>
-              {guess === "bat"
-                ? <BaseballCap size={52} weight="duotone" color={color} />
-                : <Bird size={52} weight="duotone" color={color} />}
+              <img src={guess === "bat" ? BAT_IMG_BASE : BAT_IMG_ANIMAL} alt="Your guess" style={{ width: 80, height: "auto" }} />
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 16, color, marginTop: 6 }}>Your guess</div>
             </div>
             <div style={{ fontSize: 36, color: "rgba(255,255,255,.2)", alignSelf: "center" }}>+</div>
             <div style={{ textAlign: "center" }}>
-              {guess === "bat"
-                ? <Bird size={52} weight="duotone" color="rgba(255,255,255,.4)" />
-                : <BaseballCap size={52} weight="duotone" color="rgba(255,255,255,.4)" />}
+              <img src={guess === "bat" ? BAT_IMG_ANIMAL : BAT_IMG_BASE} alt="Also right" style={{ width: 80, height: "auto", opacity: 0.4 }} />
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 16, color: "rgba(255,255,255,.4)", marginTop: 6 }}>Also right!</div>
             </div>
           </div>
 
-          {/* Funny bat illustration — embedding = all meanings at once */}
+          {/* Bat hybrid — embedding = all meanings at once */}
           <div style={{ textAlign: "center", margin: "24px 0 8px" }}>
-            <BatIllustration color={color} size={180} />
+            <img src={BAT_IMG_HYBRID} alt="Both meanings at once" style={{ width: 180, height: "auto" }} />
             <div style={{
               fontFamily: "'Fredoka',sans-serif",
               fontSize: 17,
@@ -361,7 +648,7 @@ export default function SectionAttention({ color, mode }) {
             <div style={{ animation: "fadeUp .5s ease" }}>
               <Card style={{ marginBottom: 20, background: "#fee44010", border: "1px solid #fee44035" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <BaseballCap size={48} weight="duotone" color="#fee440" />
+                  <img src={BAT_IMG_BASE} alt="Baseball bat" style={{ width: 56, height: "auto" }} />
                   <div>
                     <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 22, color: "#fee440", marginBottom: 6 }}>Baseball bat!</div>
                     <p style={{ fontSize: 20, color: "rgba(255,255,255,.6)", lineHeight: 1.55 }}>"Swung", "hit", and "ball" are all screaming baseball. The AI's attention locked onto those words!</p>
@@ -420,7 +707,7 @@ export default function SectionAttention({ color, mode }) {
             <div style={{ animation: "fadeUp .5s ease" }}>
               <Card style={{ marginBottom: 20, background: "#9b5de510", border: "1px solid #9b5de535" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <Bird size={48} weight="duotone" color="#9b5de5" />
+                  <img src={BAT_IMG_ANIMAL} alt="Flying bat" style={{ width: 56, height: "auto" }} />
                   <div>
                     <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 22, color: "#9b5de5", marginBottom: 6 }}>Flying animal!</div>
                     <p style={{ fontSize: 20, color: "rgba(255,255,255,.6)", lineHeight: 1.55 }}>"Flew", "cave", and "dusk" light up now. Same word — completely different meaning because of the context!</p>

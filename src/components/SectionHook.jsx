@@ -3,7 +3,7 @@ import {
   ArrowDown,
   Lightbulb,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote, ModelNote } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 import CatIllustration from "./CatIllustration";
 
 const notes = [
@@ -29,7 +29,7 @@ function randomVector() {
   return (Math.random() * 2 - 1).toFixed(3);
 }
 
-function VectorTicker({ color }) {
+function VectorTicker({ color, pres }) {
   const [numbers, setNumbers] = useState([]);
   const containerRef = useRef(null);
   const countRef = useRef(0);
@@ -86,7 +86,7 @@ function VectorTicker({ color }) {
         {numbers.map((n, i) => (
           <span key={i} style={{
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            fontSize: 20,
+            fontSize: pres ? 22 : 20,
             background: "rgba(255,255,255,.08)",
             borderRadius: 8,
             padding: "6px 10px",
@@ -134,7 +134,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionHook({ color, mode }) {
+export default function SectionHook({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -169,6 +169,116 @@ export default function SectionHook({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  if (mode === "presentation") {
+    // Slide 0: The big question — bridge from training to word understanding
+    if (slide === 0) return (
+      <PresSlide>
+        <PresText size={48} color="white">
+          OK but how does AI even<br />
+          <strong style={{ color }}>read and understand</strong> a word?
+        </PresText>
+      </PresSlide>
+    );
+    // Slide 1: "cat" — what happens in YOUR brain
+    if (slide === 1) return (
+      <PresSlide>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 96,
+          fontWeight: 700,
+          lineHeight: 1,
+          textAlign: "center",
+          padding: "24px 48px",
+          background: `${color}12`,
+          border: `2px solid ${color}35`,
+          borderRadius: 24,
+          color: "white",
+        }}>
+          cat
+        </div>
+        <PresText size={32}>
+          When you see this word, what happens in your brain?
+        </PresText>
+        <PresText size={22} color="rgba(255,255,255,.55)" style={{ fontStyle: "italic" }}>
+          What do you picture? What do you feel?
+        </PresText>
+      </PresSlide>
+    );
+    if (slide === 2) return (
+      <PresSlide>
+        <CatIllustration color={color} size={200} />
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", maxWidth: 600 }}>
+          {feelings.map((f, i) => (
+            <div key={i} style={{
+              padding: "10px 20px",
+              borderRadius: 50,
+              background: `${color}15`,
+              border: `1.5px solid ${color}50`,
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 24,
+              color: "white",
+              whiteSpace: "nowrap",
+              animation: `fadeUp .4s ${i * 0.08}s ease both`,
+            }}>
+              {f}
+            </div>
+          ))}
+        </div>
+        <PresText size={26} color="rgba(255,255,255,.55)">
+          Your brain floods with memories, images, and feelings — all at once, instantly.
+        </PresText>
+      </PresSlide>
+    );
+    if (slide === 3) return (
+      <PresSlide>
+        <Lightbulb size={40} weight="duotone" color={color} />
+        <PresText size={44}>
+          But AI can't do ANY of that.
+        </PresText>
+        <PresText size={26} color="rgba(255,255,255,.55)">
+          It can't picture a cat. It can't feel fur.
+        </PresText>
+        <PresText size={40}>
+          All it sees is <strong style={{ color }}>NUMBERS</strong>
+        </PresText>
+      </PresSlide>
+    );
+    if (slide === 4) return (
+      <PresSlide>
+        {/* "cat" → numbers visual */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 20, marginBottom: 8,
+        }}>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 52, fontWeight: 700,
+            color, background: `${color}18`, border: `2px solid ${color}50`,
+            borderRadius: 14, padding: "10px 32px",
+          }}>
+            "cat"
+          </div>
+          <div style={{ fontSize: 40, color: "rgba(255,255,255,.3)" }}>→</div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 28,
+            color: "rgba(255,255,255,.5)",
+          }}>
+            12,288 numbers
+          </div>
+        </div>
+
+        {/* Streaming ticker */}
+        <div style={{
+          background: "rgba(255,255,255,.04)",
+          border: "1px solid rgba(255,255,255,.1)",
+          borderRadius: 20, padding: "24px 20px",
+          width: "100%", maxWidth: 860,
+        }}>
+          <VectorTicker color={color} pres />
+        </div>
+      </PresSlide>
+    );
+  }
 
   return (
     <div className="fade-up">

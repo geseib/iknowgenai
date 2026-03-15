@@ -5,7 +5,7 @@ import {
   Lightning,
   Key,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, Body, TriviaBox, TeacherNote } from "./shared";
+import { Card, Label, H1, Body, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
 
 const notes = [
   "Analogy that works well: attention is reading the room and figuring out who's related to whom. MLP is flipping through your entire memory to decide what it all means.",
@@ -14,12 +14,12 @@ const notes = [
   "After the animation: 'Every single layer of the model does Attention + MLP, then passes the result to the next layer. How many layers do you think there are?' (96)",
 ];
 
-function Nodes({ count, lit, color }) {
+function Nodes({ count, lit, color, size: nodeSize }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
       {Array.from({ length: count }, (_, i) => (
         <div key={i} style={{
-          width: 20, height: 20, borderRadius: "50%",
+          width: nodeSize || 20, height: nodeSize || 20, borderRadius: "50%",
           background: lit ? color : "rgba(255,255,255,.14)",
           border: `1.5px solid ${lit ? color : "rgba(255,255,255,.2)"}`,
           boxShadow: lit ? `0 0 8px ${color}` : "none",
@@ -72,7 +72,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionMLP({ color, mode }) {
+export default function SectionMLP({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState(0);
   const [hasRun, setHasRun] = useState(false);
@@ -123,6 +123,137 @@ export default function SectionMLP({ color, mode }) {
     { label: "Hidden", nodes: 8, lit: phase >= 2, desc: "4× bigger! Room to think" },
     { label: "Output", nodes: 5, lit: phase >= 3, desc: "Richer, smarter signal" },
   ];
+
+  const presLayers = [
+    { label: "Input",  nodes: 5, lit: true, desc: "Context from Attention" },
+    { label: "Hidden", nodes: 8, lit: true, desc: "4× bigger! Room to think" },
+    { label: "Output", nodes: 5, lit: true, desc: "Richer, smarter signal" },
+  ];
+
+  if (mode === "presentation") {
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <PresText color="white" size={48}>The Thinking Layer</PresText>
+          <PresText size={28} color="rgba(255,255,255,.55)">
+            Attention figured out which words relate.
+          </PresText>
+          <PresText size={28}>
+            Now the MLP does the heavy thinking — connecting what it's reading to{" "}
+            <span style={{ color }}>everything it ever learned</span>.
+          </PresText>
+        </PresSlide>
+      );
+    }
+    /* Slide 1: Expand — the brainstorm phase */
+    if (slide === 1) {
+      const questions = [
+        { q: "Is it alive?", lit: false },
+        { q: "Is it a sport thing?", lit: true },
+        { q: "Does it fly?", lit: false },
+        { q: "Is it wooden?", lit: true },
+        { q: "Can you hold it?", lit: true },
+        { q: "Is it food?", lit: false },
+        { q: "Does it have wings?", lit: false },
+        { q: "Is it found outdoors?", lit: true },
+        { q: "Is it dangerous?", lit: false },
+      ];
+      return (
+        <PresSlide>
+          <PresText size={36} color="white">
+            Ever play <strong style={{ color }}>21 Questions</strong>? Fun, right?
+          </PresText>
+          <PresText size={36} color="white">
+            What about <strong style={{ color }}>49,152</strong> questions.
+            <br />Would <em>that</em> be fun?
+          </PresText>
+
+          {/* Question bubbles grid */}
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center",
+            maxWidth: 760, width: "100%",
+          }}>
+            {questions.map((item, i) => (
+              <div key={i} style={{
+                fontFamily: "'Fredoka',sans-serif", fontSize: 20,
+                padding: "10px 20px", borderRadius: 28,
+                background: item.lit ? `${color}18` : "rgba(255,255,255,.04)",
+                border: `2px solid ${item.lit ? `${color}60` : "rgba(255,255,255,.1)"}`,
+                color: item.lit ? color : "rgba(255,255,255,.3)",
+                animation: `fadeUp .4s ${i * 0.06}s ease both`,
+              }}>
+                {item.q}
+              </div>
+            ))}
+          </div>
+
+          <PresText size={22} color="rgba(255,255,255,.35)">
+            The MLP checks all 49,152 at once — most won't apply!
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    /* Slide 2: Compress — keep only what matters */
+    if (slide === 2) {
+      const kept = [
+        { q: "Is it a sport thing?", icon: "⚾" },
+        { q: "Is it wooden?", icon: "🪵" },
+        { q: "Can you hold it?", icon: "✋" },
+        { q: "Is it found outdoors?", icon: "🏟️" },
+      ];
+      return (
+        <PresSlide>
+          <PresText size={36} color="white">
+            Then it <strong style={{ color }}>compresses</strong> back down
+          </PresText>
+          <PresText size={26} color="rgba(255,255,255,.45)">
+            Keep the useful answers. Throw away the rest.
+          </PresText>
+
+          <div style={{
+            display: "flex", flexDirection: "column", gap: 14,
+            maxWidth: 500, width: "100%",
+          }}>
+            {kept.map((item, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 14,
+                fontFamily: "'Fredoka',sans-serif", fontSize: 24,
+                padding: "12px 22px", borderRadius: 16,
+                background: `${color}15`, border: `2px solid ${color}50`,
+                color: "white",
+                animation: `fadeUp .4s ${i * 0.1}s ease both`,
+              }}>
+                <span style={{ fontSize: 28 }}>{item.icon}</span>
+                {item.q}
+              </div>
+            ))}
+          </div>
+
+          <PresText size={24} color="rgba(255,255,255,.4)">
+            The word "bat" now <strong style={{ color }}>knows more</strong> about itself.
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    /* Slide 3: Analogy summary */
+    if (slide === 3) {
+      return (
+        <PresSlide>
+          <PresText size={30}>
+            <strong style={{ color }}>ATTENTION</strong> = figuring out which words are related
+          </PresText>
+          <PresText size={30}>
+            <strong style={{ color }}>MLP</strong> = brainstorming everything you know, then keeping what fits
+          </PresText>
+          <PresText size={24} color="rgba(255,255,255,.45)">
+            Every layer does both. Attention + MLP. Then passes the result to the next layer.
+          </PresText>
+        </PresSlide>
+      );
+    }
+  }
 
   return (
     <div className="fade-up">

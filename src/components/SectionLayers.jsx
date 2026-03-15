@@ -11,7 +11,7 @@ import {
   Brain,
   Lightning,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote, ModelNote } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 
 const LAYER_CARDS = [
   { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
@@ -110,13 +110,77 @@ function LayerCard({ layer, color }) {
 }
 
 /* ─── The big animated layer visualization ─── */
-function LayerAnimation({ color, onDone }) {
+// Questions the MLP "asks" at each layer range — shown during scrolling
+const LAYER_QUESTIONS = {
+  // Layers 1–16: Letters & Spelling
+  early: [
+    "Is this spelled right?",
+    "Is this a real word?",
+    "Where does this word end?",
+    "Is this uppercase or lowercase?",
+    "Is there a period here?",
+  ],
+  // Layers 17–32: Words & Grammar
+  grammar: [
+    "Is this a noun or a verb?",
+    "Past tense or present?",
+    "Does the subject match the verb?",
+    "Is this plural?",
+    "What part of speech is this?",
+  ],
+  // Layers 33–48: Facts & Knowledge
+  facts: [
+    "Does a cat have fur?",
+    "Can a cat sit?",
+    "Is a mat a real thing?",
+    "Do cats go outdoors?",
+    "Is this something alive?",
+  ],
+  // Layers 49–64: Context & Tone
+  context: [
+    "Is this a joke or serious?",
+    "Is someone being sarcastic?",
+    "What's the mood here?",
+    "Is this formal or casual?",
+    "Who is speaking?",
+  ],
+  // Layers 65–80: Logic & Reasoning
+  logic: [
+    "What usually comes next?",
+    "Does this make sense so far?",
+    "What rhymes with 'cat'?",
+    "Is there a pattern here?",
+    "What would fit logically?",
+  ],
+  // Layers 81–96: Deep Understanding
+  deep: [
+    "Which word fits best?",
+    "How confident am I?",
+    "Is 'mat' better than 'hat'?",
+    "Does this sound natural?",
+    "Final answer?",
+  ],
+};
+
+function getLayerQuestion(layer) {
+  let bucket;
+  if (layer <= 16) bucket = LAYER_QUESTIONS.early;
+  else if (layer <= 32) bucket = LAYER_QUESTIONS.grammar;
+  else if (layer <= 48) bucket = LAYER_QUESTIONS.facts;
+  else if (layer <= 64) bucket = LAYER_QUESTIONS.context;
+  else if (layer <= 80) bucket = LAYER_QUESTIONS.logic;
+  else bucket = LAYER_QUESTIONS.deep;
+  return bucket[layer % bucket.length];
+}
+
+function LayerAnimation({ color, onDone, pres }) {
   // scrollSub: "attn" or "mlp" — which half of the layer we're showing during scroll
   const [phase, setPhase] = useState("idle"); // idle | attention | mlp | scrolling | output
   const [layerNum, setLayerNum] = useState(1);
   const [activeBeams, setActiveBeams] = useState([]);
   const [mlpNodes, setMlpNodes] = useState([]);
   const [scrollSub, setScrollSub] = useState("attn"); // which sub-phase during scrolling
+  const [currentQuestion, setCurrentQuestion] = useState("");
   const [started, setStarted] = useState(false);
   const animRef = useRef(null);
   const wordRefs = useRef([]);
@@ -185,14 +249,16 @@ function LayerAnimation({ color, onDone }) {
         setScrollSub("attn");
         setActiveBeams(beamPattern);
         setMlpNodes([]);
+        setCurrentQuestion("");
         await sleep(delay);
         if (cancelled) return;
 
-        // MLP sub-phase: show nodes
+        // MLP sub-phase: show nodes + question
         const nodesForLayer = [0, 1, 2, 3, 4].filter((_, idx) => ((layer + idx) % 3) !== 0);
         setScrollSub("mlp");
         setActiveBeams([]);
         setMlpNodes(nodesForLayer);
+        setCurrentQuestion(getLayerQuestion(layer));
         await sleep(delay);
       }
 
@@ -202,6 +268,7 @@ function LayerAnimation({ color, onDone }) {
       if (cancelled) return;
       setActiveBeams([]);
       setMlpNodes([]);
+      setCurrentQuestion("");
       setPhase("output");
       await sleep(2000);
       if (onDone) onDone();
@@ -253,7 +320,7 @@ function LayerAnimation({ color, onDone }) {
       }}>
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: 16,
+          fontSize: pres ? 20 : 16,
           color: "rgba(255,255,255,.4)",
           marginBottom: 4,
         }}>
@@ -261,7 +328,7 @@ function LayerAnimation({ color, onDone }) {
         </div>
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: 14,
+          fontSize: pres ? 18 : 14,
           color: "rgba(255,255,255,.3)",
         }}>
           Layer
@@ -424,6 +491,23 @@ function LayerAnimation({ color, onDone }) {
               </div>
             ))}
           </div>
+          {/* Flashing question during MLP sub-phase of scrolling */}
+          {currentQuestion && phase === "scrolling" && scrollSub === "mlp" && (
+            <div
+              key={currentQuestion}
+              style={{
+                fontFamily: "'Fredoka',sans-serif",
+                fontSize: pres ? 18 : 15,
+                color: `${color}cc`,
+                textAlign: "center",
+                marginTop: 10,
+                fontStyle: "italic",
+                animation: "fadeUp .15s ease",
+              }}
+            >
+              "{currentQuestion}"
+            </div>
+          )}
         </div>
       )}
 
@@ -458,7 +542,7 @@ function LayerAnimation({ color, onDone }) {
               transition: "opacity .08s",
             }}>
               <ChatCircleDots size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)" }}>Attention</span>
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>Attention</span>
             </div>
             <div style={{
               display: "flex",
@@ -468,7 +552,7 @@ function LayerAnimation({ color, onDone }) {
               transition: "opacity .08s",
             }}>
               <Brain size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)" }}>MLP</span>
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>MLP</span>
             </div>
           </div>
         </div>
@@ -532,11 +616,33 @@ function LayerAnimation({ color, onDone }) {
   );
 }
 
-export default function SectionLayers({ color, mode }) {
+export default function SectionLayers({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
   const step3Ref = useRef(null);
+
+  if (mode === "presentation") {
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <PresText color="white" size={36}>One round isn't enough.</PresText>
+          <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 72, fontWeight: 700, color, lineHeight: 1 }}>96</div>
+          <PresText size={28}>TIMES</PresText>
+          <PresText size={24}>
+            <em>Each pass makes the understanding richer.</em>
+          </PresText>
+        </PresSlide>
+      );
+    }
+    if (slide === 1) {
+      return (
+        <PresSlide>
+          <LayerAnimation color={color} onDone={() => {}} pres />
+        </PresSlide>
+      );
+    }
+  }
 
   const advance = () => {
     if (step < 3) setStep(s => s + 1);

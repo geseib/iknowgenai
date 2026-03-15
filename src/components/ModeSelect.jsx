@@ -3,6 +3,7 @@ import {
   ChalkboardTeacher,
   GameController,
   Eye,
+  Presentation,
   Book,
   Exam,
 } from "@phosphor-icons/react";
@@ -32,6 +33,14 @@ const modes = [
     color: "#ffffff",
     detail: "Best for: maximum clarity",
   },
+  {
+    id: "presentation",
+    Icon: Presentation,
+    title: "Presentation",
+    desc: "Big bold slides. One idea per screen. No scrolling.",
+    color: "#fb5607",
+    detail: "Best for: projecting to a room",
+  },
 ];
 
 export default function ModeSelect({ onSelect, allCss }) {
@@ -60,7 +69,7 @@ export default function ModeSelect({ onSelect, allCss }) {
         }} />
       ))}
       <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 540 }}>
-        <Robot size={64} weight="duotone" color="rgba(255,255,255,.7)" style={{ marginBottom: 8 }} />
+        <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI mascot" style={{ width: 100, height: "auto", marginBottom: 8, opacity: 0.85 }} />
         <h1 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 42, fontWeight: 700, color: "white", marginBottom: 10, lineHeight: 1.1 }}>How AI Thinks</h1>
         <p style={{ color: "rgba(255,255,255,.5)", fontSize: 16, marginBottom: 40, lineHeight: 1.6 }}>
           An interactive lesson for 3rd &amp; 4th graders.<br />Choose how you're running this session today.

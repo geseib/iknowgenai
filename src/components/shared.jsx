@@ -23,7 +23,7 @@ export function Card({ children, style }) {
 }
 
 export function Label({ color, text, mode }) {
-  if (mode === "minimal") return null;
+  if (mode === "minimal" || mode === "presentation") return null;
   return (
     <div style={{
       fontFamily: "'Fredoka',sans-serif",
@@ -38,15 +38,17 @@ export function Label({ color, text, mode }) {
   );
 }
 
-export function H1({ children }) {
+export function H1({ children, mode }) {
+  const isPres = mode === "presentation";
   return (
     <h1 style={{
       fontFamily: "'Fredoka',sans-serif",
-      fontSize: 40,
+      fontSize: isPres ? 56 : 40,
       fontWeight: 700,
       color: "white",
       lineHeight: 1.15,
-      marginBottom: 10,
+      marginBottom: isPres ? 0 : 10,
+      ...(isPres ? { textAlign: "center" } : {}),
     }}>
       {children}
     </h1>
@@ -68,7 +70,7 @@ export function Body({ children }) {
 }
 
 export function TriviaBox({ color, number, label, fact, visible, mode }) {
-  if (!visible || mode === "minimal") return null;
+  if (!visible || mode === "minimal" || mode === "presentation") return null;
   return (
     <div className="wow-reveal" style={{
       background: `${color}10`,
@@ -172,8 +174,39 @@ export function TeacherNote({ notes, color, mode }) {
   );
 }
 
+export function PresSlide({ children }) {
+  return (
+    <div className="fade-up" style={{
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+      minHeight: "80vh",
+      gap: 24,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+export function PresText({ children, color, size = 32 }) {
+  return (
+    <div style={{
+      fontFamily: "'Fredoka',sans-serif",
+      fontSize: size,
+      color: color || "rgba(255,255,255,.75)",
+      lineHeight: 1.4,
+      textAlign: "center",
+      maxWidth: 800,
+    }}>
+      {children}
+    </div>
+  );
+}
+
 export function DiscussionGate({ question, hint, color, mode, children }) {
-  const [revealed, setRevealed] = useState(mode === "solo" || mode === "minimal");
+  const [revealed, setRevealed] = useState(mode === "solo" || mode === "minimal" || mode === "presentation");
   if (revealed) return <div style={{ animation: "fadeUp .4s ease" }}>{children}</div>;
   return (
     <Card style={{ textAlign: "center", padding: "32px 24px", marginBottom: 16 }}>
@@ -209,7 +242,7 @@ export function DiscussionGate({ question, hint, color, mode, children }) {
 }
 
 export function ModelNote({ color, children, mode }) {
-  if (mode === "minimal") return null;
+  if (mode === "minimal" || mode === "presentation") return null;
   return (
     <div style={{
       display: "flex",

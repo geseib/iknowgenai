@@ -6,13 +6,13 @@ An interactive, presentation-style web app that teaches 3rd–5th graders how la
 
 ## What It Teaches
 
-The lesson walks students through 13 sections across three groups:
+The lesson walks students through 14 sections across three groups:
 
 **Introduction** — What is AI? How is it different from regular programs? How does it compare to the human brain?
 
-**Meet the LLMs** — What does LLM stand for? Meet ChatGPT, Claude, Llama, and Gemini. What's the big question they all answer?
+**Meet the LLMs** — What does LLM stand for? Meet ChatGPT, Claude, Llama, and Gemini. Then an animated overview shows how the entire pipeline works — a robot with a spinning crank processes "The cat sat on the ___" through 96 layers of attention and thinking, flashing questions like "Does a cat have fur?" and "What rhymes with cat?" before predicting "mat."
 
-**How AI Thinks** — The five-step pipeline: numbers (embeddings), words in space (vector similarity), attention, the thinking layer (MLP), stacking layers, and next-word prediction.
+**How AI Thinks** — The six-step pipeline: how it learns (knock-knock jokes), numbers (embeddings), words in space (vector similarity), attention, the thinking layer (MLP with "21 Questions" framing), stacking 96 layers with flashing questions, and next-word prediction with a probability ranking.
 
 ### Highlights
 
@@ -22,7 +22,9 @@ The lesson walks students through 13 sections across three groups:
 | **Words in Space** | An interactive scatter plot — tap words to see clusters light up |
 | **Dimension Explorer** | Step through "Is Animal?", "Has Wings?", "You Can Ride It?" dimensions |
 | **Attention** | "bat" — baseball bat or flying animal? Context decides |
-| **Predict!** | A temperature slider that controls how "creative" the AI's next word is |
+| **The Thinking Layer** | "Ever play 21 Questions? What about 49,152 questions?" — MLP as brainstorm |
+| **96 Layers** | Watch the full animation: attention beams + thinking questions cycle 96 times |
+| **Predict!** | A ranked probability list shows how AI picks the next word, then a temperature slider |
 
 ## Screenshots
 
@@ -33,20 +35,12 @@ The lesson walks students through 13 sections across three groups:
 | ![Cat Feelings](docs/screenshots/07-cat-feelings.png) | ![Words in Space](docs/screenshots/08-words-in-space.png) |
 | ![Attention](docs/screenshots/09-attention.png) | ![Who's Used AI?](docs/screenshots/02-who-used-ai.png) |
 
-## Two Versions
-
-### Interactive React App
-
-The full interactive experience with clickable elements, animations, and two audience modes. Best for solo exploration or when you want students to interact directly.
-
-### Reveal.js Slide Deck
-
-A streamlined presentation version at [`/slides`](slides/) — just press the arrow keys to advance. Same content, same big fonts, but optimized for a teacher driving a projector. No clicks needed from students. Available at `/slides/` when deployed.
-
-## Two Modes (React App)
+## Four Modes
 
 - **Classroom Mode** — The teacher controls the pace. Each section includes collapsible "Talking Points" with discussion prompts and teaching tips.
 - **Solo Mode** — Students explore at their own pace with interactive elements guiding the way.
+- **Presentation Mode** — Full-screen, slide-by-slide with keyboard navigation (Right/Down/Space to advance, Left to go back). Designed for projecting to a class — no chrome, just content. 85+ slides across all sections.
+- **Focus Mode** — Distraction-free view with minimal UI for concentrated learning.
 
 ## Resources
 
@@ -115,13 +109,14 @@ src/
     SectionBrainVsAI.jsx   # Section 4: Brain vs AI
     SectionWhatIsLLM.jsx   # Section 5: What's an LLM?
     SectionMeetModels.jsx  # Section 6: Meet the Models
-    SectionTheBridge.jsx   # Section 7: The Big Question
-    SectionHook.jsx        # Section 8: The Secret: Numbers
-    SectionEmbeddings.jsx  # Section 9: Words in Space + Dimension Explorer
-    SectionAttention.jsx   # Section 10: Attention
-    SectionMLP.jsx         # Section 11: The Thinking Layer
-    SectionLayers.jsx      # Section 12: Rinse & Repeat
-    SectionPredict.jsx     # Section 13: Predict!
+    SectionTheBridge.jsx   # Section 7: The Big Question + animated pipeline overview
+    SectionHowItLearns.jsx # Section 8: How It Learns (knock-knock jokes)
+    SectionHook.jsx        # Section 9: The Secret: Numbers
+    SectionEmbeddings.jsx  # Section 10: Words in Space + Dimension Explorer
+    SectionAttention.jsx   # Section 11: Attention
+    SectionMLP.jsx         # Section 12: The Thinking Layer (21 Questions)
+    SectionLayers.jsx      # Section 13: Rinse & Repeat (96 layers with questions)
+    SectionPredict.jsx     # Section 14: Predict! (probability list + temperature)
     Glossary.jsx           # Scrollable glossary of 18 key AI terms
     KnowledgeCheck.jsx     # 10-question multiple choice quiz with results
   data/

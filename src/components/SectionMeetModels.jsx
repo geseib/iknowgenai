@@ -4,7 +4,7 @@ import {
   Lightbulb,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Label, H1, TeacherNote } from "./shared";
+import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 const models = [
   {
@@ -71,7 +71,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-function ModelCard({ model }) {
+function ModelCard({ model, pres }) {
   return (
     <div
       style={{
@@ -94,7 +94,7 @@ function ModelCard({ model }) {
         }}>
           {model.name}
         </div>
-        <div style={{ fontSize: 16, color: "rgba(255,255,255,.4)", marginBottom: 10 }}>
+        <div style={{ fontSize: pres ? 18 : 16, color: "rgba(255,255,255,.4)", marginBottom: 10 }}>
           {model.org}
         </div>
         <div style={{ fontSize: 18, color: model.color, lineHeight: 1.4 }}>
@@ -108,11 +108,11 @@ function ModelCard({ model }) {
             display: "flex",
             gap: 10,
             marginBottom: 10,
-            fontSize: 18,
+            fontSize: pres ? 22 : 18,
             color: "rgba(255,255,255,.75)",
             lineHeight: 1.5,
           }}>
-            <span style={{ color: model.color, flexShrink: 0, fontSize: 18 }}>&rarr;</span>
+            <span style={{ color: model.color, flexShrink: 0, fontSize: pres ? 22 : 18 }}>&rarr;</span>
             {fact}
           </div>
         ))}
@@ -121,7 +121,7 @@ function ModelCard({ model }) {
   );
 }
 
-export default function SectionMeetModels({ color, mode }) {
+export default function SectionMeetModels({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -157,6 +157,79 @@ export default function SectionMeetModels({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  /* ── Presentation mode ── */
+  if (mode === "presentation") {
+    /* Slide 0: ChatGPT */
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <div style={{ fontSize: 32, color: "rgba(255,255,255,.55)", textAlign: "center", marginBottom: 28 }}>
+            Several companies have built their own AI
+          </div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <ModelCard model={models[0]} pres />
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 1: Claude */
+    if (slide === 1) {
+      return (
+        <PresSlide>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <ModelCard model={models[1]} pres />
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 2: Llama + Gemini side by side */
+    if (slide === 2) {
+      return (
+        <PresSlide>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
+            <ModelCard model={models[2]} pres />
+            <ModelCard model={models[3]} pres />
+          </div>
+        </PresSlide>
+      );
+    }
+    /* Slide 3: What they all have in common + dramatic bridge */
+    if (slide === 3) {
+      return (
+        <PresSlide>
+          <Lightbulb size={36} weight="duotone" color={color} style={{ display: "block", margin: "0 auto 16px" }} />
+          <div style={{ fontSize: 32, color: "white", textAlign: "center", marginBottom: 16, fontFamily: "'Fredoka',sans-serif" }}>
+            What they all have in common...
+          </div>
+          <div style={{ fontSize: 28, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto", marginBottom: 20 }}>
+            All of these models learned by reading
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 52,
+            fontWeight: 700,
+            color,
+            textAlign: "center",
+            lineHeight: 1.3,
+            marginBottom: 24,
+          }}>
+            BILLIONS of words...
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 32,
+            color: "rgba(255,255,255,.5)",
+            textAlign: "center",
+            lineHeight: 1.5,
+          }}>
+            ...but <span style={{ color: "white" }}>HOW</span> did that teach them to{" "}
+            <span style={{ color: "white" }}>write back?</span>
+          </div>
+        </PresSlide>
+      );
+    }
+  }
 
   return (
     <div className="fade-up">

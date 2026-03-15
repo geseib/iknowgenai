@@ -9,7 +9,7 @@ import {
   Confetti,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TriviaBox, TeacherNote } from "./shared";
+import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
 import { P_POSITIONS, applyTemp, sampleWord, tempMeta } from "../data/predict";
 
 const TEMP_ICONS = {
@@ -50,7 +50,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionPredict({ color, mode }) {
+export default function SectionPredict({ color, mode, slide }) {
   const [temp, setTemp] = useState(.8);
   const [words, setWords] = useState([]);
   const [layerCount, setLayerCount] = useState(0);
@@ -103,6 +103,220 @@ export default function SectionPredict({ color, mode }) {
       }, 80);
     }
   }, [step]);
+
+  if (mode === "presentation") {
+    /* Slide 0: The question — how did it pick that word? */
+    if (slide === 0) {
+      return (
+        <PresSlide>
+          <PresText color="white" size={28}>
+            "The cat sat on the <span style={{ color, fontWeight: 700 }}>mat</span>"
+          </PresText>
+          <PresText color="white" size={48}>
+            But how did it <span style={{ color }}>pick</span> that word?
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    /* Slide 1: Probability list — the last word carries everything */
+    if (slide === 1) {
+      const candidates = [
+        { word: "mat",    pct: 42 },
+        { word: "floor",  pct: 18 },
+        { word: "rug",    pct: 12 },
+        { word: "ground", pct: 9 },
+        { word: "couch",  pct: 6 },
+        { word: "table",  pct: 4 },
+        { word: "bed",    pct: 3 },
+        { word: "roof",   pct: 2 },
+      ];
+      return (
+        <PresSlide>
+          <PresText size={26} color="rgba(255,255,255,.55)">
+            After 96 layers, the last position holds <em>everything</em> —
+          </PresText>
+          <PresText size={24} color="rgba(255,255,255,.45)">
+            all the words, all the context, all the facts it gathered.
+          </PresText>
+          <PresText size={28} color="white">
+            It turns that into a <span style={{ color, fontWeight: 700 }}>ranked list</span> of what could come next:
+          </PresText>
+
+          <div style={{
+            width: "100%",
+            maxWidth: 520,
+            background: "rgba(255,255,255,.04)",
+            border: `2px solid ${color}30`,
+            borderRadius: 18,
+            padding: "20px 24px",
+          }}>
+            {candidates.map((c, i) => {
+              const isTop = i === 0;
+              return (
+                <div
+                  key={c.word}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "10px 14px",
+                    marginBottom: i < candidates.length - 1 ? 6 : 0,
+                    borderRadius: 12,
+                    background: isTop ? `${color}18` : "transparent",
+                    border: isTop ? `2px solid ${color}50` : "2px solid transparent",
+                    animation: `fadeUp .4s ${i * 0.06}s ease both`,
+                  }}
+                >
+                  {/* Rank */}
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 15,
+                    color: isTop ? color : "rgba(255,255,255,.25)",
+                    width: 22,
+                    textAlign: "right",
+                    flexShrink: 0,
+                  }}>
+                    {i + 1}.
+                  </div>
+                  {/* Word */}
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: isTop ? 26 : 20,
+                    fontWeight: isTop ? 700 : 400,
+                    color: isTop ? color : "rgba(255,255,255,.6)",
+                    width: 90,
+                    flexShrink: 0,
+                  }}>
+                    {c.word}
+                    {isTop && <Star size={18} weight="fill" color={color} style={{ marginLeft: 6, verticalAlign: "middle" }} />}
+                  </div>
+                  {/* Bar */}
+                  <div style={{ flex: 1, height: isTop ? 14 : 10, background: "rgba(255,255,255,.06)", borderRadius: 7, overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${(c.pct / candidates[0].pct) * 100}%`,
+                      borderRadius: 7,
+                      background: isTop ? color : "rgba(255,255,255,.18)",
+                      boxShadow: isTop ? `0 0 12px ${color}40` : "none",
+                      animation: `probIn .6s ${i * 0.06 + 0.2}s ease both`,
+                    }} />
+                  </div>
+                  {/* Percent */}
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: isTop ? 22 : 17,
+                    fontWeight: isTop ? 700 : 400,
+                    color: isTop ? color : "rgba(255,255,255,.35)",
+                    width: 48,
+                    textAlign: "right",
+                    flexShrink: 0,
+                  }}>
+                    {c.pct}%
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <PresText size={20} color="rgba(255,255,255,.4)">
+            The top word wins — unless temperature adds some randomness.
+          </PresText>
+        </PresSlide>
+      );
+    }
+
+    if (slide === 2) {
+      return (
+        <PresSlide>
+          <div style={{ width: "100%", maxWidth: 780, margin: "0 auto" }}>
+            {/* Temperature slider card */}
+            <Card style={{ marginBottom: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 22, color: "white", display: "flex", alignItems: "center", gap: 8 }}>
+                  <TempIcon size={26} weight="duotone" color={tm.bar} /> Temperature: <span style={{ color }}>{temp.toFixed(2)}</span>
+                </div>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 18, padding: "5px 16px", borderRadius: 20, background: `${tm.bar}20`, border: `1px solid ${tm.bar}60`, color: tm.bar }}>{tm.name}</div>
+              </div>
+              <div style={{ position: "relative", marginBottom: 12 }}>
+                <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 10, borderRadius: 5, transform: "translateY(-50%)", pointerEvents: "none", background: "linear-gradient(to right,#a0d8ef 0%,#00f5d4 20%,#fee440 50%,#fb5607 75%,#f15bb5 100%)" }} />
+                <input type="range" min=".05" max="2.0" step=".05" value={temp} onChange={e => { setTemp(parseFloat(e.target.value)); reset(); }} className="temp-slider" />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "rgba(255,255,255,.3)", fontFamily: "'Fredoka',sans-serif", marginBottom: 12 }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Snowflake size={16} weight="duotone" /> Frozen</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Scales size={16} weight="duotone" /> Balanced</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Flame size={16} weight="duotone" /> Wild</span>
+              </div>
+              <div style={{ fontSize: 18, color: "rgba(255,255,255,.5)", lineHeight: 1.5, padding: "10px 14px", background: "rgba(255,255,255,.04)", borderRadius: 8 }}>{tm.desc}</div>
+            </Card>
+
+            {/* Probability bars */}
+            {!done && (
+              <Card style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 16, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2, color: "rgba(255,255,255,.35)", textTransform: "uppercase", marginBottom: 14 }}>Next word at temp {temp.toFixed(2)}:</div>
+                {dist.map(({ word, pct: p }, i) => (
+                  <div key={word} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                    <div style={{ width: 110, fontFamily: "'Fredoka',sans-serif", fontSize: 18, color: i === 0 ? color : "rgba(255,255,255,.5)", flexShrink: 0, display: "flex", alignItems: "center", gap: 5 }}>
+                      {i === 0 && <Star size={16} weight="duotone" color={color} />} {word}
+                    </div>
+                    <div style={{ flex: 1, height: 12, background: "rgba(255,255,255,.07)", borderRadius: 6, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${p}%`, borderRadius: 6, background: i === 0 ? color : "rgba(255,255,255,.2)", transition: "width .35s ease" }} />
+                    </div>
+                    <div style={{ width: 44, textAlign: "right", fontSize: 18, color: "rgba(255,255,255,.45)", flexShrink: 0 }}>{p}%</div>
+                  </div>
+                ))}
+              </Card>
+            )}
+
+            {/* Generated sentence */}
+            <Card style={{ marginBottom: 18 }}>
+              <div style={{ fontSize: 16, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2, color: "rgba(255,255,255,.35)", textTransform: "uppercase", marginBottom: 14 }}>Generated so far:</div>
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 30, minHeight: 56, marginBottom: 18, lineHeight: 1.4 }}>
+                {words.length === 0
+                  ? <span style={{ color: "rgba(255,255,255,.18)" }}>_ _ _ _ _ _ _ _ _</span>
+                  : words.map((w, i) => (
+                    <span key={i} style={{
+                      color: i === words.length - 1 ? color : "rgba(255,255,255,.85)",
+                      marginRight: w === "." ? 0 : 6,
+                      display: "inline-block",
+                      animation: i === words.length - 1 ? "fadeUp .3s ease" : "none",
+                    }}>{w}</span>
+                  ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                {!done
+                  ? <button onClick={pick} className="cta-btn" style={{ background: color, color: "#000", fontSize: 20, padding: "14px 32px" }}>
+                      {words.length === 0 ? "Generate first word" : "Pick next word"}
+                    </button>
+                  : <button onClick={reset} className="cta-btn" style={{ background: color, color: "#000", fontSize: 20, padding: "14px 32px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <ArrowCounterClockwise size={20} weight="duotone" /> Try Again
+                    </button>}
+                {layerCount > 0 && (
+                  <div style={{ fontSize: 18, fontFamily: "'Fredoka',sans-serif", color: "rgba(255,255,255,.4)" }}>
+                    <span style={{ color, fontWeight: 700 }}>{layerCount.toLocaleString()}</span> layer passes used
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </PresSlide>
+      );
+    }
+    if (slide === 3) {
+      return (
+        <PresSlide>
+          <Confetti size={56} weight="duotone" color={color} />
+          <PresText color={color} size={44}>Now you know how AI thinks!</PresText>
+          <PresText color="white" size={28}>
+            Words <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Numbers <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Space <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Attention <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Thinking <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Predict
+          </PresText>
+          <PresText size={22} color="rgba(255,255,255,.55)">
+            And repeat. Word by word. That's it!
+          </PresText>
+        </PresSlide>
+      );
+    }
+  }
 
   return (
     <div className="fade-up">
