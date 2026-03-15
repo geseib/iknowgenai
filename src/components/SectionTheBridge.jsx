@@ -162,8 +162,92 @@ function OverviewPipelineAnim({ color }) {
   const showBeams = isLayers && subPhase === "attn";
   const showThink = isLayers && subPhase === "think";
 
+  // Step tracker: 0 = not started, 1 = numbers, 2 = layers, 3 = output
+  const activeStep = phase === "idle" ? 0
+    : phase === "numbers" ? 1
+    : phase === "layers" ? 2
+    : 3; // output
+
+  const STEPS = [
+    { num: 1, label: "Words → Numbers" },
+    { num: 2, label: "96× Attention & Thinking" },
+    { num: 3, label: "Predict!" },
+  ];
+
   return (
     <div style={{ width: "100%", position: "relative" }}>
+      {/* ── Step tracker ── */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 0,
+        marginBottom: 20,
+      }}>
+        {STEPS.map((s, i) => {
+          const stepNum = i + 1;
+          const isDone = activeStep > stepNum;
+          const isCurrent = activeStep === stepNum;
+          const isReached = activeStep >= stepNum;
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center" }}>
+              {/* Connecting line (before steps 2 and 3) */}
+              {i > 0 && (
+                <div style={{
+                  width: 40,
+                  height: 2,
+                  borderRadius: 1,
+                  background: isDone || isCurrent ? color : "rgba(255,255,255,.08)",
+                  transition: "background .4s ease",
+                  opacity: isDone ? 1 : (isCurrent ? 0.6 : 1),
+                }} />
+              )}
+              {/* Step circle + label */}
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+              }}>
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  background: isDone ? color
+                    : isCurrent ? `${color}30`
+                    : "rgba(255,255,255,.06)",
+                  color: isDone ? "#000"
+                    : isCurrent ? color
+                    : "rgba(255,255,255,.2)",
+                  border: `2px solid ${isReached ? color : "rgba(255,255,255,.1)"}`,
+                  transition: "all .4s ease",
+                  boxShadow: isCurrent ? `0 0 12px ${color}35` : "none",
+                }}>
+                  {isDone ? "✓" : s.num}
+                </div>
+                <span style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 11,
+                  color: isCurrent ? "rgba(255,255,255,.8)"
+                    : isDone ? `${color}99`
+                    : "rgba(255,255,255,.25)",
+                  transition: "color .4s ease",
+                  whiteSpace: "nowrap",
+                }}>
+                  {s.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* ── Sentence row ── */}
       <div style={{
         position: "relative",

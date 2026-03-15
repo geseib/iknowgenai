@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward } from "@phosphor-icons/react";
+import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
 
@@ -71,8 +71,15 @@ export default function App() {
   const [sec, setSec] = useState(0);
   const [slide, setSlide] = useState(0); // presentation mode: which slide within section
   const [done, setDone] = useState(new Set());
+  const [navOpen, setNavOpen] = useState(false);
 
   const isPres = mode === "presentation";
+
+  const jumpToSection = useCallback((targetSec) => {
+    setSec(targetSec);
+    setSlide(0);
+    setNavOpen(false);
+  }, []);
 
   const next = useCallback(() => {
     if (isPres) {
@@ -125,6 +132,10 @@ export default function App() {
     if (!mode) return;
     const handleKey = (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      // Escape closes nav drawer
+      if (e.key === "Escape" && navOpen) { setNavOpen(false); return; }
+      // Suppress navigation while drawer is open
+      if (navOpen) return;
       if (isPres) {
         // In presentation mode: Right, Down, Space all advance; Left goes back
         if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
@@ -139,7 +150,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [mode, next, prev, isPres]);
+  }, [mode, next, prev, isPres, navOpen]);
 
   // Listen for sections signaling they're fully revealed (non-presentation modes)
   useEffect(() => {
@@ -208,6 +219,258 @@ export default function App() {
         }} />
       )}
 
+      {/* ── Nav Drawer — presentation mode only ── */}
+      {isPres && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setNavOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 140,
+              background: "rgba(5,5,18,.55)",
+              backdropFilter: "blur(3px)",
+              opacity: navOpen ? 1 : 0,
+              pointerEvents: navOpen ? "auto" : "none",
+              transition: "opacity .25s ease",
+            }}
+          />
+
+          {/* Sliding container: drawer + toggle tab move together */}
+          <div style={{
+            position: "fixed",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            zIndex: 145,
+            width: 312,
+            maxWidth: "calc(85vw + 32px)",
+            transform: navOpen ? "translateX(0)" : "translateX(-280px)",
+            transition: "transform .3s cubic-bezier(.4,0,.2,1)",
+            display: "flex",
+            pointerEvents: "none",
+          }}>
+            {/* Drawer panel */}
+            <div style={{
+              width: 280,
+              flexShrink: 0,
+              height: "100%",
+              background: "rgba(10,10,28,.95)",
+              backdropFilter: "blur(16px)",
+              borderRight: `1px solid rgba(255,255,255,.08)`,
+              boxShadow: navOpen ? `4px 0 24px rgba(0,0,0,.4)` : "none",
+              overflowY: "auto",
+              overflowX: "hidden",
+              fontFamily: "'Fredoka',sans-serif",
+              pointerEvents: "auto",
+            }}>
+            {/* Drawer header */}
+            <div style={{
+              padding: "22px 18px 14px",
+              borderBottom: "1px solid rgba(255,255,255,.06)",
+            }}>
+              <div style={{ fontSize: 18, color: "rgba(255,255,255,.6)", fontWeight: 600 }}>
+                Jump to...
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,.25)", marginTop: 4 }}>
+                Slide {currentSlideNum} of {totalSlideCount}
+              </div>
+            </div>
+
+            {/* Groups and sections */}
+            <div style={{ padding: "6px 0 16px" }}>
+              {GROUPS.map((group, gi) => {
+                const groupColor = COLORS[group.start % COLORS.length];
+                return (
+                  <div key={gi}>
+                    {/* Group header */}
+                    <div style={{
+                      padding: "10px 18px 5px",
+                      marginTop: gi > 0 ? 10 : 4,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}>
+                      <div style={{
+                        width: 3,
+                        height: 14,
+                        borderRadius: 2,
+                        background: groupColor,
+                      }} />
+                      <span style={{
+                        fontSize: 10,
+                        letterSpacing: 2.5,
+                        textTransform: "uppercase",
+                        color: `${groupColor}99`,
+                      }}>
+                        {group.name}
+                      </span>
+                    </div>
+
+                    {/* Section items */}
+                    {Array.from(
+                      { length: group.end - group.start + 1 },
+                      (_, i) => group.start + i,
+                    ).map(si => {
+                      const isActive = si === sec;
+                      const isDone = done.has(si);
+                      const sColor = COLORS[si % COLORS.length];
+                      const totalSlidesInSec = PRESENTATION_SLIDES[si] || 1;
+                      const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
+                      const pct = (slidesDone / totalSlidesInSec) * 100;
+
+                      return (
+                        <div
+                          key={si}
+                          onClick={() => jumpToSection(si)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "9px 14px",
+                            margin: "2px 8px",
+                            borderRadius: 10,
+                            cursor: "pointer",
+                            borderLeft: `3px solid ${isActive ? sColor : "transparent"}`,
+                            background: isActive ? `${sColor}12` : "transparent",
+                            transition: "all .15s ease",
+                          }}
+                          onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
+                          onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                        >
+                          {/* Number / check */}
+                          <div style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: "50%",
+                            background: isDone ? `${sColor}25` : (isActive ? `${sColor}25` : "rgba(255,255,255,.06)"),
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}>
+                            {isDone
+                              ? <CheckCircle size={14} weight="fill" color={sColor} />
+                              : <span style={{
+                                  fontSize: 10,
+                                  fontWeight: 600,
+                                  color: isActive ? sColor : "rgba(255,255,255,.25)",
+                                }}>
+                                  {si + 1}
+                                </span>}
+                          </div>
+
+                          {/* Title + mini progress */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                              fontSize: 13,
+                              color: isActive ? "white" : (isDone ? "rgba(255,255,255,.4)" : "rgba(255,255,255,.55)"),
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}>
+                              {TITLES[si]}
+                            </div>
+                            {(isActive || isDone) && (
+                              <div style={{
+                                height: 2,
+                                borderRadius: 1,
+                                marginTop: 5,
+                                background: "rgba(255,255,255,.06)",
+                              }}>
+                                <div style={{
+                                  height: "100%",
+                                  borderRadius: 1,
+                                  width: `${pct}%`,
+                                  background: isDone ? `${sColor}55` : sColor,
+                                  transition: "width .3s ease",
+                                }} />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Slide count + active dot */}
+                          <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            flexShrink: 0,
+                          }}>
+                            {(isActive || isDone) && (
+                              <span style={{
+                                fontSize: 10,
+                                color: "rgba(255,255,255,.2)",
+                              }}>
+                                {slidesDone}/{totalSlidesInSec}
+                              </span>
+                            )}
+                            {isActive && (
+                              <div style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: "50%",
+                                background: sColor,
+                                animation: "navDot 1.5s ease-in-out infinite",
+                              }} />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              padding: "10px 18px 14px",
+              borderTop: "1px solid rgba(255,255,255,.06)",
+              fontSize: 11,
+              color: "rgba(255,255,255,.2)",
+              textAlign: "center",
+            }}>
+              Press <kbd style={{
+                padding: "2px 6px",
+                borderRadius: 4,
+                background: "rgba(255,255,255,.08)",
+                fontSize: 10,
+              }}>Esc</kbd> to close
+            </div>
+            </div>
+
+            {/* Toggle tab — rides on the right edge of the drawer */}
+            <button
+              onClick={() => setNavOpen(o => !o)}
+              style={{
+                alignSelf: "center",
+                width: 32,
+                height: 48,
+                flexShrink: 0,
+                borderRadius: "0 10px 10px 0",
+                border: `1px solid rgba(255,255,255,.12)`,
+                borderLeft: "none",
+                background: navOpen ? "rgba(255,255,255,.12)" : "rgba(255,255,255,.06)",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(8px)",
+                transition: "background .2s ease",
+                animation: navOpen ? "none" : "navPulse 3s ease-in-out infinite",
+                pointerEvents: "auto",
+              }}
+            >
+              {navOpen
+                ? <CaretLeft size={16} weight="bold" />
+                : <List size={16} weight="bold" />}
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Header — presentation & minimal: just thin progress bar; others: full chrome */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
@@ -249,11 +512,10 @@ export default function App() {
           position: "relative",
           zIndex: 10,
           ...(isPres ? {
-            height: "100vh",
+            minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            overflow: "hidden",
           } : {}),
         }}
         key={isPres ? `${sec}-${slide}` : sec}

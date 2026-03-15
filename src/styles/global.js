@@ -8,6 +8,14 @@ export const ALL_CSS = `
   @keyframes probIn { from{width:0!important} }
   @keyframes dialSpin { 0%{transform:scaleY(1)} 30%{transform:scaleY(0.3)} 60%{transform:scaleY(1.4)} 100%{transform:scaleY(1)} }
   @keyframes gearSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  @keyframes navPulse {
+    0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.12)}
+    50%{box-shadow:0 0 0 5px rgba(255,255,255,0)}
+  }
+  @keyframes navDot {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.4;transform:scale(.65)}
+  }
   @keyframes wowReveal {
     0%{opacity:0;transform:translateY(18px) scale(.95)}
     65%{transform:translateY(-3px) scale(1.02)}

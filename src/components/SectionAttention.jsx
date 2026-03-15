@@ -367,18 +367,18 @@ export default function SectionAttention({ color, mode, slide }) {
         <PresText size={36} color="white">
           It could be...
         </PresText>
-        <div style={{ display: "flex", gap: 36, justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: 28, justifyContent: "center" }}>
           {[
             { img: BAT_IMG_BASE, label: "A baseball bat", clr: "#fee440" },
             { img: BAT_IMG_ANIMAL, label: "A flying animal", clr: "#9b5de5" },
           ].map(opt => (
             <div key={opt.label} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
-              padding: "24px 32px", borderRadius: 20,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+              padding: "18px 28px", borderRadius: 20,
               background: `${opt.clr}10`, border: `2px solid ${opt.clr}40`,
-              minWidth: 200,
+              minWidth: 180,
             }}>
-              <img src={opt.img} alt={opt.label} style={{ width: 120, height: "auto" }} />
+              <img src={opt.img} alt={opt.label} style={{ width: 100, height: "auto" }} />
               <div style={{
                 fontFamily: "'Fredoka',sans-serif", fontSize: 26, fontWeight: 600,
                 color: "white",
@@ -397,7 +397,7 @@ export default function SectionAttention({ color, mode, slide }) {
     /* Slide 2: AI sees BOTH at once */
     if (slide === 2) return (
       <PresSlide>
-        <img src={BAT_IMG_HYBRID} alt="Both meanings at once" style={{ width: 220, height: "auto" }} />
+        <img src={BAT_IMG_HYBRID} alt="Both meanings at once" style={{ width: 180, height: "auto" }} />
         <PresText size={36} color="white">
           AI sees <strong style={{ color }}>BOTH</strong> meanings at once
         </PresText>
