@@ -43,7 +43,7 @@ export function H1({ children, mode }) {
   return (
     <h1 style={{
       fontFamily: "'Fredoka',sans-serif",
-      fontSize: isPres ? 56 : 40,
+      fontSize: isPres ? 68 : 40,
       fontWeight: 700,
       color: "white",
       lineHeight: 1.15,
@@ -183,7 +183,7 @@ export function PresSlide({ children }) {
       alignItems: "center",
       textAlign: "center",
       minHeight: "80vh",
-      gap: 24,
+      gap: 28,
     }}>
       {children}
     </div>
@@ -191,14 +191,16 @@ export function PresSlide({ children }) {
 }
 
 export function PresText({ children, color, size = 32 }) {
+  // Apply 25% size boost for better readability from the back of the room
+  const boosted = Math.round(size * 1.25);
   return (
     <div style={{
       fontFamily: "'Fredoka',sans-serif",
-      fontSize: size,
+      fontSize: boosted,
       color: color || "rgba(255,255,255,.75)",
-      lineHeight: 1.4,
+      lineHeight: 1.35,
       textAlign: "center",
-      maxWidth: 800,
+      maxWidth: 900,
     }}>
       {children}
     </div>
