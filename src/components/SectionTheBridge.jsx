@@ -349,14 +349,12 @@ function OverviewPipelineAnim({ color }) {
                   : (phase === "enrich" && i < 4 && enrichStep === 0) ? `${color}cc`
                   : (phase === "enrich" && i < 4 && enrichStep === 1) ? "rgba(255,255,255,.3)"
                   : ((phase === "candidates" || phase === "pick") && i < 4) ? "rgba(255,255,255,.35)"
-                  : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? color
                   : "white",
                 padding: "6px 14px",
                 borderRadius: 10,
                 background: (phase === "numbers" && i === 1) ? `${color}20`
                   : ((phase === "enrich" || phase === "candidates" || phase === "pick") && i === 4) ? `${color}25`
                   : (phase === "enrich" && i < 4 && enrichStep === 0) ? `${color}10`
-                  : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? `${color}12`
                   : "rgba(255,255,255,.06)",
                 border: `1.5px solid ${
                   (phase === "numbers" && i === 1) ? `${color}50`
@@ -453,16 +451,17 @@ function OverviewPipelineAnim({ color }) {
 
           {/* Right: the two layers that bounce */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {/* Attention row */}
+              {/* Attention row — fixed height */}
               <div style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
                 padding: "10px 16px",
                 borderRadius: 12,
+                height: 52,
                 background: subPhase === "attn" ? `${color}15` : "rgba(255,255,255,.03)",
                 border: `2px solid ${subPhase === "attn" ? `${color}50` : "rgba(255,255,255,.06)"}`,
-                transition: "all .1s ease",
+                transition: "background .1s ease, border-color .1s ease, box-shadow .1s ease",
                 boxShadow: subPhase === "attn" ? `0 0 14px ${color}25` : "none",
               }}>
                 <ChatCircleDots
@@ -481,18 +480,18 @@ function OverviewPipelineAnim({ color }) {
                 </span>
               </div>
 
-              {/* Thinking row */}
+              {/* Thinking row — fixed height, question replaces label in place */}
               <div style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
                 padding: "10px 16px",
                 borderRadius: 12,
+                height: 52,
                 background: subPhase === "think" ? `${color}15` : "rgba(255,255,255,.03)",
                 border: `2px solid ${subPhase === "think" ? `${color}50` : "rgba(255,255,255,.06)"}`,
-                transition: "all .1s ease",
+                transition: "background .1s ease, border-color .1s ease, box-shadow .1s ease",
                 boxShadow: subPhase === "think" ? `0 0 14px ${color}25` : "none",
-                minHeight: 52,
               }}>
                 <Brain
                   size={22}
@@ -502,24 +501,28 @@ function OverviewPipelineAnim({ color }) {
                 />
                 <span style={{
                   fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 16,
+                  fontSize: layerNum <= 6 ? 20 : (layerNum <= 15 ? 17 : 15),
                   color: subPhase === "think" ? "rgba(255,255,255,.8)" : "rgba(255,255,255,.25)",
                   transition: "color .1s ease",
                   flex: 1,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
                 }}>
                   {subPhase === "think" && currentQuestion
-                    ? <span key={currentQuestion} style={{
-                        animation: "fadeUp .12s ease",
-                        fontSize: layerNum <= 6 ? 22 : (layerNum <= 15 ? 18 : 16),
-                        transition: "font-size .2s ease",
-                      }}>
-                        <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
-                      </span>
+                    ? <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
                     : <span>MLP <span style={{ fontSize: 13, opacity: 0.6 }}>(asks questions about each word)</span></span>}
                 </span>
-                {subPhase === "think" && (
-                  <Lightning size={18} weight="fill" color={color} style={{ flexShrink: 0 }} />
-                )}
+                <Lightning
+                  size={18}
+                  weight="fill"
+                  color={color}
+                  style={{
+                    flexShrink: 0,
+                    opacity: subPhase === "think" ? 1 : 0,
+                    transition: "opacity .1s ease",
+                  }}
+                />
               </div>
 
               {/* Progress bar */}
