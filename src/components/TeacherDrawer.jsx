@@ -17,20 +17,7 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        onClick={onToggle}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 140,
-          background: "rgba(5,5,18,.55)",
-          backdropFilter: "blur(3px)",
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? "auto" : "none",
-          transition: "opacity .25s ease",
-        }}
-      />
+      {/* No backdrop — teacher needs to see the slide content */}
 
       {/* Sliding container: tab + panel move together */}
       <div style={{

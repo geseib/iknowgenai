@@ -136,8 +136,8 @@ export default function App() {
       }
       // T toggles teacher drawer
       if (e.key === "t" || e.key === "T") { setTeacherOpen(o => !o); return; }
-      // Suppress navigation while a drawer is open
-      if (navOpen || teacherOpen) return;
+      // Suppress navigation while nav drawer is open (but NOT teacher drawer)
+      if (navOpen) return;
       // Right, Down, Space advance; Left goes back
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
