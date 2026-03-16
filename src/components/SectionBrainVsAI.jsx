@@ -201,11 +201,13 @@ export default function SectionBrainVsAI({ color, mode, slide }) {
       );
     }
 
-    /* Slides 1-14: One comparison per two slides (question → reveal) */
-    if (slide >= 1 && slide <= 14) {
-      const rowIdx = Math.floor((slide - 1) / 2);
+    /* Slides 1-6: Three key comparisons × 2 (question → reveal) */
+    // Pick the 3 most impactful: How it learns (0), Has emotions (2), Can be creative (6)
+    const selectedRows = [0, 2, 6];
+    if (slide >= 1 && slide <= 6) {
+      const selIdx = Math.floor((slide - 1) / 2);
       const isRevealed = (slide - 1) % 2 === 1;
-      const row = rows[rowIdx];
+      const row = rows[selectedRows[selIdx]];
 
       /* Question slide — just the topic, let kids think */
       if (!isRevealed) {
@@ -313,8 +315,8 @@ export default function SectionBrainVsAI({ color, mode, slide }) {
       );
     }
 
-    /* Slide 15: Insight */
-    if (slide === 15) {
+    /* Slide 7: Insight */
+    if (slide === 7) {
       return (
         <PresSlide>
           <Lightbulb size={48} weight="duotone" color={color} />

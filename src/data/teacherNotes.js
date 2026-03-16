@@ -31,44 +31,26 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 1: SectionWhatIsAI (5 slides) ──
+  // ── 1: SectionWhatIsAI (2 slides) ──
   {
     title: "What IS AI?",
     slides: [
       {
-        keyPoints: ["Get the class guessing before revealing"],
-        narrative: "Ask the class to vote by raising hands for each option. Tally roughly and tap the winning answer.",
-        definitions: [],
-        discussion: ["What do you think AI actually is?"],
-      },
-      {
-        keyPoints: ["'Robot' is the most common misconception", "AI is software, not hardware"],
-        narrative: "'Robot' is the most common misconception — great teaching opportunity. AI is software running on computers, not a physical thing.",
+        keyPoints: ["Get the class guessing before revealing", "All three answers are partly right"],
+        narrative: "Ask the class to vote by raising hands for each option. Robot, smart program, digital brain — they're all a little right. The key question: what makes AI SPECIAL compared to all of these?",
         definitions: [{ term: "AI", def: "Artificial Intelligence — software that learns from examples instead of following fixed rules" }],
-        discussion: [],
+        discussion: ["What do you think AI actually is?", "What do all three answers have in common?"],
       },
       {
-        keyPoints: ["'Smart program' is close but incomplete"],
-        narrative: "'Smart program' is the closest answer — acknowledge that. The key nuance: what makes AI different from a calculator or a regular app?",
-        definitions: [],
-        discussion: ["What makes something 'smart'?"],
-      },
-      {
-        keyPoints: ["AI was inspired by neurons but doesn't have emotions"],
-        narrative: "'Digital brain' opens a great philosophical discussion. AI was inspired by how neurons connect, but it doesn't have feelings or consciousness.",
-        definitions: [],
-        discussion: ["If it can write like a human, does that make it a brain?"],
-      },
-      {
-        keyPoints: ["AI learns patterns from data", "It's not magic — it's math"],
-        narrative: "After the class votes and you reveal: ask 'What do you think ALL three answers are missing?' The real answer: AI is a program that learns from examples.",
+        keyPoints: ["AI learns patterns from data", "Regular programs follow rules; AI learns rules itself"],
+        narrative: "The real answer: regular programs follow rules someone wrote. AI learns the rules itself — from millions of examples. Just like you learned to talk by hearing people talk.",
         definitions: [],
         discussion: ["What do you think ALL three answers are missing?"],
       },
     ],
   },
 
-  // ── 2: SectionProgramsVsAI (8 slides) ──
+  // ── 2: SectionProgramsVsAI (6 slides) ──
   {
     title: "Rules vs Learning",
     slides: [
@@ -78,43 +60,55 @@ export const TEACHER_NOTES = [
         definitions: [{ term: "Program", def: "A set of instructions a computer follows step by step" }],
         discussion: [],
       },
-      empty, // pair 1
+      empty, // pair 1 question
       {
         keyPoints: ["Rules are rigid — they break on edge cases"],
         narrative: "Use the bike analogy: you can't learn to ride a bike by reading instructions. You learn by doing. That's closer to how AI learns.",
         definitions: [],
         discussion: [],
       },
-      empty, // pair 2
-      {
-        keyPoints: ["AI discovers rules by seeing many examples"],
-        narrative: "'If I showed you 1,000 pictures of cats and 1,000 pictures of dogs, could you learn to tell them apart without anyone explaining the rules?' That's exactly what AI does.",
-        definitions: [],
-        discussion: ["Could you learn to sort cats from dogs without being told the rules?"],
-      },
-      empty, // pair 3
-      empty, // reveal 3
+      empty, // pair 2 question
+      empty, // pair 2 reveal
       {
         keyPoints: ["AI learns from examples — bad examples = bad learning"],
-        narrative: "Watch for the misconception that 'AI = smart = always right.' Emphasize that AI learns from examples, so if the examples are bad, the AI learns bad patterns.",
+        narrative: "Watch for the misconception that 'AI = smart = always right.' AI learns from examples, so if the examples are bad, the AI learns bad patterns.",
         definitions: [{ term: "Bias", def: "When AI learns unfair patterns from unbalanced training data" }],
         discussion: ["If the AI only saw pictures of golden retrievers, would it recognize a poodle as a dog?"],
       },
     ],
   },
 
-  // ── 3: SectionBrainVsAI (16 slides) ──
+  // ── 3: SectionBrainVsAI (8 slides) ──
   {
     title: "Brain vs AI",
     slides: [
       {
         keyPoints: ["Brains and AI are different, not better/worse", "AI processes differently from humans"],
-        narrative: "Kids often ask 'does AI think like us?' — be honest: we don't fully know. What we do know is that it processes very differently.",
+        narrative: "Kids often ask 'does AI think like us?' — be honest: we don't fully know. What we do know is that it processes very differently. We'll look at 3 key areas.",
         definitions: [],
         discussion: ["Does AI think like us?"],
       },
-      // Slides 1-14: comparison pairs (question → reveal)
-      ...Array.from({ length: 13 }, () => empty),
+      empty, // How it learns — question
+      {
+        keyPoints: ["Both learn from experience, but differently"],
+        narrative: "Both brains and AI learn — but brains learn from living in the world, while AI learns from millions of text examples.",
+        definitions: [],
+        discussion: [],
+      },
+      empty, // Has emotions — question
+      {
+        keyPoints: ["AI can sound emotional but doesn't feel anything"],
+        narrative: "AI can say 'I'm excited!' but it's predicting words, not feeling things. Like an actor who can cry on cue without being sad.",
+        definitions: [],
+        discussion: ["If AI can write a sad poem, does that mean it's sad?"],
+      },
+      empty, // Can be creative — question
+      {
+        keyPoints: ["AI remixes patterns — is that creativity?"],
+        narrative: "AI combines and remixes patterns from training data. Is that 'real' creativity? Great open question for the class.",
+        definitions: [],
+        discussion: ["What would AI need before you'd say it was truly like a brain?"],
+      },
       {
         keyPoints: ["AI is a giant math function", "Inspired by brains but not the same"],
         narrative: "Key point: AI was inspired by neurons, but an AI model is ultimately a giant math function — billions of multiplication operations in sequence.",

@@ -46,9 +46,9 @@ const SECTIONS = [
 // Sections export this or we define it here for coordination
 const PRESENTATION_SLIDES = [
   3,  // SectionWhoIsHere: question → grid → insight
-  5,  // SectionWhatIsAI: question → robot → program → brain → real answer
-  8,  // SectionProgramsVsAI: question → pair1 → reveal1 → pair2 → reveal2 → pair3 → reveal3 → insight
-  16, // SectionBrainVsAI: intro → 7 comparisons (question → reveal each) → insight
+  2,  // SectionWhatIsAI: question with options → real answer
+  6,  // SectionProgramsVsAI: intro → 2 pairs (question → reveal each) → insight
+  8,  // SectionBrainVsAI: intro → 3 comparisons (question → reveal each) → insight
   5,  // SectionWhatIsLLM: LLM boxes → L → L → M + insight → not just text
   4,  // SectionMeetModels: ChatGPT → Claude → Llama+Gemini → takeaway
   3,  // SectionTheBridge: training overview → animated pipeline → punchline
@@ -64,8 +64,8 @@ const PRESENTATION_SLIDES = [
 
 // Sections with a "skip to takeaway" button — maps section index → takeaway slide
 const PRESENTATION_SKIP = {
-  2: 7,   // SectionProgramsVsAI → insight slide
-  3: 15,  // SectionBrainVsAI → insight slide
+  2: 5,   // SectionProgramsVsAI → insight slide
+  3: 7,   // SectionBrainVsAI → insight slide
 };
 
 // Custom event for sections to signal they're fully revealed

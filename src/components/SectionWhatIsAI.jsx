@@ -103,59 +103,14 @@ export default function SectionWhatIsAI({ color, mode, slide }) {
               </div>
             ))}
           </div>
+          <PresText size={24} color="rgba(255,255,255,.35)">
+            They're all a little right... but what makes AI <em>special</em>?
+          </PresText>
         </PresSlide>
       );
     }
-    // Slide 1: "A robot?" — lean positive, then pivot
+    // Slide 1: The real answer
     if (slide === 1) {
-      const c = choices[0];
-      return (
-        <PresSlide>
-          <c.Icon size={72} weight="duotone" color={color} />
-          <PresText size={44} color="white">
-            Is AI a <span style={{ color }}>robot</span>?
-          </PresText>
-          <PresText size={28} color="rgba(255,255,255,.65)">
-            AI was inspired by sci-fi robots — and it CAN control robots!<br />
-            But AI doesn't need a body. It lives inside a computer.
-          </PresText>
-        </PresSlide>
-      );
-    }
-    // Slide 2: "A smart program?" — positive, build
-    if (slide === 2) {
-      const c = choices[1];
-      return (
-        <PresSlide>
-          <c.Icon size={72} weight="duotone" color={color} />
-          <PresText size={44} color="white">
-            Is AI a <span style={{ color }}>smart program</span>?
-          </PresText>
-          <PresText size={28} color="rgba(255,255,255,.65)">
-            Yes! AI IS a program. But there's one big twist —<br />
-            nobody wrote the rules. It figured them out on its own.
-          </PresText>
-        </PresSlide>
-      );
-    }
-    // Slide 3: "A digital brain?" — positive, build
-    if (slide === 3) {
-      const c = choices[2];
-      return (
-        <PresSlide>
-          <c.Icon size={72} weight="duotone" color={color} />
-          <PresText size={44} color="white">
-            Is AI a <span style={{ color }}>digital brain</span>?
-          </PresText>
-          <PresText size={28} color="rgba(255,255,255,.65)">
-            AI was inspired by how brains connect neurons!<br />
-            It can even sound emotional — but it's predicting words, not feeling things.
-          </PresText>
-        </PresSlide>
-      );
-    }
-    // Slide 4: The real answer — what makes AI different from ALL of those
-    if (slide === 4) {
       return (
         <PresSlide>
           <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI" style={{ width: 120, height: "auto" }} />

@@ -200,7 +200,7 @@ export default function SectionProgramsVsAI({ color, mode, slide }) {
   // ── Presentation Mode ──
   // Pattern: show pair unrevealed (audience guesses) → next press reveals answers
   if (mode === "presentation") {
-    const pairs = [[0, 1], [2, 3], [4, 5]];
+    const pairs = [[0, 1], [2, 3]]; // trimmed to 2 pairs
 
     // Slide 0: Intro question
     if (slide === 0) {
@@ -216,13 +216,10 @@ export default function SectionProgramsVsAI({ color, mode, slide }) {
       );
     }
 
-    // Slides 1-6: pairs of scenarios, alternating unrevealed → revealed
-    // slide 1 = pair 0 unrevealed, slide 2 = pair 0 revealed
-    // slide 3 = pair 1 unrevealed, slide 4 = pair 1 revealed
-    // slide 5 = pair 2 unrevealed, slide 6 = pair 2 revealed
-    if (slide >= 1 && slide <= 6) {
-      const pairIdx = Math.floor((slide - 1) / 2);    // 0, 0, 1, 1, 2, 2
-      const isRevealed = (slide - 1) % 2 === 1;       // false, true, false, true...
+    // Slides 1-4: 2 pairs × 2 (unrevealed → revealed)
+    if (slide >= 1 && slide <= 4) {
+      const pairIdx = Math.floor((slide - 1) / 2);
+      const isRevealed = (slide - 1) % 2 === 1;
       const [a, b] = pairs[pairIdx];
       return (
         <PresSlide>
@@ -242,8 +239,8 @@ export default function SectionProgramsVsAI({ color, mode, slide }) {
       );
     }
 
-    // Slide 7: The big insight
-    if (slide === 7) {
+    // Slide 5: The big insight
+    if (slide === 5) {
       return (
         <PresSlide>
           <Lightbulb size={48} weight="duotone" color={color} />
