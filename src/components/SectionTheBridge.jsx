@@ -64,7 +64,7 @@ const OVERVIEW_BEAM_PATTERNS = [
 
 /* ── OverviewPipelineAnim: the animated pipeline on slide 1 ── */
 function OverviewPipelineAnim({ color }) {
-  // phase: "idle" | "numbers" | "layers" | "output"
+  // phase: "idle" | "numbers" | "layers" | "enrich" | "candidates" | "pick"
   const [phase, setPhase] = useState("idle");
   const [layerNum, setLayerNum] = useState(1);
   const [subPhase, setSubPhase] = useState("attn"); // "attn" | "think"
@@ -73,6 +73,7 @@ function OverviewPipelineAnim({ color }) {
   const [showResult, setShowResult] = useState(false);
   const [sentenceDropped, setSentenceDropped] = useState(false);
   const [gearSpinning, setGearSpinning] = useState(false);
+  const [pickedWord, setPickedWord] = useState(false);
   const wordRefs = useRef([]);
   const svgRef = useRef(null);
 
@@ -134,13 +135,25 @@ function OverviewPipelineAnim({ color }) {
 
       if (cancelled) return;
       setGearSpinning(false);
+      setSubPhase("");
+      setCurrentQuestion("");
       await sleep(300);
       if (cancelled) return;
 
-      // Output
-      setPhase("output");
-      setSubPhase("");
-      setCurrentQuestion("");
+      // Enrich — "the" glows, loaded with meaning
+      setPhase("enrich");
+      await sleep(1800);
+      if (cancelled) return;
+
+      // Candidates — show probability list
+      setPhase("candidates");
+      await sleep(2200);
+      if (cancelled) return;
+
+      // Pick — highlight "mat" and fill the blank
+      setPickedWord(true);
+      await sleep(600);
+      if (cancelled) return;
       setShowResult(true);
     }
 
@@ -162,11 +175,13 @@ function OverviewPipelineAnim({ color }) {
   const showBeams = isLayers && subPhase === "attn";
   const showThink = isLayers && subPhase === "think";
 
-  // Step tracker: 0 = not started, 1 = numbers, 2 = layers, 3 = output
+  const isOutputPhase = phase === "enrich" || phase === "candidates" || phase === "pick";
+
+  // Step tracker: 0 = not started, 1 = numbers, 2 = layers, 3 = predict
   const activeStep = phase === "idle" ? 0
     : phase === "numbers" ? 1
     : phase === "layers" ? 2
-    : 3; // output
+    : 3; // enrich/candidates/pick
 
   const STEPS = [
     { num: 1, label: "Words → Numbers" },
@@ -295,16 +310,21 @@ function OverviewPipelineAnim({ color }) {
                 fontSize: 24,
                 fontWeight: 600,
                 color: (phase === "numbers" && i === 1) ? color
+                  : (phase === "enrich" && i === 4) ? color
                   : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? color
                   : "white",
                 padding: "6px 14px",
                 borderRadius: 10,
                 background: (phase === "numbers" && i === 1) ? `${color}20`
+                  : (phase === "enrich" && i === 4) ? `${color}25`
                   : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? `${color}12`
                   : "rgba(255,255,255,.06)",
                 border: `1.5px solid ${
-                  (phase === "numbers" && i === 1) ? `${color}50` : "rgba(255,255,255,.1)"
+                  (phase === "numbers" && i === 1) ? `${color}50`
+                  : (phase === "enrich" && i === 4) ? color
+                  : "rgba(255,255,255,.1)"
                 }`,
+                boxShadow: (phase === "enrich" && i === 4) ? `0 0 16px ${color}40` : "none",
                 transition: "all .15s ease",
               }}
             >
@@ -340,12 +360,12 @@ function OverviewPipelineAnim({ color }) {
       </div>
 
       {/* ── Machine: robot + counter + layers ── */}
-      {(isLayers || phase === "output") && (
+      {isLayers && (
         <div style={{
           display: "flex",
           gap: 20,
           alignItems: "center",
-          animation: phase === "output" ? "none" : "fadeUp .4s ease",
+          animation: "fadeUp .4s ease",
         }}>
           {/* Left: robot with spinning gear + counter */}
           <div style={{
@@ -376,23 +396,20 @@ function OverviewPipelineAnim({ color }) {
                 }}
               />
             </div>
-            {isLayers && (
-              <div style={{
-                fontFamily: "'Fredoka',sans-serif",
-                fontSize: 15,
-                color: "rgba(255,255,255,.45)",
-                textAlign: "center",
-                lineHeight: 1.2,
-              }}>
-                <span style={{ color, fontWeight: 700, fontSize: 22 }}>{layerNum}</span>
-                <br />of 96
-              </div>
-            )}
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 15,
+              color: "rgba(255,255,255,.45)",
+              textAlign: "center",
+              lineHeight: 1.2,
+            }}>
+              <span style={{ color, fontWeight: 700, fontSize: 22 }}>{layerNum}</span>
+              <br />of 96
+            </div>
           </div>
 
           {/* Right: the two layers that bounce */}
-          {isLayers && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
               {/* Attention row */}
               <div style={{
                 display: "flex",
@@ -475,28 +492,122 @@ function OverviewPipelineAnim({ color }) {
                 }} />
               </div>
             </div>
-          )}
+        </div>
+      )}
 
-          {/* Output state */}
-          {phase === "output" && (
-            <div style={{ flex: 1, textAlign: "center" }} className="wow-reveal">
-              <div style={{
-                fontFamily: "'Fredoka',sans-serif",
-                fontSize: 20,
-                color: "rgba(255,255,255,.5)",
-                marginBottom: 4,
-              }}>
-                After 96 layers...
-              </div>
-              <div style={{
-                fontFamily: "'Fredoka',sans-serif",
-                fontSize: 18,
-                color: "rgba(255,255,255,.7)",
-              }}>
-                it predicts: <span style={{ color, fontWeight: 700, fontSize: 26 }}>"mat"</span>
-              </div>
-            </div>
-          )}
+      {/* ── Enrich: "the" is loaded with meaning ── */}
+      {phase === "enrich" && (
+        <div style={{
+          textAlign: "center",
+          animation: "fadeUp .4s ease",
+        }}>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 17,
+            color: "rgba(255,255,255,.55)",
+            lineHeight: 1.5,
+          }}>
+            After 96 layers, the last word "<span style={{ color, fontWeight: 700 }}>the</span>"
+            now carries the meaning of the <em>entire</em> sentence
+            <br />
+            <span style={{ fontSize: 14, color: "rgba(255,255,255,.35)" }}>
+              + everything it learned in training
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Candidates: probability list ── */}
+      {(phase === "candidates" || phase === "pick") && (
+        <div style={{
+          display: "flex",
+          gap: 20,
+          alignItems: "flex-start",
+          animation: phase === "candidates" && !pickedWord ? "fadeUp .4s ease" : "none",
+        }}>
+          <div style={{
+            flex: 1,
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 15,
+            color: "rgba(255,255,255,.5)",
+            lineHeight: 1.5,
+            paddingTop: 4,
+          }}>
+            It builds a list of words that could come next — ranked by probability:
+          </div>
+          <div style={{
+            flexShrink: 0,
+            width: 220,
+            background: "rgba(255,255,255,.04)",
+            border: `1.5px solid ${color}30`,
+            borderRadius: 14,
+            padding: "10px 12px",
+          }}>
+            {[
+              { word: "mat", pct: 42 },
+              { word: "floor", pct: 18 },
+              { word: "rug", pct: 12 },
+              { word: "ground", pct: 9 },
+              { word: "couch", pct: 6 },
+            ].map((c, i) => {
+              const isTop = i === 0;
+              const highlighted = isTop && pickedWord;
+              return (
+                <div
+                  key={c.word}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "5px 8px",
+                    marginBottom: i < 4 ? 3 : 0,
+                    borderRadius: 8,
+                    background: highlighted ? `${color}20` : "transparent",
+                    border: `1.5px solid ${highlighted ? `${color}60` : "transparent"}`,
+                    transition: "all .4s ease",
+                    animation: `fadeUp .3s ${i * 0.06}s ease both`,
+                    boxShadow: highlighted ? `0 0 12px ${color}30` : "none",
+                  }}
+                >
+                  <span style={{
+                    fontSize: highlighted ? 18 : 14,
+                    fontWeight: highlighted ? 700 : 400,
+                    color: highlighted ? color : (isTop && !pickedWord ? "rgba(255,255,255,.7)" : "rgba(255,255,255,.4)"),
+                    width: 50,
+                    transition: "all .4s ease",
+                  }}>
+                    {c.word}
+                  </span>
+                  <div style={{
+                    flex: 1, height: highlighted ? 8 : 5,
+                    background: "rgba(255,255,255,.06)",
+                    borderRadius: 4,
+                    overflow: "hidden",
+                    transition: "height .4s ease",
+                  }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${(c.pct / 42) * 100}%`,
+                      borderRadius: 4,
+                      background: highlighted ? color : "rgba(255,255,255,.15)",
+                      transition: "background .4s ease",
+                      animation: `probIn .5s ${i * 0.06 + 0.1}s ease both`,
+                    }} />
+                  </div>
+                  <span style={{
+                    fontSize: 12,
+                    color: highlighted ? color : "rgba(255,255,255,.25)",
+                    width: 30,
+                    textAlign: "right",
+                    fontWeight: highlighted ? 700 : 400,
+                    transition: "all .4s ease",
+                  }}>
+                    {c.pct}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
