@@ -28,12 +28,20 @@ export default async function handler(req, res) {
     const choice = response.choices[0];
     const topLogprobs = choice.logprobs?.content?.[0]?.top_logprobs || [];
 
-    // Convert logprobs to percentages
-    const candidates = topLogprobs.map(lp => ({
+    // Apply temperature scaling to logprobs, then softmax
+    // OpenAI returns raw logprobs (temp=1) regardless of temperature param
+    const t = Math.max(0.05, Math.min(temperature, 2));
+    const filtered = topLogprobs.filter(lp => lp.token.trim().length > 0);
+    const scaledLogprobs = filtered.map(lp => lp.logprob / t);
+    const maxLogprob = Math.max(...scaledLogprobs);
+    const exps = scaledLogprobs.map(lp => Math.exp(lp - maxLogprob));
+    const sumExps = exps.reduce((a, b) => a + b, 0);
+
+    const candidates = filtered.map((lp, i) => ({
       token: lp.token.trim(),
       logprob: lp.logprob,
-      pct: Math.round(Math.exp(lp.logprob) * 100),
-    })).filter(c => c.token.length > 0);
+      pct: Math.round((exps[i] / sumExps) * 100),
+    }));
 
     res.status(200).json({
       chosen: choice.message.content.trim(),
