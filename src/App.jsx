@@ -467,6 +467,38 @@ export default function App() {
         isTeacherMode={isTeacherMode}
       />
 
+      {/* Home button — top right */}
+      <button
+        onClick={() => { setMode(null); setSec(0); setSlide(0); setDone(new Set()); setNavOpen(false); setTeacherOpen(false); }}
+        style={{
+          position: "fixed",
+          top: 10,
+          right: 12,
+          zIndex: 120,
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          border: "1px solid rgba(255,255,255,.1)",
+          background: "rgba(255,255,255,.06)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "all .2s ease",
+          backdropFilter: "blur(8px)",
+          padding: 0,
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.14)"}
+        onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,.06)"}
+        title="Home"
+      >
+        <img
+          src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`}
+          alt="Home"
+          style={{ width: 22, height: "auto", opacity: 0.7 }}
+        />
+      </button>
+
       {/* Header — thin progress bar */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
