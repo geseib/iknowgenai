@@ -110,16 +110,16 @@ function OverviewPipelineAnim({ color }) {
         if (cancelled) return;
         setLayerNum(layer);
 
-        // Speed curve
+        // Speed curve — slow start so kids can read the first questions
         let delay;
-        if (layer <= 4) delay = 350;
-        else if (layer <= 8) delay = 250;
-        else if (layer <= 15) delay = 160;
-        else if (layer <= 30) delay = 100;
-        else if (layer <= 70) delay = 60;
-        else if (layer <= 85) delay = 100;
-        else if (layer <= 92) delay = 160;
-        else delay = 280;
+        if (layer <= 3) delay = 600;       // very slow — read the question
+        else if (layer <= 6) delay = 450;  // still readable
+        else if (layer <= 10) delay = 300;
+        else if (layer <= 20) delay = 160;
+        else if (layer <= 60) delay = 60;  // cruising
+        else if (layer <= 80) delay = 80;
+        else if (layer <= 90) delay = 140;
+        else delay = 250;                  // slow finish
 
         // Attention sub-phase
         setSubPhase("attn");
@@ -492,7 +492,7 @@ function OverviewPipelineAnim({ color }) {
                 border: `2px solid ${subPhase === "think" ? `${color}50` : "rgba(255,255,255,.06)"}`,
                 transition: "all .1s ease",
                 boxShadow: subPhase === "think" ? `0 0 14px ${color}25` : "none",
-                minHeight: 48,
+                minHeight: 52,
               }}>
                 <Brain
                   size={22}
@@ -508,8 +508,12 @@ function OverviewPipelineAnim({ color }) {
                   flex: 1,
                 }}>
                   {subPhase === "think" && currentQuestion
-                    ? <span key={currentQuestion} style={{ animation: "fadeUp .12s ease" }}>
-                        MLP — <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
+                    ? <span key={currentQuestion} style={{
+                        animation: "fadeUp .12s ease",
+                        fontSize: layerNum <= 6 ? 22 : (layerNum <= 15 ? 18 : 16),
+                        transition: "font-size .2s ease",
+                      }}>
+                        <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
                       </span>
                     : <span>MLP <span style={{ fontSize: 13, opacity: 0.6 }}>(asks questions about each word)</span></span>}
                 </span>
