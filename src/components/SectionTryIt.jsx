@@ -58,14 +58,14 @@ function PredictTab({ color }) {
   const tm = tempLabel(temp);
   const TempIcon = tm.icon;
 
-  const predict = async () => {
+  const predictWith = async (text) => {
     setLoading(true);
     setResult(null);
     try {
       const res = await fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, temperature: temp }),
+        body: JSON.stringify({ prompt: text, temperature: temp }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -74,6 +74,14 @@ function PredictTab({ color }) {
       setResult({ error: err.message });
     }
     setLoading(false);
+  };
+
+  const predict = () => predictWith(prompt);
+
+  const pickWord = (token) => {
+    const next = prompt + " " + token;
+    setPrompt(next);
+    predictWith(next);
   };
 
   return (
@@ -166,10 +174,15 @@ function PredictTab({ color }) {
           {result.candidates.map((c, i) => {
             const isTop = i === 0;
             return (
-              <div key={i} style={{
+              <div key={i} onClick={() => !loading && pickWord(c.token)} style={{
                 display: "flex", alignItems: "center", gap: 12, marginBottom: 8,
                 animation: `fadeUp .3s ${i * 0.05}s ease both`,
-              }}>
+                cursor: "pointer", borderRadius: 8, padding: "4px 6px", margin: "0 -6px",
+                transition: "background .15s ease",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.06)"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >
                 <div style={{
                   width: 90, fontFamily: "'Fredoka',sans-serif", fontSize: 17,
                   color: isTop ? color : "rgba(255,255,255,.5)", flexShrink: 0,
@@ -196,6 +209,12 @@ function PredictTab({ color }) {
             color: "rgba(255,255,255,.7)",
           }}>
             "{prompt} <span style={{ color, fontWeight: 700 }}>{result.chosen}</span>"
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 13,
+            color: "rgba(255,255,255,.3)", marginTop: 8, fontStyle: "italic",
+          }}>
+            Click any word above to add it and predict the next one!
           </div>
         </Card>
       )}
