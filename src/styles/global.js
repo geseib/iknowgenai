@@ -8,6 +8,7 @@ export const ALL_CSS = `
   @keyframes probIn { from{width:0!important} }
   @keyframes dialSpin { 0%{transform:scaleY(1)} 30%{transform:scaleY(0.3)} 60%{transform:scaleY(1.4)} 100%{transform:scaleY(1)} }
   @keyframes gearSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .spin { animation: gearSpin .8s linear infinite; }
   @keyframes navPulse {
     0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.12)}
     50%{box-shadow:0 0 0 5px rgba(255,255,255,0)}

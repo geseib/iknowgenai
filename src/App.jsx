@@ -22,6 +22,7 @@ import SectionAttention from "./components/SectionAttention";
 import SectionMLP from "./components/SectionMLP";
 import SectionLayers from "./components/SectionLayers";
 import SectionPredict from "./components/SectionPredict";
+import SectionTryIt from "./components/SectionTryIt";
 
 const SECTIONS = [
   SectionWhoIsHere,
@@ -38,6 +39,7 @@ const SECTIONS = [
   SectionMLP,
   SectionLayers,
   SectionPredict,
+  SectionTryIt,
 ];
 
 // How many presentation slides each section has (used only in presentation mode)
@@ -57,6 +59,7 @@ const PRESENTATION_SLIDES = [
   4,  // SectionMLP: intro → expand (brainstorm) → compress (pick best) → analogy
   2,  // SectionLayers: 96 times → animation
   5,  // SectionPredict: how did it pick? → meaning load anim → probability list → playground → celebration
+  2,  // SectionTryIt: intro → interactive playground
 ];
 
 // Sections with a "skip to takeaway" button — maps section index → takeaway slide

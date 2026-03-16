@@ -473,4 +473,24 @@ export const TEACHER_NOTES = [
       },
     ],
   },
+
+  // ── 14: SectionTryIt (2 slides) ──
+  {
+    title: "Try It Yourself!",
+    slides: [
+      {
+        keyPoints: ["Hands-on demo with real AI", "Three tools: Predict, Word Space, Generate"],
+        narrative: "This is the hands-on payoff. Kids get to use real AI and see the concepts they just learned in action. Let them experiment freely.",
+        definitions: [],
+        discussion: ["What sentence do you want to try?", "Which words do you think will cluster together?"],
+      },
+      {
+        keyPoints: ["Predict: see real probability rankings", "Word Space: see real embeddings plotted", "Generate: watch AI write word by word"],
+        narrative: "Let kids take turns suggesting prompts. Try the prediction with different sentences to see how context changes the top word. Try embedding surprising word combinations. The generate tab shows the streaming effect — AI writes one token at a time, just like we learned.",
+        definitions: [],
+        discussion: ["Did the AI's top prediction surprise you?", "Why do you think those words clustered together?", "Does knowing how it works change what you think about AI's writing?"],
+        simplification: "These demos use OpenAI's gpt-4o-mini model and text-embedding-3-small. Different models would give different results. The embedding visualization reduces 1,536 dimensions down to 2D using PCA, which loses most of the information — the real embedding space is much richer than what the 2D plot shows.",
+      },
+    ],
+  },
 ];
