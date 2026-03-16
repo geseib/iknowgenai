@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
+import { TEACHER_NOTES } from "./data/teacherNotes";
+import TeacherDrawer from "./components/TeacherDrawer";
 
 import ModeSelect from "./components/ModeSelect";
 import Glossary from "./components/Glossary";
@@ -72,8 +74,16 @@ export default function App() {
   const [slide, setSlide] = useState(0); // presentation mode: which slide within section
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
+  const [teacherOpen, setTeacherOpen] = useState(false);
 
-  const isPres = mode === "presentation";
+  const isTeacherMode = mode === "teacher";
+  // Both student and teacher modes use presentation-style rendering
+  const isPres = mode === "student" || mode === "teacher";
+
+  // Open teacher drawer automatically when entering teacher mode
+  useEffect(() => {
+    if (mode === "teacher") setTeacherOpen(true);
+  }, [mode]);
 
   const jumpToSection = useCallback((targetSec) => {
     setSec(targetSec);
@@ -82,83 +92,62 @@ export default function App() {
   }, []);
 
   const next = useCallback(() => {
-    if (isPres) {
-      const maxSlides = PRESENTATION_SLIDES[sec] || 1;
-      if (slide < maxSlides - 1) {
-        setSlide(s => s + 1);
-        return;
-      }
-      // At last slide of section — advance to next section, skipping 0-slide sections
-      if (sec < TOTAL - 1) {
-        setDone(p => new Set([...p, sec]));
-        let nextSec = sec + 1;
-        while (nextSec < TOTAL - 1 && PRESENTATION_SLIDES[nextSec] === 0) {
-          setDone(p => new Set([...p, nextSec]));
-          nextSec++;
-        }
-        setSec(nextSec);
-        setSlide(0);
-      }
-    } else {
-      setDone(p => new Set([...p, sec]));
-      setSec(s => Math.min(s + 1, TOTAL - 1));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    const maxSlides = PRESENTATION_SLIDES[sec] || 1;
+    if (slide < maxSlides - 1) {
+      setSlide(s => s + 1);
+      return;
     }
-  }, [sec, slide, isPres]);
+    if (sec < TOTAL - 1) {
+      setDone(p => new Set([...p, sec]));
+      let nextSec = sec + 1;
+      while (nextSec < TOTAL - 1 && PRESENTATION_SLIDES[nextSec] === 0) {
+        setDone(p => new Set([...p, nextSec]));
+        nextSec++;
+      }
+      setSec(nextSec);
+      setSlide(0);
+    }
+  }, [sec, slide]);
 
   const prev = useCallback(() => {
-    if (isPres) {
-      if (slide > 0) {
-        setSlide(s => s - 1);
-        return;
-      }
-      // At first slide — go to previous section's last slide, skipping 0-slide sections
-      if (sec > 0) {
-        let prevSec = sec - 1;
-        while (prevSec > 0 && PRESENTATION_SLIDES[prevSec] === 0) {
-          prevSec--;
-        }
-        setSec(prevSec);
-        setSlide((PRESENTATION_SLIDES[prevSec] || 1) - 1);
-      }
-    } else {
-      setSec(s => Math.max(s - 1, 0));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    if (slide > 0) {
+      setSlide(s => s - 1);
+      return;
     }
-  }, [sec, slide, isPres]);
+    if (sec > 0) {
+      let prevSec = sec - 1;
+      while (prevSec > 0 && PRESENTATION_SLIDES[prevSec] === 0) {
+        prevSec--;
+      }
+      setSec(prevSec);
+      setSlide((PRESENTATION_SLIDES[prevSec] || 1) - 1);
+    }
+  }, [sec, slide]);
 
   // Keyboard navigation
   useEffect(() => {
     if (!mode) return;
     const handleKey = (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-      // Escape closes nav drawer
-      if (e.key === "Escape" && navOpen) { setNavOpen(false); return; }
-      // Suppress navigation while drawer is open
-      if (navOpen) return;
-      if (isPres) {
-        // In presentation mode: Right, Down, Space all advance; Left goes back
-        if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
-          e.preventDefault();
-          next();
-        }
-        if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
-      } else {
-        if (e.key === "ArrowRight") { e.preventDefault(); next(); }
-        if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+      // Escape closes any open drawer
+      if (e.key === "Escape") {
+        if (navOpen) { setNavOpen(false); return; }
+        if (teacherOpen) { setTeacherOpen(false); return; }
       }
+      // T toggles teacher drawer
+      if (e.key === "t" || e.key === "T") { setTeacherOpen(o => !o); return; }
+      // Suppress navigation while a drawer is open
+      if (navOpen || teacherOpen) return;
+      // Right, Down, Space advance; Left goes back
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        next();
+      }
+      if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [mode, next, prev, isPres, navOpen]);
-
-  // Listen for sections signaling they're fully revealed (non-presentation modes)
-  useEffect(() => {
-    if (!mode || isPres) return;
-    const handleDone = () => next();
-    window.addEventListener(SECTION_DONE_EVENT, handleDone);
-    return () => window.removeEventListener(SECTION_DONE_EVENT, handleDone);
-  }, [mode, next, isPres]);
+  }, [mode, next, prev, navOpen, teacherOpen]);
 
   if (!mode) return <ModeSelect onSelect={setMode} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
@@ -166,21 +155,14 @@ export default function App() {
 
   const color = COLORS[sec % COLORS.length];
   const currentGroup = GROUPS.find(g => sec >= g.start && sec <= g.end);
-  const isMinimal = mode === "minimal";
-  const showChrome = !isMinimal && !isPres;
 
-  // Progress: in presentation mode, count total slides for accurate progress
-  let progressPct;
-  let currentSlideNum, totalSlideCount;
-  if (isPres) {
-    totalSlideCount = PRESENTATION_SLIDES.reduce((a, b) => a + b, 0);
-    currentSlideNum = PRESENTATION_SLIDES.slice(0, sec).reduce((a, b) => a + b, 0) + slide + 1;
-    progressPct = Math.round((currentSlideNum / totalSlideCount) * 100);
-  } else {
-    totalSlideCount = TOTAL;
-    currentSlideNum = sec + 1;
-    progressPct = Math.round((currentSlideNum / totalSlideCount) * 100);
-  }
+  // Progress — always slide-based
+  const totalSlideCount = PRESENTATION_SLIDES.reduce((a, b) => a + b, 0);
+  const currentSlideNum = PRESENTATION_SLIDES.slice(0, sec).reduce((a, b) => a + b, 0) + slide + 1;
+  const progressPct = Math.round((currentSlideNum / totalSlideCount) * 100);
+
+  // Teacher notes for current slide
+  const currentNotes = TEACHER_NOTES[sec]?.slides?.[slide] || {};
 
   const stars = Array.from({ length: 80 }, (_, i) => ({
     x: ((i * 137.508) % 100).toFixed(2),
@@ -196,8 +178,8 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#050512", color: "white", fontFamily: "'Nunito',sans-serif", position: "relative" }}>
       <style>{ALL_CSS}</style>
 
-      {/* Starfield — hidden in minimal, shown in presentation */}
-      {!isMinimal && (
+      {/* Starfield */}
+      {(
         <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           {stars.map((s, i) => (
             <div key={i} style={{
@@ -209,8 +191,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Ambient blob — hidden in minimal */}
-      {!isMinimal && (
+      {/* Ambient blob */}
+      {(
         <div style={{
           position: "fixed", top: "25%", right: "-15%", width: "55vw", height: "55vw",
           borderRadius: "50%", background: `radial-gradient(circle,${color}14 0%,transparent 65%)`,
@@ -219,8 +201,8 @@ export default function App() {
         }} />
       )}
 
-      {/* ── Nav Drawer — presentation mode only ── */}
-      {isPres && (
+      {/* ── Nav Drawer ── */}
+      {(
         <>
           {/* Backdrop */}
           <div
@@ -471,36 +453,25 @@ export default function App() {
         </>
       )}
 
-      {/* Header — presentation & minimal: just thin progress bar; others: full chrome */}
+      {/* ── Teacher Drawer ── */}
+      <TeacherDrawer
+        open={teacherOpen}
+        onToggle={() => setTeacherOpen(o => !o)}
+        notes={currentNotes}
+        sectionTitle={TITLES[sec]}
+        slideLabel={`Slide ${slide + 1} of ${PRESENTATION_SLIDES[sec]}`}
+        color={color}
+        isTeacherMode={isTeacherMode}
+      />
+
+      {/* Header — thin progress bar */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: showChrome ? "rgba(5,5,18,.88)" : "transparent",
-        backdropFilter: showChrome ? "blur(12px)" : "none",
-        borderBottom: showChrome ? "1px solid rgba(255,255,255,.06)" : "none",
+        background: "transparent",
       }}>
-        <div style={{ height: showChrome ? 3 : 2, background: "rgba(255,255,255,.08)" }}>
-          <div style={{ height: "100%", width: `${progressPct}%`, background: showChrome ? color : (isPres ? `${color}88` : "rgba(255,255,255,.25)"), transition: "width .5s ease", borderRadius: "0 2px 2px 0" }} />
+        <div style={{ height: 2, background: "rgba(255,255,255,.08)" }}>
+          <div style={{ height: "100%", width: `${progressPct}%`, background: `${color}88`, transition: "width .5s ease", borderRadius: "0 2px 2px 0" }} />
         </div>
-        {showChrome && (
-          <div style={{ padding: "10px 22px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 17, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="" style={{ width: 22, height: "auto" }} />
-                <span style={{ color }}>How AI Thinks</span>
-              </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,.3)", fontFamily: "'Fredoka',sans-serif", marginTop: 1, display: "flex", alignItems: "center", gap: 4 }}>
-                {mode === "classroom"
-                  ? <><ChalkboardTeacher size={12} weight="duotone" /> Classroom</>
-                  : <><GameController size={12} weight="duotone" /> Solo</>}
-                {" · "}{currentGroup?.name}
-              </div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 13, color: "rgba(255,255,255,.35)" }}>{sec + 1} / {TOTAL}</div>
-              <div style={{ fontSize: 11, color: `${color}88`, fontFamily: "'Fredoka',sans-serif", marginTop: 1 }}>{progressPct}% complete</div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Content */}
@@ -511,35 +482,30 @@ export default function App() {
           padding: isPres ? "0 40px" : (isMinimal ? "32px 28px 72px" : "88px 28px 96px"),
           position: "relative",
           zIndex: 10,
-          ...(isPres ? {
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          } : {}),
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
         }}
-        key={isPres ? `${sec}-${slide}` : sec}
+        key={`${sec}-${slide}`}
       >
-        <SectionComponent color={color} mode={mode} slide={isPres ? slide : undefined} />
+        <SectionComponent color={color} mode="presentation" slide={slide} />
       </div>
 
       {/* Footer nav */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0, padding: "13px 22px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: showChrome ? "rgba(5,5,18,.9)" : "transparent",
-        backdropFilter: showChrome ? "blur(12px)" : "none",
-        borderTop: showChrome ? "1px solid rgba(255,255,255,.06)" : "none", zIndex: 100,
+        background: "transparent", zIndex: 100,
       }}>
-        <button onClick={prev} disabled={sec === 0 && slide === 0} className="ghost-btn" style={!showChrome ? { opacity: (sec === 0 && slide === 0) ? 0.2 : 0.5 } : {}}>
-          <ArrowLeft size={18} weight="bold" /> {showChrome && "Back"}
+        <button onClick={prev} disabled={sec === 0 && slide === 0} className="ghost-btn" style={{ opacity: (sec === 0 && slide === 0) ? 0.2 : 0.5 }}>
+          <ArrowLeft size={18} weight="bold" />
         </button>
         <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 13, color: "rgba(255,255,255,.3)", textAlign: "center", lineHeight: 1.3 }}>
-          {showChrome && <div style={{ color: "rgba(255,255,255,.38)", marginBottom: 2 }}>{TITLES[sec]}</div>}
           <div>{currentSlideNum} / {totalSlideCount}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {isPres && PRESENTATION_SKIP[sec] !== undefined && slide < PRESENTATION_SKIP[sec] && (
+          {PRESENTATION_SKIP[sec] !== undefined && slide < PRESENTATION_SKIP[sec] && (
             <button
               onClick={() => setSlide(PRESENTATION_SKIP[sec])}
               className="ghost-btn"
@@ -548,12 +514,12 @@ export default function App() {
               Skip <FastForward size={15} weight="bold" />
             </button>
           )}
-          {sec < TOTAL - 1 || (isPres && slide < (PRESENTATION_SLIDES[sec] || 1) - 1)
-            ? <button onClick={next} className={showChrome ? "cta-btn" : "ghost-btn"} style={showChrome ? { background: color, color: "#000" } : { opacity: 0.5 }}>
-                {showChrome && "Next"} <ArrowRight size={18} weight="bold" />
+          {sec < TOTAL - 1 || slide < (PRESENTATION_SLIDES[sec] || 1) - 1
+            ? <button onClick={next} className="ghost-btn" style={{ opacity: 0.5 }}>
+                <ArrowRight size={18} weight="bold" />
               </button>
-            : <button onClick={() => { setSec(0); setSlide(0); setDone(new Set()); window.scrollTo({ top: 0 }); }} className={showChrome ? "cta-btn" : "ghost-btn"} style={showChrome ? { background: color, color: "#000", display: "flex", alignItems: "center", gap: 6 } : { opacity: 0.5 }}>
-                <ArrowCounterClockwise size={18} weight="bold" /> {showChrome && "Restart"}
+            : <button onClick={() => { setSec(0); setSlide(0); setDone(new Set()); }} className="ghost-btn" style={{ opacity: 0.5 }}>
+                <ArrowCounterClockwise size={18} weight="bold" />
               </button>
           }
         </div>
