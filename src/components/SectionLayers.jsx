@@ -294,10 +294,10 @@ function LayerAnimation({ color, onDone, pres }) {
   const showBeams = phase === "attention" || (phase === "scrolling" && scrollSub === "attn");
   const showMlp = phase === "mlp" || (phase === "scrolling" && scrollSub === "mlp");
 
-  const phaseLabel = phase === "attention" ? "Attention — words talk to each other"
-    : phase === "mlp" ? "MLP — the thinking layer"
-    : phase === "scrolling" && scrollSub === "attn" ? "Attention"
-    : phase === "scrolling" && scrollSub === "mlp" ? "MLP"
+  const phaseLabel = phase === "attention" ? "Attention — words look at each other"
+    : phase === "mlp" ? "MLP — asks questions about each word"
+    : phase === "scrolling" && scrollSub === "attn" ? "Attention (words look at each other)"
+    : phase === "scrolling" && scrollSub === "mlp" ? "MLP (asks questions)"
     : phase === "output" ? "Done!"
     : "Ready";
 
@@ -542,7 +542,7 @@ function LayerAnimation({ color, onDone, pres }) {
               transition: "opacity .08s",
             }}>
               <ChatCircleDots size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>Attention</span>
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>Attention <span style={{ fontSize: pres ? 13 : 11, opacity: 0.6 }}>(look at each other)</span></span>
             </div>
             <div style={{
               display: "flex",
@@ -552,7 +552,7 @@ function LayerAnimation({ color, onDone, pres }) {
               transition: "opacity .08s",
             }}>
               <Brain size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>MLP</span>
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>MLP <span style={{ fontSize: pres ? 13 : 11, opacity: 0.6 }}>(ask questions)</span></span>
             </div>
           </div>
         </div>
@@ -691,7 +691,7 @@ export default function SectionLayers({ color, mode, slide }) {
           lineHeight: 1.4,
           marginBottom: 16,
         }}>
-          One round of Attention + MLP isn't enough.
+          One round of Attention <span style={{ fontSize: 18, opacity: 0.5 }}>(words look at each other)</span> + MLP <span style={{ fontSize: 18, opacity: 0.5 }}>(asks questions)</span> isn't enough.
         </div>
 
         <div style={{

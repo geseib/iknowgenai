@@ -192,7 +192,7 @@ function OverviewPipelineAnim({ color }) {
 
   const STEPS = [
     { num: 1, label: "Words → Numbers" },
-    { num: 2, label: "96× Attention & Thinking" },
+    { num: 2, label: "96× Attention & MLP" },
     { num: 3, label: "Predict!" },
   ];
 
@@ -476,7 +476,7 @@ function OverviewPipelineAnim({ color }) {
                   color: subPhase === "attn" ? "rgba(255,255,255,.8)" : "rgba(255,255,255,.25)",
                   transition: "color .1s ease",
                 }}>
-                  Attention — words look at each other
+                  Attention <span style={{ fontSize: 13, opacity: 0.6 }}>(words look at each other)</span>
                 </span>
               </div>
 
@@ -508,9 +508,9 @@ function OverviewPipelineAnim({ color }) {
                 }}>
                   {subPhase === "think" && currentQuestion
                     ? <span key={currentQuestion} style={{ animation: "fadeUp .12s ease" }}>
-                        Thinking — <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
+                        MLP — <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
                       </span>
-                    : "Thinking — asks questions about each word"}
+                    : <span>MLP <span style={{ fontSize: 13, opacity: 0.6 }}>(asks questions about each word)</span></span>}
                 </span>
                 {subPhase === "think" && (
                   <Lightning size={18} weight="fill" color={color} style={{ flexShrink: 0 }} />
@@ -841,7 +841,7 @@ export default function SectionTheBridge({ color, mode, slide }) {
           </div>
 
           <PresText color="white" size={34}>
-            96 layers of attention and thinking...{"\n"}just to add <span style={{ color, fontWeight: 700 }}>one word</span>.
+            96 layers of Attention and MLP...{"\n"}just to add <span style={{ color, fontWeight: 700 }}>one word</span>.
           </PresText>
 
           <PresText size={24} color="rgba(255,255,255,.55)">

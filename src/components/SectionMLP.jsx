@@ -136,10 +136,10 @@ export default function SectionMLP({ color, mode, slide }) {
         <PresSlide>
           <PresText color="white" size={48}>The Thinking Layer</PresText>
           <PresText size={28} color="rgba(255,255,255,.55)">
-            Attention figured out which words relate.
+            Attention <span style={{ fontSize: 20, opacity: 0.6 }}>(words look at each other)</span> figured out which words relate.
           </PresText>
           <PresText size={28}>
-            Now the MLP does the heavy thinking — connecting what it's reading to{" "}
+            Now the MLP <span style={{ fontSize: 20, opacity: 0.6 }}>(asks questions about each word)</span> does the heavy thinking — connecting what it's reading to{" "}
             <span style={{ color }}>everything it ever learned</span>.
           </PresText>
         </PresSlide>
@@ -242,10 +242,12 @@ export default function SectionMLP({ color, mode, slide }) {
       return (
         <PresSlide>
           <PresText size={30}>
-            <strong style={{ color }}>ATTENTION</strong> = figuring out which words are related
+            <strong style={{ color }}>ATTENTION</strong> <span style={{ fontSize: 20, color: "rgba(255,255,255,.4)" }}>(words look at each other)</span>
+            <br />= figuring out which words are related
           </PresText>
           <PresText size={30}>
-            <strong style={{ color }}>MLP</strong> = brainstorming everything you know, then keeping what fits
+            <strong style={{ color }}>MLP</strong> <span style={{ fontSize: 20, color: "rgba(255,255,255,.4)" }}>(asks questions about each word)</span>
+            <br />= brainstorming everything you know, then keeping what fits
           </PresText>
           <PresText size={24} color="rgba(255,255,255,.45)">
             Every layer does both. Attention + MLP. Then passes the result to the next layer.

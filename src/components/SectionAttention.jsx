@@ -460,6 +460,9 @@ export default function SectionAttention({ color, mode, slide }) {
         }}>
           That's <span style={{ color }}>ATTENTION</span>!
         </div>
+        <PresText size={22} color="rgba(255,255,255,.4)">
+          words look at each other
+        </PresText>
         <PresText size={28} color="rgba(255,255,255,.55)">
           Same word, completely different meaning — depending on which other words shine their spotlight on it.
         </PresText>

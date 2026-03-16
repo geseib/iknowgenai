@@ -598,7 +598,7 @@ export default function SectionPredict({ color, mode, slide }) {
           <Confetti size={56} weight="duotone" color={color} />
           <PresText color={color} size={44}>Now you know how AI thinks!</PresText>
           <PresText color="white" size={28}>
-            Words <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Numbers <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Space <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Attention <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Thinking <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Predict
+            Words <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Numbers <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Space <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Attention <span style={{ fontSize: 18, color: "rgba(255,255,255,.3)" }}>(look)</span> <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> MLP <span style={{ fontSize: 18, color: "rgba(255,255,255,.3)" }}>(ask)</span> <span style={{ color: "rgba(255,255,255,.4)" }}>&rarr;</span> Predict
           </PresText>
           <PresText size={22} color="rgba(255,255,255,.55)">
             And repeat. Word by word. That's it!
