@@ -223,7 +223,12 @@ function PredictTab({ color }) {
 }
 
 /* ── Embed Tab ── */
-const DEFAULT_WORDS = ["cat", "dog", "fish", "car", "truck", "bicycle", "king", "queen", "pizza", "hamburger", "happy", "sad"];
+const EMBED_PRESETS = [
+  { label: "Family", words: ["mom", "dad", "brother", "sister", "aunt", "uncle", "grandma", "grandpa", "cousin", "baby"] },
+  { label: "Animals", words: ["cat", "dog", "fish", "bird", "snake", "horse", "dolphin", "eagle", "spider", "whale"] },
+  { label: "Food & Sports", words: ["pizza", "hamburger", "sushi", "ice cream", "soccer", "basketball", "swimming", "tennis", "baseball", "football"] },
+];
+const DEFAULT_WORDS = EMBED_PRESETS[0].words;
 
 function EmbedTab({ color }) {
   const [input, setInput] = useState(DEFAULT_WORDS.join(", "));
@@ -262,7 +267,26 @@ function EmbedTab({ color }) {
         marginBottom: 14,
         lineHeight: 1.5,
       }}>
-        Enter words separated by commas — see where AI places them in "meaning space"!
+        Enter words separated by commas — or pick a category to get started!
+      </div>
+
+      {/* Preset buttons */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+        {EMBED_PRESETS.map(p => (
+          <button
+            key={p.label}
+            onClick={() => { setInput(p.words.join(", ")); setResult(null); }}
+            className="ghost-btn"
+            style={{
+              fontSize: 13,
+              padding: "6px 14px",
+              borderColor: input === p.words.join(", ") ? `${color}60` : undefined,
+              color: input === p.words.join(", ") ? color : undefined,
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
