@@ -1,6 +1,7 @@
 // Per-slide teacher notes for every section.
 // Each entry maps to SECTIONS[i] and contains a slides[] array matching PRESENTATION_SLIDES[i].
-// Fields: keyPoints (string[]), narrative (string), definitions ({term,def}[]), discussion (string[])
+// Fields: keyPoints (string[]), narrative (string), definitions ({term,def}[]), discussion (string[]),
+//         simplification (string|null) — where we simplified for kids; what the real story is
 
 const empty = { keyPoints: [], narrative: "", definitions: [], discussion: [] };
 
@@ -138,6 +139,7 @@ export const TEACHER_NOTES = [
         narrative: "'Large' is worth dwelling on. GPT-4 trained on trillions of words. The entire English Wikipedia is about 4 billion words — so these models read hundreds of Wikipedias.",
         definitions: [],
         discussion: ["How many books do you think you've read in your life? How does that compare?"],
+        simplification: "We say 'words' throughout this lesson, but LLMs actually process 'tokens' — pieces of words. For example, 'unhelpful' might be split into 'un', 'help', 'ful'. We use 'words' because it's more intuitive for kids, but tokens are the real unit.",
       },
       {
         keyPoints: ["'Language' = focused on words and text"],
@@ -204,12 +206,14 @@ export const TEACHER_NOTES = [
         narrative: "This is the transition beat — use it as a dramatic pause. 'We know what LLMs are. Now we're going to open the hood and look at the engine.'",
         definitions: [{ term: "Training", def: "The process of feeding an AI massive amounts of data so it can learn patterns" }],
         discussion: ["How do YOU think reading millions of books could teach a computer to write?"],
+        simplification: "The training steps shown here (vectorize → read → grammar → facts → reasoning) are presented as sequential stages for clarity, but in reality training happens all at once — the model learns all of these capabilities simultaneously through exposure to data. The neat progression is a teaching tool, not a literal description of training phases.",
       },
       {
         keyPoints: ["The 3-step pipeline: numbers → 96 layers → predict", "Watch the animation play through"],
         narrative: "Let the animation run. The robot with the crank is processing 'The cat sat on the ___' through 96 layers. Don't talk over it — let kids watch.",
         definitions: [],
         discussion: [],
+        simplification: "We show 96 layers because that's what some well-known models like GPT-3 use. But different models have different numbers — GPT-2 has 48, some small models have 12, and newer models may have 128+. The number 96 is an example, not a universal constant. Similarly, the model processes tokens (word pieces), not whole words.",
       },
       {
         keyPoints: ["96 layers for just ONE word", "Then repeat for every word"],
@@ -269,12 +273,14 @@ export const TEACHER_NOTES = [
         narrative: "'All of that — the fur, the purring, the picture in your head — your brain does that instantly. But AI can't do ANY of that. It only has one tool: numbers.'",
         definitions: [{ term: "Embedding", def: "A list of numbers that represents what a word means to the AI" }],
         discussion: [],
+        simplification: "We say AI turns 'words' into numbers, but technically it processes 'tokens' — subword pieces. The word 'unhelpful' might become three tokens: 'un', 'help', 'ful'. Each token gets its own embedding. We simplify to 'words' because it's more intuitive for this age group.",
       },
       {
         keyPoints: ["12,288 numbers per word", "Let the visual do the work"],
         narrative: "When the numbers start streaming, stay quiet. Let the visual do the work. The scrolling counter drives it home.",
         definitions: [],
         discussion: ["How many numbers do you think represent one word?"],
+        simplification: "12,288 is the embedding dimension for GPT-3 (175B). Other models use different sizes: GPT-2 uses 768 or 1,600, Claude and GPT-4's sizes aren't public, and smaller models might use 256 or 512. We use 12,288 because it's impressively large and comes from a well-known model, but it's not universal.",
       },
       {
         keyPoints: ["Each word becomes a point in 'meaning space'"],
@@ -316,10 +322,11 @@ export const TEACHER_NOTES = [
       },
       empty, empty, // more dimension steps
       {
-        keyPoints: ["Real AI uses 12,288 dimensions", "Captures everything about a word's meaning"],
-        narrative: "'If you could measure a word along 12,288 different axes, do you think you could capture everything about what it means?'",
+        keyPoints: ["Real AI uses thousands of dimensions", "Captures everything about a word's meaning"],
+        narrative: "'If you could measure a word along thousands of different axes, do you think you could capture everything about what it means?'",
         definitions: [],
-        discussion: ["Could 12,288 dimensions capture everything about a word?"],
+        discussion: ["Could thousands of dimensions capture everything about a word?"],
+        simplification: "The named dimensions like 'Is Animal?', 'Has Wings?', and 'You Can Ride It?' are illustrative — they help kids grasp the concept. In reality, embedding dimensions aren't human-readable categories. They're abstract mathematical directions discovered during training. No one can look at dimension #7,431 and say 'this one means animals.' The meaning is distributed across many dimensions in ways that aren't easily interpretable.",
       },
     ],
   },
@@ -365,10 +372,11 @@ export const TEACHER_NOTES = [
         discussion: ["Can you predict which words will be the clues this time?"],
       },
       {
-        keyPoints: ["Attention = words looking at each other for clues", "96 attention heads work in parallel"],
+        keyPoints: ["Attention = words looking at each other for clues", "Multiple attention heads work in parallel"],
         narrative: "That's attention! Same word, completely different meaning — depending on which other words shine their spotlight on it.",
-        definitions: [{ term: "Attention Head", def: "One spotlight that focuses on different relationships — real models have 96 working in parallel" }],
+        definitions: [{ term: "Attention Head", def: "One spotlight that focuses on different relationships — real models have many working in parallel" }],
         discussion: ["Can you think of other words that have two completely different meanings?"],
+        simplification: "We show attention as simple curved beams between word pairs. Real attention is more nuanced: each 'head' computes a weighted score for every word pair simultaneously, and there are many heads per layer (32, 64, 96, or more depending on the model). The beam animation captures the essence — words influencing each other — but the actual math is far more parallel and subtle.",
       },
     ],
   },
@@ -382,12 +390,14 @@ export const TEACHER_NOTES = [
         narrative: "Attention is reading the room and figuring out who's related to whom. MLP is flipping through your entire memory to decide what it all means.",
         definitions: [{ term: "MLP", def: "Multi-Layer Perceptron — the 'thinking layer' that asks questions about each word using everything it learned in training" }],
         discussion: [],
+        simplification: "The '21 Questions' analogy and the flashing questions ('Does it have fur?', 'Is this spelled right?') are illustrative. The MLP doesn't literally ask yes/no questions. It performs matrix multiplications that activate different patterns in its weights. Researchers have found that certain neurons do seem to respond to specific concepts (like a 'cat neuron'), but knowledge isn't stored as discrete facts — it's distributed across millions of weights in ways we still don't fully understand. The question framing helps kids grasp the idea that the MLP is checking what it knows, even though the mechanism is mathematical rather than linguistic.",
       },
       {
         keyPoints: ["21 Questions → 49,152 questions", "4× expansion = room to brainstorm"],
         narrative: "The 4× expansion is worth pausing on. Ask: 'Why would you make it bigger in the middle?' Answer: more room to consider possibilities.",
         definitions: [],
         discussion: ["Why would you want MORE room to think before narrowing down?"],
+        simplification: "49,152 is the MLP hidden dimension for models with 12,288 embedding dimensions (4× expansion). Different models use different expansion ratios — some use 4×, others use 8/3× (like Llama). The exact number varies, but the expand-then-compress pattern is consistent across most transformer architectures.",
       },
       {
         keyPoints: ["Keep what's useful, throw away the rest", "Expand then compress = brainstorm then decide"],
@@ -409,16 +419,18 @@ export const TEACHER_NOTES = [
     title: "Rinse & Repeat",
     slides: [
       {
-        keyPoints: ["96 layers — each pass makes understanding richer", "Early layers = spelling, late layers = reasoning"],
+        keyPoints: ["Many layers — each pass makes understanding richer", "Early layers = spelling, late layers = reasoning"],
         narrative: "Ask the class to guess what early vs late layers might do BEFORE revealing. 'What would you learn first if you were trying to understand language from scratch?'",
-        definitions: [{ term: "Layer", def: "One complete round of Attention + MLP — the model has 96 of these stacked in sequence" }],
+        definitions: [{ term: "Layer", def: "One complete round of Attention + MLP — models stack many of these in sequence" }],
         discussion: ["If you cut the model off at layer 32, what could it do? What couldn't it do?"],
+        simplification: "We use 96 layers throughout this lesson, but that's specific to certain models like GPT-3. GPT-2 has 48 layers, smaller models may have 12-24, and newer models can exceed 100. The progression from 'letters & spelling' (early) to 'deep understanding' (late) is supported by research, but the boundaries aren't as clean as our 6 labeled ranges suggest. In reality, layers specialize gradually and capabilities overlap across many layers. The neat categories help kids build intuition for the general principle: simple features first, complex reasoning later.",
       },
       {
-        keyPoints: ["Watch the full 96-layer animation", "Notice the questions changing as layers get deeper"],
-        narrative: "The 96-layer count is the wow moment. The animation shows questions evolving from 'Is this spelled right?' (early) to 'Which word fits best?' (late). Let it play.",
+        keyPoints: ["Watch the full layer animation", "Notice the questions changing as layers get deeper"],
+        narrative: "The layer count is the wow moment. The animation shows questions evolving from 'Is this spelled right?' (early) to 'Which word fits best?' (late). Let it play.",
         definitions: [],
-        discussion: ["What do you think happens between layer 1 and layer 96 that makes the answer so much better?"],
+        discussion: ["What do you think happens between layer 1 and the last layer that makes the answer so much better?"],
+        simplification: "The flashing questions during the animation ('Does a cat have fur?', 'What rhymes with cat?') are an analogy. Each layer doesn't literally ask a question — it performs mathematical transformations. But research (particularly 'probing' studies) has shown that different types of information do emerge at different depths. The questions we show are inspired by what researchers have found at each layer range, presented in kid-friendly language.",
       },
     ],
   },
@@ -436,14 +448,16 @@ export const TEACHER_NOTES = [
       {
         keyPoints: ["Meaning flows into the last position", "All words contribute context"],
         narrative: "Watch the animation: each word sends its meaning into the last word. Grammar, facts, context — it all accumulates. The model then ranks candidate next words.",
-        definitions: [{ term: "Prediction", def: "The model's best guess for the next word, based on everything it processed through 96 layers" }],
+        definitions: [{ term: "Prediction", def: "The model's best guess for the next word, based on everything it processed" }],
         discussion: [],
+        simplification: "The animation shows meaning 'flowing' from individual words into the last position, as though each word contributes a discrete piece. In reality, by the time the model reaches the final layer, information has been mixed and transformed so many times through attention and MLP operations that the last position's representation is a complex blend of the entire context — not a simple sum of parts. The beam animation is a useful metaphor but oversimplifies how information aggregates through dozens of layers.",
       },
       {
         keyPoints: ["Ranked probability list shows most likely next words", "The top word wins — unless temperature adds randomness"],
         narrative: "The probability list shows how the model ranks candidates. 'mat' wins at 42%, but 'floor', 'rug', and others are possibilities too.",
         definitions: [{ term: "Probability", def: "How likely the model thinks each word is — shown as a percentage" }],
         discussion: ["Why might there be multiple good answers instead of just one?"],
+        simplification: "The percentages shown (mat 42%, floor 18%, etc.) are illustrative, not from a real model. In practice, the model produces a probability distribution over its entire vocabulary (50,000+ tokens), not just 5-8 words. Most tokens get near-zero probability. Also, the model predicts the next token, not necessarily a complete word — 'mat' might be one token, but longer words get split into multiple tokens that are predicted one at a time.",
       },
       {
         keyPoints: ["Temperature controls creativity vs safety", "Low = predictable, High = creative"],

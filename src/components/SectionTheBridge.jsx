@@ -34,6 +34,7 @@ const notes = [
 
 /* ── Training pipeline rows for slide 0 ── */
 const TRAINING_ROWS = [
+  { icon: HashStraight, label: "Turned words into numbers", sub: "every word becomes a list of numbers" },
   { icon: Books, label: "Read the entire internet", sub: "trillions of words" },
   { icon: TextAa, label: "Learned spelling & grammar", sub: "every rule of language" },
   { icon: Brain, label: "Learned facts & knowledge", sub: "history, science, everything" },

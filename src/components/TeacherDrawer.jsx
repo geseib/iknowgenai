@@ -5,6 +5,7 @@ import {
   BookOpen,
   ChatCircleDots,
   ListBullets,
+  Warning,
 } from "@phosphor-icons/react";
 
 export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, slideLabel, color, isTeacherMode }) {
@@ -12,7 +13,8 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
     notes.keyPoints?.length > 0 ||
     notes.narrative ||
     notes.definitions?.length > 0 ||
-    notes.discussion?.length > 0
+    notes.discussion?.length > 0 ||
+    notes.simplification
   );
 
   return (
@@ -207,6 +209,31 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
                     <span>"{q}"</span>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Simplification Notice */}
+            {notes?.simplification && (
+              <div style={{ marginTop: 18 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, letterSpacing: 2, textTransform: "uppercase",
+                  color: "#fb560799", marginBottom: 8,
+                }}>
+                  <Warning size={14} weight="duotone" color="#fb5607" />
+                  Simplification Note
+                </div>
+                <div style={{
+                  fontSize: 12,
+                  color: "rgba(255,255,255,.5)",
+                  lineHeight: 1.6,
+                  padding: "10px 12px",
+                  background: "rgba(251,86,7,.06)",
+                  borderRadius: 10,
+                  borderLeft: "3px solid rgba(251,86,7,.35)",
+                }}>
+                  {notes.simplification}
+                </div>
               </div>
             )}
           </div>
