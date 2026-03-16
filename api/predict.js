@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     const candidates = filtered.map((lp, i) => ({
       token: lp.token.trim(),
       logprob: lp.logprob,
-      pct: Math.round((exps[i] / sumExps) * 100),
+      pct: Math.round((exps[i] / sumExps) * 1000) / 10, // one decimal place
     }));
 
     res.status(200).json({

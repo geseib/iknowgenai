@@ -50,7 +50,7 @@ function tempLabel(t) {
 }
 
 function PredictTab({ color }) {
-  const [prompt, setPrompt] = useState("The cat sat on the");
+  const [prompt, setPrompt] = useState("The dog ran to the");
   const [temp, setTemp] = useState(1.0);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -198,7 +198,7 @@ function PredictTab({ color }) {
                     transition: "width .35s ease",
                   }} />
                 </div>
-                <div style={{ width: 40, textAlign: "right", fontSize: 15, color: isTop ? color : "rgba(255,255,255,.4)", fontWeight: isTop ? 700 : 400, flexShrink: 0 }}>
+                <div style={{ width: 50, textAlign: "right", fontSize: 15, color: isTop ? color : "rgba(255,255,255,.4)", fontWeight: isTop ? 700 : 400, flexShrink: 0 }}>
                   {c.pct}%
                 </div>
               </div>
