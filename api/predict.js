@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "POST only" });
   }
 
-  const { prompt, topN = 8 } = req.body;
+  const { prompt, topN = 8, temperature = 1 } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: "prompt required" });
   }
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       max_tokens: 1,
       logprobs: true,
       top_logprobs: Math.min(topN, 20),
-      temperature: 1,
+      temperature: Math.max(0, Math.min(temperature, 2)),
     });
 
     const choice = response.choices[0];

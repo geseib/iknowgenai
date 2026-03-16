@@ -7,6 +7,9 @@ import {
   ArrowCounterClockwise,
   Star,
   Spinner,
+  Snowflake,
+  Scales,
+  Flame,
 } from "@phosphor-icons/react";
 import { Card, PresSlide, PresText } from "./shared";
 
@@ -38,10 +41,22 @@ function Tab({ active, label, Icon, color, onClick }) {
 }
 
 /* ── Predict Tab ── */
+function tempLabel(t) {
+  if (t <= 0.15) return { name: "Frozen", icon: Snowflake, clr: "#a0d8ef" };
+  if (t <= 0.5)  return { name: "Cold", icon: Snowflake, clr: "#00f5d4" };
+  if (t <= 1.0)  return { name: "Balanced", icon: Scales, clr: "#fee440" };
+  if (t <= 1.5)  return { name: "Warm", icon: Flame, clr: "#fb5607" };
+  return { name: "Wild", icon: Flame, clr: "#f15bb5" };
+}
+
 function PredictTab({ color }) {
   const [prompt, setPrompt] = useState("The cat sat on the");
+  const [temp, setTemp] = useState(1.0);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const tm = tempLabel(temp);
+  const TempIcon = tm.icon;
 
   const predict = async () => {
     setLoading(true);
@@ -50,7 +65,7 @@ function PredictTab({ color }) {
       const res = await fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, temperature: temp }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -71,6 +86,40 @@ function PredictTab({ color }) {
         lineHeight: 1.5,
       }}>
         Type a sentence and see what the AI thinks comes next — with real probabilities!
+      </div>
+
+      {/* Temperature slider */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 12,
+        marginBottom: 14, padding: "10px 14px",
+        background: "rgba(255,255,255,.04)", borderRadius: 12,
+        border: "1px solid rgba(255,255,255,.08)",
+      }}>
+        <TempIcon size={20} weight="duotone" color={tm.clr} />
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)", whiteSpace: "nowrap" }}>
+          Temp: <span style={{ color: tm.clr, fontWeight: 700 }}>{temp.toFixed(2)}</span>
+        </div>
+        <div style={{ flex: 1, position: "relative" }}>
+          <div style={{
+            position: "absolute", top: "50%", left: 0, right: 0, height: 6, borderRadius: 3,
+            transform: "translateY(-50%)", pointerEvents: "none",
+            background: "linear-gradient(to right,#a0d8ef 0%,#00f5d4 20%,#fee440 50%,#fb5607 75%,#f15bb5 100%)",
+          }} />
+          <input
+            type="range" min="0.05" max="2.0" step="0.05"
+            value={temp}
+            onChange={e => setTemp(parseFloat(e.target.value))}
+            className="temp-slider"
+          />
+        </div>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif", fontSize: 12,
+          padding: "3px 10px", borderRadius: 12,
+          background: `${tm.clr}20`, border: `1px solid ${tm.clr}50`,
+          color: tm.clr, whiteSpace: "nowrap",
+        }}>
+          {tm.name}
+        </div>
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
