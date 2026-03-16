@@ -473,7 +473,7 @@ export default function App() {
         style={{
           position: "fixed",
           top: 10,
-          right: 12,
+          left: 12,
           zIndex: 120,
           width: 36,
           height: 36,
