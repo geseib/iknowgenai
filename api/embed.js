@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { moderateWords } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -68,6 +69,12 @@ export default async function handler(req, res) {
 
   // Limit to 30 words to control costs
   const wordList = words.slice(0, 30);
+
+  // Content safety check
+  const check = await moderateWords(wordList);
+  if (!check.safe) {
+    return res.status(400).json({ error: check.message });
+  }
 
   try {
     const response = await openai.embeddings.create({

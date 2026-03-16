@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { moderate } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -12,11 +13,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "prompt required" });
   }
 
+  // Content safety check
+  const check = await moderate(prompt);
+  if (!check.safe) {
+    return res.status(400).json({ error: check.message });
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "Complete the text with one word. Do not explain." },
+        { role: "system", content: "Complete the text with one word. Do not explain. The word must be appropriate for children ages 8-11. Never produce violent, sexual, scary, or inappropriate content." },
         { role: "user", content: prompt },
       ],
       max_tokens: 1,
@@ -29,7 +36,6 @@ export default async function handler(req, res) {
     const topLogprobs = choice.logprobs?.content?.[0]?.top_logprobs || [];
 
     // Apply temperature scaling to logprobs, then softmax
-    // OpenAI returns raw logprobs (temp=1) regardless of temperature param
     const t = Math.max(0.05, Math.min(temperature, 2));
     const filtered = topLogprobs.filter(lp => lp.token.trim().length > 0);
     const scaledLogprobs = filtered.map(lp => lp.logprob / t);

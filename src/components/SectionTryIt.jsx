@@ -401,7 +401,11 @@ function GenerateTab({ color }) {
             if (data.token) {
               setOutput(prev => prev + data.token);
             }
-            if (data.done || data.error) break;
+            if (data.error) {
+              setOutput(data.error);
+              break;
+            }
+            if (data.done) break;
           }
         }
       }

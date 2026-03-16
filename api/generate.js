@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { moderate } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -12,6 +13,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "prompt required" });
   }
 
+  // Content safety check
+  const check = await moderate(prompt);
+  if (!check.safe) {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.write(`data: ${JSON.stringify({ error: check.message })}\n\n`);
+    res.end();
+    return;
+  }
+
   // Set up streaming headers
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -21,7 +32,14 @@ export default async function handler(req, res) {
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are a helpful, kid-friendly assistant. Keep responses short and appropriate for ages 8-11." },
+        {
+          role: "system",
+          content: "You are a helpful, kid-friendly assistant for children ages 8-11 in a classroom setting. " +
+            "Keep responses short, positive, and age-appropriate. " +
+            "Never produce content that is violent, scary, sexual, or inappropriate for young children. " +
+            "If asked about inappropriate topics, politely redirect to something fun and educational. " +
+            "Do not discuss weapons, drugs, alcohol, death, horror, or adult themes."
+        },
         { role: "user", content: prompt },
       ],
       max_tokens: Math.min(maxTokens, 120),
