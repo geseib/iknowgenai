@@ -497,10 +497,10 @@ function LayerAnimation({ color, onDone, pres }) {
               key={currentQuestion}
               style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: pres ? 18 : 15,
+                fontSize: pres ? 32 : 15,
                 color: `${color}cc`,
                 textAlign: "center",
-                marginTop: 10,
+                marginTop: pres ? 16 : 10,
                 fontStyle: "italic",
                 animation: "fadeUp .15s ease",
               }}
