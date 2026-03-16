@@ -8,6 +8,7 @@ import {
   ArrowCounterClockwise,
   Confetti,
   ArrowDown,
+  Target,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
 import { P_POSITIONS, applyTemp, sampleWord, tempMeta } from "../data/predict";
@@ -47,6 +48,290 @@ function ContinueButton({ onClick, color, label }) {
         {label} <ArrowDown size={20} weight="bold" />
       </button>
     </div>
+  );
+}
+
+/* ── Labels showing what each word contributes to "the" ── */
+const MEANING_LABELS = [
+  { word: "The", meaning: "grammar & structure" },
+  { word: "cat", meaning: "it's about an animal" },
+  { word: "sat", meaning: "a physical action" },
+  { word: "on", meaning: "location / position" },
+];
+
+const PREDICT_CANDIDATES = [
+  { word: "mat", pct: 42 },
+  { word: "floor", pct: 18 },
+  { word: "rug", pct: 12 },
+  { word: "ground", pct: 9 },
+  { word: "couch", pct: 6 },
+];
+
+/* ── MeaningLoadSlide: expanded animation of meaning → "the" → prediction ── */
+function MeaningLoadSlide({ color }) {
+  // phase: 0=idle, 1=beams flowing, 2=labels appear, 3=loaded, 4=candidates, 5=pick
+  const [phase, setPhase] = useState(0);
+  const wordRefs = useRef([]);
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timeout;
+    function sleep(ms) { return new Promise(r => { timeout = setTimeout(r, ms); }); }
+
+    async function run() {
+      await sleep(600);
+      if (cancelled) return;
+
+      // Phase 1: beams flow from words 0-3 into word 4
+      setPhase(1);
+      await sleep(1400);
+      if (cancelled) return;
+
+      // Phase 2: labels appear showing what each word contributes
+      setPhase(2);
+      await sleep(2400);
+      if (cancelled) return;
+
+      // Phase 3: "the" fully loaded — pulse big
+      setPhase(3);
+      await sleep(1400);
+      if (cancelled) return;
+
+      // Phase 4: candidate list appears
+      setPhase(4);
+      await sleep(2000);
+      if (cancelled) return;
+
+      // Phase 5: "mat" picked
+      setPhase(5);
+    }
+
+    run();
+    return () => { cancelled = true; clearTimeout(timeout); };
+  }, []);
+
+  const getCenter = (idx) => {
+    const el = wordRefs.current[idx];
+    const svg = svgRef.current;
+    if (!el || !svg) return { x: 0, y: 0 };
+    const er = el.getBoundingClientRect();
+    const sr = svg.getBoundingClientRect();
+    return { x: er.left - sr.left + er.width / 2, y: er.top - sr.top + er.height / 2 };
+  };
+
+  const words = ["The", "cat", "sat", "on", "the"];
+  const isLoading = phase >= 1 && phase <= 2;
+  const isLoaded = phase >= 3;
+  const showCandidates = phase >= 4;
+  const isPicked = phase >= 5;
+
+  return (
+    <PresSlide>
+      <div style={{ width: "100%", maxWidth: 700 }}>
+        {/* Sentence row with SVG beams */}
+        <div style={{ position: "relative", marginBottom: 24 }}>
+          <svg ref={svgRef} style={{
+            position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+            pointerEvents: "none", zIndex: 1,
+          }}>
+            {/* Beams from words 0-3 into "the" (index 4) */}
+            {(phase === 1 || phase === 2) && [0, 1, 2, 3].map((srcIdx, i) => {
+              const from = getCenter(srcIdx);
+              const to = getCenter(4);
+              if (!from.x && !to.x) return null;
+              const midY = Math.min(from.y, to.y) - 32 - (i % 2) * 16;
+              return (
+                <path
+                  key={`beam-${srcIdx}`}
+                  d={`M ${from.x} ${from.y} Q ${(from.x + to.x) / 2} ${midY} ${to.x} ${to.y}`}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth="3"
+                  opacity="0.7"
+                  style={{ animation: `fadeUp .5s ${i * 0.2}s ease both` }}
+                >
+                  <animate
+                    attributeName="stroke-dasharray"
+                    from="0 400"
+                    to="400 0"
+                    dur={`${0.7 + i * 0.1}s`}
+                    fill="freeze"
+                  />
+                </path>
+              );
+            })}
+          </svg>
+
+          <div style={{
+            display: "flex", gap: 14, justifyContent: "center",
+            position: "relative", zIndex: 2,
+          }}>
+            {words.map((w, i) => {
+              const isTarget = i === 4;
+              const isSource = i < 4;
+              return (
+                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <div
+                    ref={el => wordRefs.current[i] = el}
+                    style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: isTarget && isLoaded ? 30 : 26,
+                      fontWeight: 600,
+                      padding: isTarget && isLoaded ? "10px 20px" : "8px 16px",
+                      borderRadius: 12,
+                      color: isTarget && phase >= 1 ? color
+                        : isSource && isLoading ? `${color}cc`
+                        : isSource && isLoaded ? "rgba(255,255,255,.3)"
+                        : "white",
+                      background: isTarget && phase >= 1 ? `${color}25`
+                        : isSource && isLoading ? `${color}10`
+                        : "rgba(255,255,255,.06)",
+                      border: `2px solid ${
+                        isTarget && phase >= 1 ? color
+                        : isSource && isLoading ? `${color}40`
+                        : "rgba(255,255,255,.1)"
+                      }`,
+                      boxShadow: isTarget && isLoaded
+                        ? `0 0 28px ${color}60, 0 0 56px ${color}20`
+                        : (isTarget && phase >= 1 ? `0 0 14px ${color}35` : "none"),
+                      transform: isTarget && isLoaded ? "scale(1.1)" : "scale(1)",
+                      transition: "all .5s ease",
+                    }}
+                  >
+                    {w}
+                  </div>
+                  {/* Meaning labels below source words */}
+                  {isSource && phase >= 2 && (
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 11,
+                      color: phase >= 3 ? "rgba(255,255,255,.2)" : `${color}aa`,
+                      textAlign: "center",
+                      maxWidth: 80,
+                      lineHeight: 1.2,
+                      animation: "fadeUp .3s ease",
+                      transition: "color .5s ease",
+                    }}>
+                      {MEANING_LABELS[i].meaning}
+                    </div>
+                  )}
+                  {/* "Loaded" label under "the" */}
+                  {isTarget && isLoaded && (
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 12,
+                      color,
+                      fontWeight: 600,
+                      animation: "fadeUp .4s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}>
+                      <Target size={14} weight="fill" color={color} />
+                      loaded with meaning
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Description text */}
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 18,
+          color: "rgba(255,255,255,.55)",
+          textAlign: "center",
+          lineHeight: 1.5,
+          marginBottom: 20,
+          minHeight: 52,
+        }}>
+          {phase === 0 && <span style={{ animation: "fadeUp .3s ease" }}>The model has processed all 96 layers...</span>}
+          {phase === 1 && <span style={{ animation: "fadeUp .3s ease" }}>Each word sends its meaning into the <span style={{ color, fontWeight: 700 }}>last position</span></span>}
+          {phase === 2 && <span style={{ animation: "fadeUp .3s ease" }}>Grammar, facts, context — it all flows into "<span style={{ color, fontWeight: 700 }}>the</span>"</span>}
+          {phase === 3 && <span style={{ animation: "fadeUp .3s ease" }}>"<span style={{ color, fontWeight: 700 }}>the</span>" now holds the meaning of the entire sentence + everything it ever learned</span>}
+          {phase >= 4 && <span style={{ animation: "fadeUp .3s ease" }}>From all that meaning, it ranks what word is most likely next:</span>}
+        </div>
+
+        {/* Candidate list */}
+        {showCandidates && (
+          <div style={{
+            maxWidth: 400,
+            margin: "0 auto",
+            background: "rgba(255,255,255,.04)",
+            border: `2px solid ${color}30`,
+            borderRadius: 16,
+            padding: "14px 18px",
+            animation: "fadeUp .4s ease",
+          }}>
+            {PREDICT_CANDIDATES.map((c, i) => {
+              const isTop = i === 0;
+              const highlighted = isTop && isPicked;
+              return (
+                <div
+                  key={c.word}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "7px 10px",
+                    marginBottom: i < 4 ? 4 : 0,
+                    borderRadius: 10,
+                    background: highlighted ? `${color}20` : "transparent",
+                    border: `2px solid ${highlighted ? `${color}60` : "transparent"}`,
+                    transition: "all .4s ease",
+                    animation: `fadeUp .3s ${i * 0.07}s ease both`,
+                    boxShadow: highlighted ? `0 0 14px ${color}30` : "none",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: highlighted ? 22 : 17,
+                    fontWeight: highlighted ? 700 : 400,
+                    color: highlighted ? color : (isTop && !isPicked ? "rgba(255,255,255,.7)" : "rgba(255,255,255,.4)"),
+                    width: 65,
+                    transition: "all .4s ease",
+                  }}>
+                    {c.word}
+                    {highlighted && <Star size={16} weight="fill" color={color} style={{ marginLeft: 4, verticalAlign: "middle" }} />}
+                  </span>
+                  <div style={{
+                    flex: 1,
+                    height: highlighted ? 10 : 7,
+                    background: "rgba(255,255,255,.06)",
+                    borderRadius: 5,
+                    overflow: "hidden",
+                    transition: "height .4s ease",
+                  }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${(c.pct / 42) * 100}%`,
+                      borderRadius: 5,
+                      background: highlighted ? color : "rgba(255,255,255,.18)",
+                      transition: "background .4s ease",
+                      animation: `probIn .5s ${i * 0.07 + 0.15}s ease both`,
+                    }} />
+                  </div>
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: highlighted ? 18 : 14,
+                    fontWeight: highlighted ? 700 : 400,
+                    color: highlighted ? color : "rgba(255,255,255,.25)",
+                    width: 40,
+                    textAlign: "right",
+                    transition: "all .4s ease",
+                  }}>
+                    {c.pct}%
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </PresSlide>
   );
 }
 
@@ -119,8 +404,13 @@ export default function SectionPredict({ color, mode, slide }) {
       );
     }
 
-    /* Slide 1: Probability list — the last word carries everything */
+    /* Slide 1: Animated — meaning loads into "the", then prediction emerges */
     if (slide === 1) {
+      return <MeaningLoadSlide color={color} />;
+    }
+
+    /* Slide 2: Probability list — the last word carries everything */
+    if (slide === 2) {
       const candidates = [
         { word: "mat",    pct: 42 },
         { word: "floor",  pct: 18 },
@@ -226,7 +516,7 @@ export default function SectionPredict({ color, mode, slide }) {
       );
     }
 
-    if (slide === 2) {
+    if (slide === 3) {
       return (
         <PresSlide>
           <div style={{ width: "100%", maxWidth: 780, margin: "0 auto" }}>
@@ -302,7 +592,7 @@ export default function SectionPredict({ color, mode, slide }) {
         </PresSlide>
       );
     }
-    if (slide === 3) {
+    if (slide === 4) {
       return (
         <PresSlide>
           <Confetti size={56} weight="duotone" color={color} />

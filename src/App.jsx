@@ -54,7 +54,7 @@ const PRESENTATION_SLIDES = [
   7,  // SectionAttention: bat reveal → both meanings → AI sees both + unless → words look around → sentence 1 → sentence 2 → insight
   4,  // SectionMLP: intro → expand (brainstorm) → compress (pick best) → analogy
   2,  // SectionLayers: 96 times → animation
-  4,  // SectionPredict: how did it pick? → probability list → playground → celebration
+  5,  // SectionPredict: how did it pick? → meaning load anim → probability list → playground → celebration
 ];
 
 // Sections with a "skip to takeaway" button — maps section index → takeaway slide

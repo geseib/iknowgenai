@@ -74,6 +74,7 @@ function OverviewPipelineAnim({ color }) {
   const [sentenceDropped, setSentenceDropped] = useState(false);
   const [gearSpinning, setGearSpinning] = useState(false);
   const [pickedWord, setPickedWord] = useState(false);
+  const [enrichStep, setEnrichStep] = useState(0); // 0=beams flowing in, 1=loaded up
   const wordRefs = useRef([]);
   const svgRef = useRef(null);
 
@@ -140,12 +141,18 @@ function OverviewPipelineAnim({ color }) {
       await sleep(300);
       if (cancelled) return;
 
-      // Enrich — "the" glows, loaded with meaning
+      // Enrich — beams flow from each word into "the"
       setPhase("enrich");
-      await sleep(1800);
+      setEnrichStep(0);
+      await sleep(1600);
       if (cancelled) return;
 
-      // Candidates — show probability list
+      // "the" is now loaded — pulse it
+      setEnrichStep(1);
+      await sleep(1200);
+      if (cancelled) return;
+
+      // Candidates — probability list emerges from "the"
       setPhase("candidates");
       await sleep(2200);
       if (cancelled) return;
@@ -274,6 +281,7 @@ function OverviewPipelineAnim({ color }) {
           position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
           pointerEvents: "none", zIndex: 1,
         }}>
+          {/* Attention beams during layers phase */}
           {showBeams && activeBeams.map(([a, b], i) => {
             const from = getCenter(a);
             const to = getCenter(b);
@@ -298,6 +306,32 @@ function OverviewPipelineAnim({ color }) {
               </path>
             );
           })}
+          {/* Enrich beams — meaning flows FROM each word INTO "the" */}
+          {phase === "enrich" && enrichStep === 0 && [0, 1, 2, 3].map((srcIdx, i) => {
+            const from = getCenter(srcIdx);
+            const to = getCenter(4);
+            if (!from.x && !to.x) return null;
+            const midY = Math.min(from.y, to.y) - 28 - (i % 2) * 14;
+            return (
+              <path
+                key={`enrich-${srcIdx}`}
+                d={`M ${from.x} ${from.y} Q ${(from.x + to.x) / 2} ${midY} ${to.x} ${to.y}`}
+                fill="none"
+                stroke={color}
+                strokeWidth="2.5"
+                opacity="0.7"
+                style={{ animation: `fadeUp .4s ${i * 0.15}s ease both` }}
+              >
+                <animate
+                  attributeName="stroke-dasharray"
+                  from="0 300"
+                  to="300 0"
+                  dur={`${0.6 + i * 0.1}s`}
+                  fill="freeze"
+                />
+              </path>
+            );
+          })}
         </svg>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", position: "relative", zIndex: 2 }}>
@@ -310,22 +344,30 @@ function OverviewPipelineAnim({ color }) {
                 fontSize: 24,
                 fontWeight: 600,
                 color: (phase === "numbers" && i === 1) ? color
-                  : (phase === "enrich" && i === 4) ? color
+                  : ((phase === "enrich" || phase === "candidates" || phase === "pick") && i === 4) ? color
+                  : (phase === "enrich" && i < 4 && enrichStep === 0) ? `${color}cc`
+                  : (phase === "enrich" && i < 4 && enrichStep === 1) ? "rgba(255,255,255,.3)"
+                  : ((phase === "candidates" || phase === "pick") && i < 4) ? "rgba(255,255,255,.35)"
                   : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? color
                   : "white",
                 padding: "6px 14px",
                 borderRadius: 10,
                 background: (phase === "numbers" && i === 1) ? `${color}20`
-                  : (phase === "enrich" && i === 4) ? `${color}25`
+                  : ((phase === "enrich" || phase === "candidates" || phase === "pick") && i === 4) ? `${color}25`
+                  : (phase === "enrich" && i < 4 && enrichStep === 0) ? `${color}10`
                   : (showBeams && activeBeams.some(([a, b]) => a === i || b === i)) ? `${color}12`
                   : "rgba(255,255,255,.06)",
                 border: `1.5px solid ${
                   (phase === "numbers" && i === 1) ? `${color}50`
-                  : (phase === "enrich" && i === 4) ? color
+                  : ((phase === "enrich" || phase === "candidates" || phase === "pick") && i === 4) ? color
+                  : (phase === "enrich" && i < 4 && enrichStep === 0) ? `${color}40`
                   : "rgba(255,255,255,.1)"
                 }`,
-                boxShadow: (phase === "enrich" && i === 4) ? `0 0 16px ${color}40` : "none",
-                transition: "all .15s ease",
+                boxShadow: ((phase === "enrich" || phase === "candidates" || phase === "pick") && i === 4)
+                  ? (phase === "enrich" && enrichStep === 1 ? `0 0 24px ${color}60, 0 0 48px ${color}25` : `0 0 14px ${color}35`)
+                  : "none",
+                transform: (phase === "enrich" && i === 4 && enrichStep === 1) ? "scale(1.15)" : "scale(1)",
+                transition: "all .4s ease",
               }}
             >
               {w}
@@ -495,25 +537,39 @@ function OverviewPipelineAnim({ color }) {
         </div>
       )}
 
-      {/* ── Enrich: "the" is loaded with meaning ── */}
+      {/* ── Enrich: meaning flows into "the" ── */}
       {phase === "enrich" && (
         <div style={{
           textAlign: "center",
           animation: "fadeUp .4s ease",
         }}>
-          <div style={{
-            fontFamily: "'Fredoka',sans-serif",
-            fontSize: 17,
-            color: "rgba(255,255,255,.55)",
-            lineHeight: 1.5,
-          }}>
-            After 96 layers, the last word "<span style={{ color, fontWeight: 700 }}>the</span>"
-            now carries the meaning of the <em>entire</em> sentence
-            <br />
-            <span style={{ fontSize: 14, color: "rgba(255,255,255,.35)" }}>
-              + everything it learned in training
-            </span>
-          </div>
+          {enrichStep === 0 && (
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 17,
+              color: "rgba(255,255,255,.55)",
+              lineHeight: 1.5,
+              animation: "fadeUp .3s ease",
+            }}>
+              Each word sends its meaning into the last position...
+            </div>
+          )}
+          {enrichStep === 1 && (
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 17,
+              color: "rgba(255,255,255,.55)",
+              lineHeight: 1.5,
+              animation: "fadeUp .4s ease",
+            }}>
+              "<span style={{ color, fontWeight: 700 }}>the</span>" now holds the meaning of the{" "}
+              <em>entire sentence</em>
+              <br />
+              <span style={{ fontSize: 14, color: "rgba(255,255,255,.35)" }}>
+                + every fact, pattern, and rule from 96 layers of thinking
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -533,7 +589,8 @@ function OverviewPipelineAnim({ color }) {
             lineHeight: 1.5,
             paddingTop: 4,
           }}>
-            It builds a list of words that could come next — ranked by probability:
+            From all that meaning packed into "<span style={{ color, fontWeight: 700 }}>the</span>",
+            it ranks what word is most likely to come next:
           </div>
           <div style={{
             flexShrink: 0,
