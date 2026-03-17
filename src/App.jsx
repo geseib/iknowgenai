@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle } from "@phosphor-icons/react";
+import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle, GraduationCap } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
 import { TEACHER_NOTES } from "./data/teacherNotes";
 import { GRADE_CONFIG } from "./data/gradeConfig";
-import { GradeContext } from "./data/GradeContext";
+import { GradeContext, GRADES } from "./data/GradeContext";
 import TeacherDrawer from "./components/TeacherDrawer";
 
 import ModeSelect from "./components/ModeSelect";
@@ -247,6 +247,56 @@ export default function App() {
               </div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,.25)", marginTop: 4 }}>
                 Slide {currentSlideNum} of {totalSlideCount}
+              </div>
+            </div>
+
+            {/* Grade switcher */}
+            <div style={{
+              padding: "10px 14px",
+              borderBottom: "1px solid rgba(255,255,255,.06)",
+            }}>
+              <div style={{
+                display: "flex",
+                gap: 0,
+                background: "rgba(255,255,255,.05)",
+                borderRadius: 10,
+                padding: 3,
+              }}>
+                {GRADES.map(g => {
+                  const active = g === grade;
+                  return (
+                    <button
+                      key={g}
+                      onClick={() => {
+                        setGrade(g);
+                        setSlide(0);
+                      }}
+                      style={{
+                        fontFamily: "'Fredoka',sans-serif",
+                        fontSize: 12,
+                        fontWeight: active ? 700 : 500,
+                        padding: "6px 0",
+                        borderRadius: 8,
+                        border: "none",
+                        cursor: "pointer",
+                        background: active ? "rgba(255,255,255,.12)" : "transparent",
+                        color: active ? "white" : "rgba(255,255,255,.3)",
+                        transition: "all .2s ease",
+                        flex: 1,
+                      }}
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{
+                fontSize: 10,
+                color: "rgba(255,255,255,.2)",
+                textAlign: "center",
+                marginTop: 4,
+              }}>
+                {GRADE_CONFIG[grade].label} &middot; {GRADE_CONFIG[grade].duration}
               </div>
             </div>
 
