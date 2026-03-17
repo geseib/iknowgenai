@@ -4,6 +4,8 @@ import {
   Book,
   Exam,
 } from "@phosphor-icons/react";
+import { GRADE_CONFIG } from "../data/gradeConfig";
+import { GRADES } from "../data/GradeContext";
 
 const modes = [
   {
@@ -24,7 +26,11 @@ const modes = [
   },
 ];
 
-export default function ModeSelect({ onSelect, allCss }) {
+export default function ModeSelect({ onSelect, grade, onGradeChange, allCss }) {
+  const gc = GRADE_CONFIG[grade];
+  const totalSlides = gc.presentationSlides.reduce((a, b) => a + b, 0);
+  const activeSections = gc.presentationSlides.filter(n => n > 0).length;
+
   const stars = Array.from({ length: 60 }, (_, i) => ({
     x: ((i * 137.508) % 100).toFixed(1),
     y: ((i * 73.214) % 100).toFixed(1),
@@ -49,12 +55,60 @@ export default function ModeSelect({ onSelect, allCss }) {
           pointerEvents: "none",
         }} />
       ))}
-      <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 540 }}>
+      <div style={{ position: "relative", zIndex: 10, textAlign: "center", maxWidth: 580 }}>
         <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI mascot" style={{ width: 100, height: "auto", marginBottom: 8, opacity: 0.85 }} />
-        <h1 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 42, fontWeight: 700, color: "white", marginBottom: 10, lineHeight: 1.1 }}>How AI Thinks</h1>
-        <p style={{ color: "rgba(255,255,255,.5)", fontSize: 16, marginBottom: 40, lineHeight: 1.6 }}>
-          An interactive lesson for 3rd &amp; 4th graders.<br />Choose how you're running this session today.
+        <h1 style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 42, fontWeight: 700, color: "white", marginBottom: 6, lineHeight: 1.1 }}>How AI Thinks</h1>
+        <p style={{ color: "rgba(255,255,255,.45)", fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>
+          {gc.subtitle}
         </p>
+
+        {/* Grade selector */}
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: 0,
+          marginBottom: 32,
+          background: "rgba(255,255,255,.06)",
+          borderRadius: 14,
+          padding: 4,
+          border: "1px solid rgba(255,255,255,.1)",
+        }}>
+          {GRADES.map(g => {
+            const active = g === grade;
+            const cfg = GRADE_CONFIG[g];
+            return (
+              <button
+                key={g}
+                onClick={() => onGradeChange(g)}
+                style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 16,
+                  fontWeight: active ? 700 : 500,
+                  padding: "10px 24px",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  background: active ? "rgba(255,255,255,.12)" : "transparent",
+                  color: active ? "white" : "rgba(255,255,255,.35)",
+                  transition: "all .2s ease",
+                  flex: 1,
+                }}
+              >
+                <div>{g}</div>
+                <div style={{
+                  fontSize: 11,
+                  fontWeight: 400,
+                  color: active ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.2)",
+                  marginTop: 2,
+                }}>
+                  {cfg.label}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mode cards */}
         <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
           {modes.map(m => (
             <div key={m.id} className="mode-card" onClick={() => onSelect(m.id)}
@@ -81,7 +135,9 @@ export default function ModeSelect({ onSelect, allCss }) {
           </button>
         </div>
 
-        <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>14 sections &middot; ~45 minutes &middot; Ages 8&ndash;11</p>
+        <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>
+          {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}
+        </p>
       </div>
     </div>
   );

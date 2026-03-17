@@ -7,6 +7,8 @@ import {
   CaretDown,
   Info,
 } from "@phosphor-icons/react";
+import { useGrade } from "../data/GradeContext";
+import { GRADE_CONFIG } from "../data/gradeConfig";
 
 export function Card({ children, style }) {
   return (
@@ -191,8 +193,9 @@ export function PresSlide({ children }) {
 }
 
 export function PresText({ children, color, size = 32 }) {
-  // Apply 25% size boost for better readability from the back of the room
-  const boosted = Math.round(size * 1.25);
+  const grade = useGrade();
+  const gradeMultiplier = GRADE_CONFIG[grade]?.presTextSizeMultiplier ?? 1.0;
+  const boosted = Math.round(size * 1.25 * gradeMultiplier);
   return (
     <div style={{
       fontFamily: "'Fredoka',sans-serif",

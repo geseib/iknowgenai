@@ -3,6 +3,8 @@ import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, A
 import { ALL_CSS } from "./styles/global";
 import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
 import { TEACHER_NOTES } from "./data/teacherNotes";
+import { GRADE_CONFIG } from "./data/gradeConfig";
+import { GradeContext } from "./data/GradeContext";
 import TeacherDrawer from "./components/TeacherDrawer";
 
 import ModeSelect from "./components/ModeSelect";
@@ -42,25 +44,8 @@ const SECTIONS = [
   SectionTryIt,
 ];
 
-// How many presentation slides each section has (used only in presentation mode)
-// Sections export this or we define it here for coordination
-const PRESENTATION_SLIDES = [
-  3,  // SectionWhoIsHere: question → grid → insight
-  2,  // SectionWhatIsAI: question with options → real answer
-  6,  // SectionProgramsVsAI: intro → 2 pairs (question → reveal each) → insight
-  8,  // SectionBrainVsAI: intro → 3 comparisons (question → reveal each) → insight
-  5,  // SectionWhatIsLLM: LLM boxes → L → L → M + insight → not just text
-  4,  // SectionMeetModels: ChatGPT → Claude → Llama+Gemini → takeaway
-  3,  // SectionTheBridge: training overview → animated pipeline → punchline
-  11, // SectionHowItLearns: knock knock → lettuce → punchline → robots intro → R1 question → R1 answer → R2 question → R2 answer → R3 question → R3 answer → insight
-  5,  // SectionHook: "how does AI read a word?" → cat word → feelings → numbers reveal → ticker
-  8,  // SectionEmbeddings: dimensions → scatter → neighbourhoods → animal → bird+plane → has wings → rideable → all dimensions
-  7,  // SectionAttention: bat reveal → both meanings → AI sees both + unless → words look around → sentence 1 → sentence 2 → insight
-  4,  // SectionMLP: intro → expand (brainstorm) → compress (pick best) → analogy
-  2,  // SectionLayers: 96 times → animation
-  5,  // SectionPredict: how did it pick? → meaning load anim → probability list → playground → celebration
-  2,  // SectionTryIt: intro → interactive playground
-];
+// Default slide counts (3-5 grade level) — overridden by GRADE_CONFIG
+const DEFAULT_SLIDES = GRADE_CONFIG["3-5"].presentationSlides;
 
 // Sections with a "skip to takeaway" button — maps section index → takeaway slide
 const PRESENTATION_SKIP = {
@@ -73,15 +58,16 @@ const SECTION_DONE_EVENT = "sectionFullyRevealed";
 
 export default function App() {
   const [mode, setMode] = useState(null);
+  const [grade, setGrade] = useState("3-5");
   const [sec, setSec] = useState(0);
-  const [slide, setSlide] = useState(0); // presentation mode: which slide within section
+  const [slide, setSlide] = useState(0);
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
 
   const isTeacherMode = mode === "teacher";
-  // Both student and teacher modes use presentation-style rendering
   const isPres = mode === "student" || mode === "teacher";
+  const PRESENTATION_SLIDES = GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES;
 
   // Open teacher drawer automatically when entering teacher mode
   useEffect(() => {
@@ -152,7 +138,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [mode, next, prev, navOpen, teacherOpen]);
 
-  if (!mode) return <ModeSelect onSelect={setMode} allCss={ALL_CSS} />;
+  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
   if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
 
@@ -178,6 +164,7 @@ export default function App() {
   const SectionComponent = SECTIONS[sec];
 
   return (
+    <GradeContext.Provider value={grade}>
     <div style={{ minHeight: "100vh", background: "#050512", color: "white", fontFamily: "'Nunito',sans-serif", position: "relative" }}>
       <style>{ALL_CSS}</style>
 
@@ -560,5 +547,6 @@ export default function App() {
         </div>
       </div>
     </div>
+    </GradeContext.Provider>
   );
 }
