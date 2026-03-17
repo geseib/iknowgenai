@@ -11,7 +11,9 @@ import {
   Target,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
-import { P_POSITIONS, applyTemp, sampleWord, tempMeta } from "../data/predict";
+import { applyTemp, sampleWord, tempMeta } from "../data/predict";
+import { useGrade } from "../data/GradeContext";
+import { GRADE_EXAMPLES } from "../data/gradeContent";
 
 const TEMP_ICONS = {
   Frozen:   Snowflake,
@@ -51,24 +53,10 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-/* ── Labels showing what each word contributes to "the" ── */
-const MEANING_LABELS = [
-  { word: "The", meaning: "grammar & structure" },
-  { word: "cat", meaning: "it's about an animal" },
-  { word: "sat", meaning: "a physical action" },
-  { word: "on", meaning: "location / position" },
-];
-
-const PREDICT_CANDIDATES = [
-  { word: "mat", pct: 42 },
-  { word: "floor", pct: 18 },
-  { word: "rug", pct: 12 },
-  { word: "ground", pct: 9 },
-  { word: "couch", pct: 6 },
-];
-
 /* ── MeaningLoadSlide: expanded animation of meaning → "the" → prediction ── */
-function MeaningLoadSlide({ color }) {
+function MeaningLoadSlide({ color, gc }) {
+  const MEANING_LABELS = gc.meaningLabels;
+  const PREDICT_CANDIDATES = gc.meaningCandidates;
   // phase: 0=idle, 1=beams flowing, 2=labels appear, 3=loaded, 4=candidates, 5=pick
   const [phase, setPhase] = useState(0);
   const wordRefs = useRef([]);
@@ -120,7 +108,7 @@ function MeaningLoadSlide({ color }) {
     return { x: er.left - sr.left + er.width / 2, y: er.top - sr.top + er.height / 2 };
   };
 
-  const words = ["The", "cat", "sat", "on", "the"];
+  const words = gc.meaningWords;
   const isLoading = phase >= 1 && phase <= 2;
   const isLoaded = phase >= 3;
   const showCandidates = phase >= 4;
@@ -336,6 +324,10 @@ function MeaningLoadSlide({ color }) {
 }
 
 export default function SectionPredict({ color, mode, slide }) {
+  const grade = useGrade();
+  const gc = GRADE_EXAMPLES[grade].predict;
+  const P_POSITIONS = gc.positions;
+
   const [temp, setTemp] = useState(.8);
   const [words, setWords] = useState([]);
   const [layerCount, setLayerCount] = useState(0);
@@ -395,7 +387,7 @@ export default function SectionPredict({ color, mode, slide }) {
       return (
         <PresSlide>
           <PresText color="white" size={28}>
-            "The cat sat on the <span style={{ color, fontWeight: 700 }}>mat</span>"
+            "{gc.sentenceStart} <span style={{ color, fontWeight: 700 }}>{gc.highlightWord}</span>"
           </PresText>
           <PresText color="white" size={48}>
             But how did it <span style={{ color }}>pick</span> that word?
@@ -406,21 +398,12 @@ export default function SectionPredict({ color, mode, slide }) {
 
     /* Slide 1: Animated — meaning loads into "the", then prediction emerges */
     if (slide === 1) {
-      return <MeaningLoadSlide color={color} />;
+      return <MeaningLoadSlide color={color} gc={gc} />;
     }
 
     /* Slide 2: Probability list — the last word carries everything */
     if (slide === 2) {
-      const candidates = [
-        { word: "mat",    pct: 42 },
-        { word: "floor",  pct: 18 },
-        { word: "rug",    pct: 12 },
-        { word: "ground", pct: 9 },
-        { word: "couch",  pct: 6 },
-        { word: "table",  pct: 4 },
-        { word: "bed",    pct: 3 },
-        { word: "roof",   pct: 2 },
-      ];
+      const candidates = gc.rankedCandidates;
       return (
         <PresSlide>
           <PresText size={26} color="rgba(255,255,255,.55)">

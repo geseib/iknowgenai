@@ -12,6 +12,8 @@ import {
   Flame,
 } from "@phosphor-icons/react";
 import { Card, PresSlide, PresText } from "./shared";
+import { useGrade } from "../data/GradeContext";
+import { GRADE_EXAMPLES } from "../data/gradeContent";
 
 /* ── Tab button ── */
 function Tab({ active, label, Icon, color, onClick }) {
@@ -49,8 +51,8 @@ function tempLabel(t) {
   return { name: "Wild", icon: Flame, clr: "#f15bb5" };
 }
 
-function PredictTab({ color }) {
-  const [prompt, setPrompt] = useState("The dog ran to the");
+function PredictTab({ color, defaultPrompt }) {
+  const [prompt, setPrompt] = useState(defaultPrompt);
   const [temp, setTemp] = useState(1.0);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -223,14 +225,8 @@ function PredictTab({ color }) {
 }
 
 /* ── Embed Tab ── */
-const EMBED_PRESETS = [
-  { label: "Family", words: ["mom", "dad", "brother", "sister", "aunt", "uncle", "grandma", "grandpa", "cousin", "baby"] },
-  { label: "Animals", words: ["cat", "dog", "fish", "bird", "snake", "horse", "dolphin", "eagle", "spider", "whale"] },
-  { label: "Food & Sports", words: ["pizza", "hamburger", "sushi", "ice cream", "soccer", "basketball", "swimming", "tennis", "baseball", "football"] },
-];
-const DEFAULT_WORDS = EMBED_PRESETS[0].words;
-
-function EmbedTab({ color }) {
+function EmbedTab({ color, embedPresets }) {
+  const DEFAULT_WORDS = embedPresets[0].words;
   const [input, setInput] = useState(DEFAULT_WORDS.join(", "));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -272,7 +268,7 @@ function EmbedTab({ color }) {
 
       {/* Preset buttons */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-        {EMBED_PRESETS.map(p => (
+        {embedPresets.map(p => (
           <button
             key={p.label}
             onClick={() => { setInput(p.words.join(", ")); setResult(null); }}
@@ -504,6 +500,8 @@ function GenerateTab({ color }) {
 
 /* ── Main Section ── */
 export default function SectionTryIt({ color, mode, slide }) {
+  const grade = useGrade();
+  const tryItContent = GRADE_EXAMPLES[grade].tryIt;
   const [tab, setTab] = useState("predict");
 
   if (mode === "presentation") {
@@ -530,8 +528,8 @@ export default function SectionTryIt({ color, mode, slide }) {
       </div>
 
       {/* Active tab */}
-      {tab === "predict" && <PredictTab color={color} />}
-      {tab === "embed" && <EmbedTab color={color} />}
+      {tab === "predict" && <PredictTab color={color} defaultPrompt={tryItContent.defaultPrompt} />}
+      {tab === "embed" && <EmbedTab color={color} embedPresets={tryItContent.embedPresets} />}
       {tab === "generate" && <GenerateTab color={color} />}
     </div>
   );

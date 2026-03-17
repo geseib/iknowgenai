@@ -24,6 +24,8 @@ import {
   P2_VEHICLES,
   P2_STEPS,
 } from "../data/embeddings";
+import { useGrade } from "../data/GradeContext";
+import { GRADE_EXAMPLES } from "../data/gradeContent";
 
 /* ── Icon mapping ─────────────────────────────────────────────────────────── */
 const P2_ICONS = {
@@ -217,6 +219,8 @@ function DimensionExplorer({ color, onComplete }) {
 
 /* ── Main Section ─────────────────────────────────────────────────────────── */
 export default function SectionEmbeddings({ color, mode, slide }) {
+  const grade = useGrade();
+  const gradeDimensions = GRADE_EXAMPLES[grade].dimensions;
   const [sel, setSel] = useState(null);
   const [step, setStep] = useState(0);
   const [part2Done, setPart2Done] = useState(false);
@@ -280,12 +284,7 @@ export default function SectionEmbeddings({ color, mode, slide }) {
           display: "flex", flexDirection: "column", gap: 14,
           maxWidth: 700, width: "100%",
         }}>
-          {[
-            { dim: "Has wings?", yes: "bat, bird, butterfly", no: "pizza, car" },
-            { dim: "Can you eat it?", yes: "pizza, burger, cake", no: "bat, car" },
-            { dim: "Is it alive?", yes: "bat, bird, dog", no: "pizza, car" },
-            { dim: "Is it furry?", yes: "dog, cat, bat", no: "pizza, bird" },
-          ].map((d, i) => (
+          {gradeDimensions.map((d, i) => (
             <div key={i} style={{
               display: "flex", alignItems: "center", gap: 16,
               padding: "12px 20px", borderRadius: 14,
