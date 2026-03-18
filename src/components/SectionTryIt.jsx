@@ -352,7 +352,7 @@ function PredictTab({ color, defaultPrompt }) {
             )}
           </div>
           {enriched.map((c, i) => {
-            const isTop = i === 0;
+            const isChosen = c.token === result.chosen;
             const dimmed = !c.included && topP < 0.95;
             return (
               <div key={i}>
@@ -388,23 +388,23 @@ function PredictTab({ color, defaultPrompt }) {
                 >
                   <div style={{
                     width: 90, fontFamily: "'Fredoka',sans-serif", fontSize: 17,
-                    color: isTop ? color : "rgba(255,255,255,.5)", flexShrink: 0,
-                    display: "flex", alignItems: "center", gap: 5, fontWeight: isTop ? 700 : 400,
+                    color: isChosen ? color : "rgba(255,255,255,.5)", flexShrink: 0,
+                    display: "flex", alignItems: "center", gap: 5, fontWeight: isChosen ? 700 : 400,
                   }}>
-                    {isTop && <Star size={14} weight="fill" color={color} />}
+                    {isChosen && <Star size={14} weight="fill" color={color} />}
                     {c.token}
                   </div>
                   <div style={{ flex: 1, height: 10, background: "rgba(255,255,255,.06)", borderRadius: 5, overflow: "hidden" }}>
                     <div style={{
                       height: "100%", width: `${c.pct}%`, borderRadius: 5,
-                      background: isTop ? color : (dimmed ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.18)"),
+                      background: isChosen ? color : (dimmed ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.18)"),
                       transition: "width .35s ease",
                     }} />
                   </div>
                   <div style={{
                     width: 50, textAlign: "right", fontSize: 15, flexShrink: 0,
-                    color: isTop ? color : "rgba(255,255,255,.4)",
-                    fontWeight: isTop ? 700 : 400,
+                    color: isChosen ? color : "rgba(255,255,255,.4)",
+                    fontWeight: isChosen ? 700 : 400,
                   }}>
                     {c.pct}%
                   </div>
