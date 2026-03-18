@@ -147,7 +147,7 @@ function PredictTab({ color, defaultPrompt }) {
   const tm = tempLabel(temp);
   const TempIcon = tm.icon;
 
-  const predictWith = async (text, autoAppend = false) => {
+  const predictWith = async (text) => {
     setLoading(true);
     setResult(null);
     setBlocked(false);
@@ -159,7 +159,6 @@ function PredictTab({ color, defaultPrompt }) {
       });
       const data = await res.json();
       if (data.blocked) {
-        // Content wasn't safe for kids — silently reset
         setBlocked(true);
         setResult(null);
         setLoading(false);
@@ -168,17 +167,13 @@ function PredictTab({ color, defaultPrompt }) {
       if (data.error) throw new Error(data.error);
       setResult(data);
       setFact(pickRandom(PREDICT_FACTS));
-      // Auto-append the chosen word to the prompt so the sentence grows
-      if (autoAppend && data.chosen) {
-        setPrompt(text + " " + data.chosen);
-      }
     } catch (err) {
       setResult({ error: err.message });
     }
     setLoading(false);
   };
 
-  const predict = () => predictWith(prompt, true);
+  const predict = () => predictWith(prompt);
 
   const pickWord = (token) => {
     const next = prompt + " " + token;
