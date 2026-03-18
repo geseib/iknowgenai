@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Lightning,
   MagnifyingGlass,
@@ -11,10 +11,92 @@ import {
   Snowflake,
   Scales,
   Flame,
+  Lightbulb,
 } from "@phosphor-icons/react";
 import { Card, PresSlide, PresText } from "./shared";
 import { useGrade } from "../data/GradeContext";
 import { GRADE_EXAMPLES } from "../data/gradeContent";
+
+/* ── Did You Know facts (per tab) ────────────────────────────────────── */
+const PREDICT_FACTS = [
+  "AI doesn't actually \"know\" the answer — it ranks every word in its vocabulary and picks the most likely one, just like you saw!",
+  "At temperature 0, the AI always picks the #1 word. That's why low-temperature answers sound robotic — there's no surprise.",
+  "The AI considers about 50,000 possible next tokens for every single position in a sentence. You just saw the top few!",
+  "ChatGPT generates its answers one token at a time — the same predict-and-pick process you're using right now.",
+  "When you click a word to continue, you're doing exactly what the AI does: pick one word, then predict the next one. Over and over.",
+  "The AI doesn't read your sentence like you do — it processes all the words at once using attention, then predicts the next one.",
+  "Higher temperature doesn't make the AI \"smarter\" — it just makes it more willing to pick lower-ranked words, which can seem creative or weird.",
+  "The probabilities you see add up to 100%. The AI always has to pick something — even if nothing fits perfectly.",
+  "Real AI models run through 96 layers of attention and thinking before producing each prediction you see here.",
+  "The word the AI picks becomes part of the input for the next prediction — that's why AI can write whole paragraphs, one word at a time.",
+];
+
+const TOKENIZE_FACTS = [
+  "The word \"the\" is so common it gets its own single token, but rare words like \"quintessential\" get split into pieces.",
+  "Spaces count! In most tokenizers, the space before a word is part of the token — \" cat\" and \"cat\" are different tokens.",
+  "Emojis often take 2-3 tokens each because they weren't common in the training data. Try typing a few to see!",
+  "GPT-4o's tokenizer has about 200,000 tokens in its vocabulary — that's roughly 6x more words than the average adult knows.",
+  "The same sentence in English and Japanese will use very different numbers of tokens — some languages are more \"token-efficient\" than others.",
+  "Numbers are tricky for tokenizers! \"123\" might be one token, but \"12345\" could be split into \"123\" + \"45\".",
+  "The tokenizer was trained on text from the internet, so common English words tend to be single tokens while rare words get split up.",
+  "Every token has a unique ID number — that number is what the AI actually processes, not the letters you see.",
+  "A typical English word averages about 4 characters per token. If your ratio is higher, your text has lots of short, common words!",
+  "Punctuation like \"!\" and \".\" are usually their own tokens. That's why AI can learn that \"!\" means excitement.",
+];
+
+const EMBED_FACTS = [
+  "The 2D plot you see squishes 1,536 dimensions down to just 2 — imagine flattening a globe into a map. Lots of detail gets lost!",
+  "AI discovered that \"king\" minus \"man\" plus \"woman\" equals \"queen\" — just from reading text, nobody programmed that relationship.",
+  "Words that appear in similar sentences end up close together in embedding space — that's how the AI learns meaning without a dictionary.",
+  "The embedding model maps every word to a point in 1,536-dimensional space — way more than the 3 dimensions we can see.",
+  "Similar words cluster together because they were used in similar contexts during training — the AI learned meaning from patterns, not definitions.",
+  "Even misspelled words get embeddings! The AI has seen enough typos to roughly understand what you meant.",
+  "Embeddings capture surprising connections: \"doctor\" and \"hospital\" are close together even though they're totally different types of words.",
+  "The distance between words in embedding space is measured using cosine similarity — basically how much two arrows point in the same direction.",
+  "These embeddings are what allow AI to understand that \"happy\" and \"joyful\" mean similar things even though they share no letters.",
+  "Every one of the ~50,000 tokens in the AI's vocabulary has its own unique set of 1,536 coordinates — like a GPS position for meaning.",
+];
+
+const GENERATE_FACTS = [
+  "Everything you see streaming in was generated one token at a time — the AI has no plan for the full sentence before it starts writing.",
+  "The AI doesn't actually understand what it writes — it's predicting the most likely next token based on patterns from its training data.",
+  "If you give the same prompt twice, you might get different answers! That's because temperature adds a bit of randomness to each pick.",
+  "The AI was trained on hundreds of billions of words — roughly the equivalent of reading every book in 1,000 libraries.",
+  "AI writes about 50-100 tokens per second. A human types about 40 words per minute. AI is roughly 100x faster at producing text!",
+  "The AI doesn't \"think\" and then \"write\" — the writing IS the thinking. Each token choice is shaped by all 96 layers of processing.",
+  "AI can write in many styles because it trained on everything from Shakespeare to Reddit comments to scientific papers.",
+  "When AI writes something that seems creative, it's actually remixing patterns it saw in training — like a DJ mixing familiar songs into something new.",
+  "The AI doesn't remember your previous conversations — each session starts fresh. It's predicting, not recalling.",
+  "Real AI companies use human feedback (RLHF) to teach models to write helpfully and safely — exactly like the rating game from earlier!",
+];
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* ── Did You Know component ──────────────────────────────────────────── */
+function DidYouKnow({ fact, color }) {
+  return (
+    <div className="fade-up" style={{
+      display: "flex", gap: 12, alignItems: "flex-start",
+      padding: "12px 16px", marginTop: 14,
+      borderRadius: 12,
+      background: `${color}08`,
+      border: `1px solid ${color}25`,
+    }}>
+      <Lightbulb size={20} weight="duotone" color={color} style={{ flexShrink: 0, marginTop: 2 }} />
+      <div style={{
+        fontFamily: "'Fredoka',sans-serif",
+        fontSize: 14,
+        color: "rgba(255,255,255,.6)",
+        lineHeight: 1.55,
+      }}>
+        <span style={{ color, fontWeight: 700 }}>Did you know? </span>
+        {fact}
+      </div>
+    </div>
+  );
+}
 
 /* ── Tab button ── */
 function Tab({ active, label, Icon, color, onClick }) {
@@ -57,6 +139,7 @@ function PredictTab({ color, defaultPrompt }) {
   const [temp, setTemp] = useState(1.0);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fact, setFact] = useState("");
 
   const tm = tempLabel(temp);
   const TempIcon = tm.icon;
@@ -73,6 +156,7 @@ function PredictTab({ color, defaultPrompt }) {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      setFact(pickRandom(PREDICT_FACTS));
     } catch (err) {
       setResult({ error: err.message });
     }
@@ -219,6 +303,7 @@ function PredictTab({ color, defaultPrompt }) {
           }}>
             Click any word above to add it and predict the next one!
           </div>
+          {fact && <DidYouKnow fact={fact} color={color} />}
         </Card>
       )}
     </div>
@@ -231,6 +316,7 @@ function EmbedTab({ color, embedPresets }) {
   const [input, setInput] = useState(DEFAULT_WORDS.join(", "));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fact, setFact] = useState("");
 
   const embed = async () => {
     const words = input.split(",").map(w => w.trim()).filter(Boolean);
@@ -246,6 +332,7 @@ function EmbedTab({ color, embedPresets }) {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      setFact(pickRandom(EMBED_FACTS));
     } catch (err) {
       setResult({ error: err.message });
     }
@@ -358,6 +445,7 @@ function EmbedTab({ color, embedPresets }) {
           ))}
         </Card>
       )}
+      {fact && result?.words && <DidYouKnow fact={fact} color={color} />}
     </div>
   );
 }
@@ -367,12 +455,14 @@ function GenerateTab({ color }) {
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fact, setFact] = useState("");
   const outputRef = useRef(null);
 
   const generate = async () => {
     if (!prompt.trim()) return;
     setLoading(true);
     setOutput("");
+    setFact(pickRandom(GENERATE_FACTS));
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -486,13 +576,14 @@ function GenerateTab({ color }) {
           </div>
           {!loading && output && (
             <button
-              onClick={() => { setOutput(""); }}
+              onClick={() => { setOutput(""); setFact(""); }}
               className="ghost-btn"
               style={{ marginTop: 12, fontSize: 14, padding: "8px 16px" }}
             >
               <ArrowCounterClockwise size={14} weight="bold" /> Clear
             </button>
           )}
+          {fact && !loading && output && <DidYouKnow fact={fact} color={color} />}
         </Card>
       )}
     </div>
@@ -506,6 +597,7 @@ function TokenizeTab({ color }) {
   const [input, setInput] = useState("Unbelievable! The cat sat on the mat.");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fact, setFact] = useState("");
 
   const tokenize = async () => {
     if (!input.trim()) return;
@@ -520,6 +612,7 @@ function TokenizeTab({ color }) {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      setFact(pickRandom(TOKENIZE_FACTS));
     } catch (err) {
       setResult({ error: err.message });
     }
@@ -686,6 +779,7 @@ function TokenizeTab({ color }) {
           }}>
             These are the actual tokens GPT-4o-mini uses — the same tokenizer as ChatGPT!
           </div>
+          {fact && <DidYouKnow fact={fact} color={color} />}
         </Card>
       )}
     </div>
