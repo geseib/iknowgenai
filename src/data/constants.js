@@ -1,16 +1,17 @@
 export const COLORS = [
   "#00f5d4","#00bbf9","#fee440","#f15bb5","#9b5de5",
-  "#fb5607","#06d6a0","#00f5d4","#fee440","#f15bb5",
-  "#9b5de5","#00bbf9","#fb5607","#06d6a0","#fee440"
+  "#fb5607","#06d6a0","#00f5d4","#fb5607","#fee440",
+  "#f15bb5","#9b5de5","#06d6a0","#00bbf9","#fb5607",
+  "#06d6a0","#fee440","#f15bb5"
 ];
 
-export const TOTAL = 15;
+export const TOTAL = 18;
 
 export const GROUPS = [
   { name: "Introduction",  start: 0, end: 2  },
   { name: "Meet the LLMs", start: 3, end: 6  },
-  { name: "How AI Thinks", start: 7, end: 13 },
-  { name: "Try It!",       start: 14, end: 14 },
+  { name: "How AI Thinks", start: 7, end: 16 },
+  { name: "Try It!",       start: 17, end: 17 },
 ];
 
 export const TITLES = [
@@ -22,8 +23,11 @@ export const TITLES = [
   "Meet the Models",
   "The Big Question",
   "How AI Learns",
+  "Three Steps to Helpful AI",
   "Numbers & Words",
+  "Tokens — Not Quite Words",
   "Words in Space",
+  "Beyond 2D",
   "Attention!",
   "The Thinking Layer",
   "Rinse & Repeat",

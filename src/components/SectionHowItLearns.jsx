@@ -53,31 +53,66 @@ const notes = [
 
 const mascotUrl = `${import.meta.env.BASE_URL}robotcomputerbrain.png`;
 
-/* ── Weight Dials ─────────────────────────────────────────────────────── */
-function WeightDials({ seed, spinning, color }) {
+/* ── Mini Dial (circular gauge with spinning needle) ─────────────────── */
+function MiniDial({ state, color, seed, index }) {
+  // Deterministic "locked" angle from seed
+  const slots = [0, 45, 90, 135, 180, 225, 270, 315];
+  const angle = slots[((seed || 0) * 137 + (index || 0) * 73) % slots.length];
+  const size = 48;
+
+  const isLocked = state === "locked";
+  const isStopped = state === "stopped";
+  const isSpinning = state === "spinning";
+
   return (
     <div style={{
-      display: "flex", gap: 5, alignItems: "flex-end",
-      height: 48, padding: "0 2px",
+      width: size, height: size, borderRadius: "50%", position: "relative",
+      background: "rgba(18,50,82,.6)",
+      border: `5px solid ${isLocked ? color : isStopped ? `${color}55` : `${color}88`}`,
+      boxShadow: isLocked
+        ? `0 0 0 2px ${color}28, 0 0 18px ${color}50, inset 0 0 12px ${color}20`
+        : "inset 0 0 0 1px rgba(255,255,255,.04)",
+      opacity: isStopped ? 0.45 : 1,
+      transition: "all .3s ease",
     }}>
-      {Array.from({ length: 4 }, (_, i) => {
-        const baseH = ((seed * 137 + i * 73) % 70) + 25;
-        const h = spinning
-          ? `${((seed * 53 + i * 97 + 40) % 70) + 25}%`
-          : `${baseH}%`;
-        return (
-          <div key={i} style={{
-            width: 10,
-            height: h,
-            borderRadius: 5,
-            background: spinning ? `${color}cc` : `${color}55`,
-            transition: spinning
-              ? "height .4s cubic-bezier(.68,-.55,.27,1.55)"
-              : "height .6s ease",
-            animation: spinning ? `dialSpin .5s ${i * 0.1}s ease both` : "none",
-          }} />
-        );
-      })}
+      {/* Inner ring */}
+      <div style={{
+        position: "absolute", inset: 8, borderRadius: "50%",
+        border: `3px solid ${isLocked ? `${color}44` : `${color}18`}`,
+      }} />
+      {/* Needle */}
+      <div style={{
+        position: "absolute", left: "50%", top: "50%",
+        width: 5, height: 16, borderRadius: 999,
+        background: isLocked ? color : isStopped ? `${color}66` : `${color}cc`,
+        transformOrigin: "50% calc(100% - 2px)",
+        transform: isSpinning ? undefined : `translate(-50%, -100%) rotate(${angle}deg)`,
+        animation: isSpinning ? `needleSpin .9s linear infinite` : "none",
+        boxShadow: isLocked ? `0 0 10px ${color}ee` : "none",
+        transition: isSpinning ? "none" : "background .3s ease",
+      }} />
+      {/* Pulse ring for winner */}
+      {isLocked && (
+        <div style={{
+          position: "absolute", inset: -7, borderRadius: "50%",
+          border: `2px solid ${color}99`,
+          animation: "dialPulse 1.6s ease-out infinite",
+          pointerEvents: "none",
+        }} />
+      )}
+    </div>
+  );
+}
+
+function DialRow({ state, color, seed }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      gap: 10, minHeight: 60,
+    }}>
+      {[0, 1, 2].map(i => (
+        <MiniDial key={i} state={state} color={color} seed={seed} index={i} />
+      ))}
     </div>
   );
 }
@@ -110,6 +145,12 @@ function RobotGuess({ guess, correct, revealed, seed, color, animate, pres }) {
   const imgSize = pres ? 70 : 60;
   const guessSize = pres ? 26 : 20;
 
+  const isWinner = revealed && correct;
+  const isLoser = revealed && !correct;
+
+  // Dial state: stopped while waiting, locked for winner, spinning for losers (adjusting weights)
+  const dialState = !revealed ? "stopped" : correct ? "locked" : "spinning";
+
   return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center",
@@ -117,24 +158,29 @@ function RobotGuess({ guess, correct, revealed, seed, color, animate, pres }) {
       flex: "1 1 0",
       padding: pres ? "20px 16px" : "16px 12px",
       borderRadius: 18,
-      background: revealed && correct ? `${color}15` : "rgba(255,255,255,.04)",
-      border: `2px solid ${revealed && correct ? color : "rgba(255,255,255,.1)"}`,
-      transition: "all .3s ease",
+      background: isWinner
+        ? `${color}15`
+        : "rgba(255,255,255,.04)",
+      border: isWinner
+        ? `2px solid ${color}`
+        : `2px solid rgba(255,255,255,.1)`,
+      boxShadow: isWinner
+        ? `0 0 0 1px ${color}28, 0 0 22px ${color}30, 0 0 56px ${color}18`
+        : "none",
+      opacity: isLoser ? 0.72 : 1,
+      transform: isWinner ? "translateY(-2px)" : "none",
+      transition: "all .35s ease",
       animation: animate ? "fadeUp .4s ease" : "none",
     }}>
       {/* Robot image */}
       <img src={mascotUrl} alt="AI" style={{
         width: imgSize, height: "auto",
-        opacity: revealed && !correct ? 0.4 : 1,
+        opacity: isLoser ? 0.4 : 1,
         transition: "opacity .3s ease",
       }} />
 
-      {/* Weight dials */}
-      <WeightDials
-        seed={seed}
-        spinning={revealed && !correct}
-        color={color}
-      />
+      {/* Spinning dials */}
+      <DialRow state={dialState} color={color} seed={seed} />
 
       {/* Guess or question mark */}
       {revealed ? (
@@ -183,25 +229,126 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
+/* ── Reading Prompt (words light up left to right) ───────────────────── */
+function ReadingPrompt({ text, reading, color, size = 32 }) {
+  const words = text.split(" ");
+  const [litCount, setLitCount] = useState(0);
+
+  useEffect(() => {
+    if (!reading) { setLitCount(words.length); return; }
+    setLitCount(0);
+    const delay = 1800 / words.length; // spread across first 1.8s of the wait
+    const timers = words.map((_, i) =>
+      setTimeout(() => setLitCount(i + 1), delay * (i + 1))
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [reading, text]);
+
+  return (
+    <div style={{
+      fontSize: size, textAlign: "center", lineHeight: 1.4,
+      fontFamily: "'Fredoka',sans-serif", fontWeight: 700,
+    }}>
+      {words.map((w, i) => (
+        <span key={i} style={{
+          color: i < litCount ? color : "rgba(255,255,255,.18)",
+          transition: "color .3s ease",
+        }}>
+          {w}{i < words.length - 1 ? " " : ""}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Presentation: single round with auto-reveal ─────────────────────── */
+function RobotRoundSlide({ round, roundIdx, color }) {
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    setRevealed(false);
+    const timer = setTimeout(() => setRevealed(true), 2500);
+    return () => clearTimeout(timer);
+  }, [roundIdx]);
+
+  const jokeCompletedUpTo = roundIdx + (revealed ? 1 : 0);
+
+  return (
+    <PresSlide>
+      <JokeProgress completedUpTo={jokeCompletedUpTo} color={color} pres />
+
+      <ReadingPrompt
+        text={round.prompt}
+        reading={!revealed}
+        color="white"
+        size={36}
+      />
+      <PresText size={24} color="rgba(255,255,255,.35)">
+        predict what comes next...
+      </PresText>
+
+      {/* Three robots side by side */}
+      <div style={{
+        display: "flex", gap: 20, justifyContent: "center",
+        width: "100%", maxWidth: 860,
+      }}>
+        {round.robots.map((r, i) => (
+          <RobotGuess
+            key={i}
+            guess={r.guess}
+            correct={r.correct}
+            revealed={revealed}
+            seed={roundIdx * 30 + i * 11 + (revealed ? 50 : 0)}
+            color={color}
+            animate={true}
+            pres
+          />
+        ))}
+      </div>
+
+      {revealed && (
+        <PresText size={22} color="rgba(255,255,255,.4)">
+          Wrong robots adjust their weights and try again next round!
+        </PresText>
+      )}
+    </PresSlide>
+  );
+}
+
 /* ── Main Section ────────────────────────────────────────────────────── */
 export default function SectionHowItLearns({ color, mode, slide }) {
   const [step, setStep] = useState(0);
-  const stepRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  const [roundRevealed, setRoundRevealed] = useState([false, false, false]);
+  const stepRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
   // Interactive mode steps:
   // 0: Intro
-  // 1: Round 1 - robots with "?" (unrevealed)
-  // 2: Round 1 - answers revealed
-  // 3: Round 2 - unrevealed
-  // 4: Round 2 - revealed
-  // 5: Round 3 - unrevealed
-  // 6: Round 3 - revealed
-  // 7: Insight
-  const maxStep = 7;
+  // 1: Round 1 (auto-reveals after delay)
+  // 2: Round 2 (auto-reveals after delay)
+  // 3: Round 3 (auto-reveals after delay)
+  // 4: Insight
+  const maxStep = 4;
 
   const advance = () => {
     if (step < maxStep) setStep(s => s + 1);
   };
+
+  // Auto-reveal timer for each round
+  useEffect(() => {
+    if (step >= 1 && step <= 3) {
+      const roundIdx = step - 1;
+      if (!roundRevealed[roundIdx]) {
+        const timer = setTimeout(() => {
+          setRoundRevealed(prev => {
+            const next = [...prev];
+            next[roundIdx] = true;
+            return next;
+          });
+        }, 4000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [step, roundRevealed]);
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -222,13 +369,13 @@ export default function SectionHowItLearns({ color, mode, slide }) {
     }
   }, [step]);
 
-  const completedUpTo = step >= 6 ? 4 : step >= 4 ? 2 : step >= 2 ? 1 : 0;
+  const completedUpTo = step >= 3 && roundRevealed[2] ? 4 : step >= 2 && roundRevealed[1] ? 2 : step >= 1 && roundRevealed[0] ? 1 : 0;
 
   /* ── Presentation Mode ── */
   /* Slides 0-2: Interactive joke reveal with the class
      Slide 3: Transition to robots
-     Slides 4-9: Robot rounds (question → answer × 3)
-     Slide 10: Insight */
+     Slides 4-6: Robot rounds (auto-reveal after delay × 3)
+     Slide 7: Insight */
   if (mode === "presentation") {
     // Slide 0: "Knock knock!" — kids will yell "Who's there?"
     if (slide === 0) {
@@ -318,51 +465,20 @@ export default function SectionHowItLearns({ color, mode, slide }) {
       );
     }
 
-    // Slides 4-9: Robot rounds (question → answer for each of 3 rounds)
-    if (slide >= 4 && slide <= 9) {
-      const roundIdx = Math.floor((slide - 4) / 2);
-      const revealed = (slide - 4) % 2 === 1;
-      const round = ROUNDS[roundIdx];
-      const jokeCompletedUpTo = roundIdx + (revealed ? 1 : 0);
-
+    // Slides 4-6: Robot rounds (auto-reveal after delay)
+    if (slide >= 4 && slide <= 6) {
+      const roundIdx = slide - 4;
       return (
-        <PresSlide>
-          <JokeProgress completedUpTo={jokeCompletedUpTo} color={color} pres />
-
-          <PresText size={32} color="rgba(255,255,255,.6)">
-            After "<strong style={{ color: "white" }}>{round.prompt}</strong>" predict what comes next...
-          </PresText>
-
-          {/* Three robots side by side */}
-          <div style={{
-            display: "flex", gap: 20, justifyContent: "center",
-            width: "100%", maxWidth: 860,
-          }}>
-            {round.robots.map((r, i) => (
-              <RobotGuess
-                key={i}
-                guess={r.guess}
-                correct={r.correct}
-                revealed={revealed}
-                seed={roundIdx * 30 + i * 11 + (revealed ? 50 : 0)}
-                color={color}
-                animate={true}
-                pres
-              />
-            ))}
-          </div>
-
-          {revealed && (
-            <PresText size={22} color="rgba(255,255,255,.4)">
-              Wrong robots adjust their weights and try again next round!
-            </PresText>
-          )}
-        </PresSlide>
+        <RobotRoundSlide
+          round={ROUNDS[roundIdx]}
+          roundIdx={roundIdx}
+          color={color}
+        />
       );
     }
 
-    // Slide 10: Insight
-    if (slide === 10) {
+    // Slide 7: Insight
+    if (slide === 7) {
       return (
         <PresSlide>
           <JokeProgress completedUpTo={4} color={color} pres />
@@ -452,26 +568,33 @@ export default function SectionHowItLearns({ color, mode, slide }) {
         )}
       </div>
 
-      {/* ── Rounds 1-3: unrevealed → revealed ── */}
+      {/* ── Rounds 1-3: auto-reveal after delay ── */}
       {ROUNDS.map((round, roundIdx) => {
-        const questionStep = roundIdx * 2 + 1;
-        const answerStep = roundIdx * 2 + 2;
+        const roundStep = roundIdx + 1;
+        const revealed = roundRevealed[roundIdx];
         const jokeCompletedBase = roundIdx;
 
         return (
           <div key={roundIdx}>
-            {/* Question slide - robots with "?" */}
-            {step >= questionStep && (
+            {step >= roundStep && (
               <div
-                ref={stepRefs[roundIdx * 2]}
+                ref={stepRefs[roundIdx]}
                 style={{ animation: "fadeUp .4s ease", paddingTop: 24 }}
               >
-                <JokeProgress completedUpTo={jokeCompletedBase} color={color} />
-                <div style={{
-                  fontFamily: "'Fredoka',sans-serif", fontSize: 22,
-                  color: "rgba(255,255,255,.5)", textAlign: "center", marginBottom: 16,
-                }}>
-                  After "{round.prompt}" — predict what comes next...
+                <JokeProgress completedUpTo={jokeCompletedBase + (revealed ? 1 : 0)} color={color} />
+                <div style={{ marginBottom: 16 }}>
+                  <ReadingPrompt
+                    text={round.prompt}
+                    reading={!revealed}
+                    color="white"
+                    size={22}
+                  />
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif", fontSize: 16,
+                    color: "rgba(255,255,255,.35)", textAlign: "center", marginTop: 6,
+                  }}>
+                    predict what comes next...
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
                   {round.robots.map((r, i) => (
@@ -479,20 +602,16 @@ export default function SectionHowItLearns({ color, mode, slide }) {
                       key={i}
                       guess={r.guess}
                       correct={r.correct}
-                      revealed={step >= answerStep}
-                      seed={roundIdx * 30 + i * 11 + (step >= answerStep ? 50 : 0)}
+                      revealed={revealed}
+                      seed={roundIdx * 30 + i * 11 + (revealed ? 50 : 0)}
                       color={color}
                       animate={true}
                     />
                   ))}
                 </div>
 
-                {step === questionStep && (
-                  <ContinueButton onClick={advance} color={color} label="Reveal answers!" />
-                )}
-
-                {step >= answerStep && step === answerStep && (
-                  <div style={{ textAlign: "center", marginTop: 12 }}>
+                {revealed && step === roundStep && (
+                  <div style={{ textAlign: "center", marginTop: 12, animation: "fadeUp .4s ease" }}>
                     <div style={{
                       fontSize: 18, color: "rgba(255,255,255,.4)", marginBottom: 8,
                     }}>
@@ -512,10 +631,10 @@ export default function SectionHowItLearns({ color, mode, slide }) {
         );
       })}
 
-      {/* ── Step 7: Insight ── */}
-      {step >= 7 && (
+      {/* ── Step 4: Insight ── */}
+      {step >= 4 && (
         <div
-          ref={stepRefs[6]}
+          ref={stepRefs[3]}
           style={{
             animation: "fadeUp .5s ease", paddingTop: 24,
             minHeight: "50vh", display: "flex", flexDirection: "column",

@@ -7,6 +7,8 @@ export const ALL_CSS = `
   @keyframes blobPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
   @keyframes probIn { from{width:0!important} }
   @keyframes dialSpin { 0%{transform:scaleY(1)} 30%{transform:scaleY(0.3)} 60%{transform:scaleY(1.4)} 100%{transform:scaleY(1)} }
+  @keyframes needleSpin { from{transform:translate(-50%,-100%) rotate(0deg)} to{transform:translate(-50%,-100%) rotate(360deg)} }
+  @keyframes dialPulse { 0%{transform:scale(.92);opacity:0} 26%{opacity:1} 100%{transform:scale(1.3);opacity:0} }
   @keyframes gearSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
   .spin { animation: gearSpin .8s linear infinite; }
   @keyframes navPulse {
@@ -29,6 +31,7 @@ export const ALL_CSS = `
   }
   .fade-up { animation: fadeUp .45s ease forwards; }
   .wow-reveal { animation: wowReveal .6s cubic-bezier(.34,1.56,.64,1) forwards; }
+  @keyframes snapSplit { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
   .pop-in { animation: popIn .4s cubic-bezier(.34,1.56,.64,1) forwards; }
   .word-chip {
     display:inline-flex; align-items:center; padding:8px 14px; border-radius:10px;

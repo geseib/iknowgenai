@@ -18,8 +18,11 @@ import SectionBrainVsAI from "./components/SectionBrainVsAI";
 import SectionWhatIsLLM from "./components/SectionWhatIsLLM";
 import SectionMeetModels from "./components/SectionMeetModels";
 import SectionTheBridge from "./components/SectionTheBridge";
+import SectionThreeSteps from "./components/SectionThreeSteps";
 import SectionHook from "./components/SectionHook";
+import SectionTokens from "./components/SectionTokens";
 import SectionEmbeddings from "./components/SectionEmbeddings";
+import SectionBeyond2D from "./components/SectionBeyond2D";
 import SectionAttention from "./components/SectionAttention";
 import SectionMLP from "./components/SectionMLP";
 import SectionLayers from "./components/SectionLayers";
@@ -35,8 +38,11 @@ const SECTIONS = [
   SectionMeetModels,
   SectionTheBridge,
   SectionHowItLearns,
+  SectionThreeSteps,
   SectionHook,
+  SectionTokens,
   SectionEmbeddings,
+  SectionBeyond2D,
   SectionAttention,
   SectionMLP,
   SectionLayers,

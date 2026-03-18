@@ -3,6 +3,7 @@ import {
   Lightning,
   MagnifyingGlass,
   PencilSimple,
+  Scissors,
   ArrowRight,
   ArrowCounterClockwise,
   Star,
@@ -498,6 +499,199 @@ function GenerateTab({ color }) {
   );
 }
 
+/* ── Tokenize Tab ── */
+const CHIP_COLORS = ["#00f5d4", "#00bbf9", "#fee440", "#f15bb5", "#9b5de5", "#fb5607", "#06d6a0", "#ff6b6b"];
+
+function TokenizeTab({ color }) {
+  const [input, setInput] = useState("Unbelievable! The cat sat on the mat.");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const tokenize = async () => {
+    if (!input.trim()) return;
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/tokenize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: input }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setResult(data);
+    } catch (err) {
+      setResult({ error: err.message });
+    }
+    setLoading(false);
+  };
+
+  const presets = [
+    "Unbelievable! The cat sat on the mat.",
+    "The quick brown fox jumps over the lazy dog.",
+    "Supercalifragilisticexpialidocious",
+    "AI is really really really cool!!!",
+    "🎉 Hello World! 🌍",
+  ];
+
+  return (
+    <div>
+      <div style={{
+        fontFamily: "'Fredoka',sans-serif",
+        fontSize: 16,
+        color: "rgba(255,255,255,.55)",
+        marginBottom: 14,
+        lineHeight: 1.5,
+      }}>
+        Type any text and see exactly how AI splits it into tokens — the actual pieces it processes!
+      </div>
+
+      {/* Preset buttons */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+        {presets.map((p, i) => (
+          <button
+            key={i}
+            onClick={() => { setInput(p); setResult(null); }}
+            className="ghost-btn"
+            style={{
+              fontSize: 12,
+              padding: "5px 12px",
+              borderColor: input === p ? `${color}60` : undefined,
+              color: input === p ? color : undefined,
+            }}
+          >
+            {p.length > 25 ? p.slice(0, 25) + "…" : p}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && tokenize()}
+          placeholder="Type anything..."
+          style={{
+            flex: 1,
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 16,
+            padding: "12px 16px",
+            borderRadius: 12,
+            border: `2px solid ${color}40`,
+            background: "rgba(255,255,255,.06)",
+            color: "white",
+            outline: "none",
+          }}
+        />
+        <button
+          onClick={tokenize}
+          disabled={loading || !input.trim()}
+          className="cta-btn"
+          style={{ background: color, color: "#000", fontSize: 16, padding: "12px 22px" }}
+        >
+          {loading ? <Spinner size={18} className="spin" /> : <>Tokenize <Scissors size={16} weight="bold" /></>}
+        </button>
+      </div>
+
+      {result?.error && (
+        <div style={{ color: "#f15bb5", fontSize: 14, marginBottom: 12 }}>Error: {result.error}</div>
+      )}
+
+      {result?.tokens && (
+        <Card>
+          {/* Stats bar */}
+          <div style={{
+            display: "flex", gap: 20, marginBottom: 16,
+            fontSize: 14, fontFamily: "'Fredoka',sans-serif",
+          }}>
+            <div style={{ color: "rgba(255,255,255,.4)" }}>
+              Characters: <span style={{ color: "white", fontWeight: 700 }}>{result.charCount}</span>
+            </div>
+            <div style={{ color: "rgba(255,255,255,.4)" }}>
+              Tokens: <span style={{ color, fontWeight: 700 }}>{result.count}</span>
+            </div>
+            <div style={{ color: "rgba(255,255,255,.4)" }}>
+              Ratio: <span style={{ color: "rgba(255,255,255,.7)", fontWeight: 600 }}>
+                {(result.charCount / result.count).toFixed(1)} chars/token
+              </span>
+            </div>
+          </div>
+
+          {/* Token chips */}
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16,
+          }}>
+            {result.tokens.map((t, i) => {
+              const chipColor = CHIP_COLORS[i % CHIP_COLORS.length];
+              // Show spaces visually
+              const display = t.text.replace(/ /g, "⎵").replace(/\n/g, "↵");
+              return (
+                <div key={i} style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  animation: `popIn .3s ${i * 0.03}s ease both`,
+                }}>
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 16, fontWeight: 600,
+                    padding: "6px 12px",
+                    borderRadius: 10,
+                    background: `${chipColor}18`,
+                    border: `2px solid ${chipColor}60`,
+                    color: "white",
+                    whiteSpace: "pre",
+                  }}>
+                    {display}
+                  </div>
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                    fontSize: 10,
+                    color: `${chipColor}88`,
+                    marginTop: 3,
+                  }}>
+                    {t.id}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Original text with token boundaries highlighted */}
+          <div style={{
+            fontSize: 12, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2,
+            color: "rgba(255,255,255,.35)", textTransform: "uppercase", marginBottom: 8,
+          }}>
+            Token boundaries:
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 18,
+            lineHeight: 1.6,
+            color: "rgba(255,255,255,.85)",
+          }}>
+            {result.tokens.map((t, i) => (
+              <span key={i} style={{
+                borderBottom: `2px solid ${CHIP_COLORS[i % CHIP_COLORS.length]}60`,
+                paddingBottom: 2,
+                marginRight: 0,
+              }}>
+                {t.text}
+              </span>
+            ))}
+          </div>
+
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 13,
+            color: "rgba(255,255,255,.3)", marginTop: 14, fontStyle: "italic",
+          }}>
+            These are the actual tokens GPT-4o-mini uses — the same tokenizer as ChatGPT!
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 /* ── Main Section ── */
 export default function SectionTryIt({ color, mode, slide }) {
   const grade = useGrade();
@@ -510,7 +704,7 @@ export default function SectionTryIt({ color, mode, slide }) {
         <PresSlide>
           <PresText color={color} size={48}>Try It Yourself!</PresText>
           <PresText size={26} color="rgba(255,255,255,.55)">
-            Now let's use <span style={{ color: "white" }}>real AI</span> — predict words, explore embeddings, and generate text.
+            Now let's use <span style={{ color: "white" }}>real AI</span> — predict words, tokenize text, explore embeddings, and generate.
           </PresText>
         </PresSlide>
       );
@@ -523,12 +717,14 @@ export default function SectionTryIt({ color, mode, slide }) {
       {/* Tab selector */}
       <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 24, flexWrap: "wrap" }}>
         <Tab active={tab === "predict"} label="Predict" Icon={Lightning} color={color} onClick={() => setTab("predict")} />
+        <Tab active={tab === "tokenize"} label="Tokenize" Icon={Scissors} color={color} onClick={() => setTab("tokenize")} />
         <Tab active={tab === "embed"} label="Word Space" Icon={MagnifyingGlass} color={color} onClick={() => setTab("embed")} />
         <Tab active={tab === "generate"} label="Generate" Icon={PencilSimple} color={color} onClick={() => setTab("generate")} />
       </div>
 
       {/* Active tab */}
       {tab === "predict" && <PredictTab color={color} defaultPrompt={tryItContent.defaultPrompt} />}
+      {tab === "tokenize" && <TokenizeTab color={color} />}
       {tab === "embed" && <EmbedTab color={color} embedPresets={tryItContent.embedPresets} />}
       {tab === "generate" && <GenerateTab color={color} />}
     </div>

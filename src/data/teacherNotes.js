@@ -246,7 +246,53 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 8: SectionHook (5 slides) ──
+  // ── 8: SectionThreeSteps (9 slides) — 7-8 only ──
+  {
+    title: "Three Steps to Helpful AI",
+    slides: [
+      {
+        keyPoints: ["Pre-training alone isn't enough", "AI reads the internet but doesn't know how to be helpful"],
+        narrative: "Connect back to the knock-knock joke section. 'Remember how the robots learned by guessing? Real AI does something similar — but on a much bigger scale, and in three stages.'",
+        definitions: [],
+        discussion: ["If you read every book in the library, would you automatically be helpful?"],
+      },
+      {
+        keyPoints: ["Pre-training = reading trillions of words", "Learns patterns, grammar, facts — everything at once"],
+        narrative: "The spinning dials represent the billions of weights being adjusted. The AI is speed-reading the entire internet.",
+        definitions: [{ term: "Pre-training", def: "The first stage where AI reads massive amounts of text to learn patterns" }],
+        discussion: [],
+      },
+      {
+        keyPoints: ["Raw model just continues patterns", "It doesn't know it should answer questions"],
+        narrative: "This is a genuinely surprising moment for kids. The AI that read trillions of words... just keeps going. It doesn't know what a 'question' is yet.",
+        definitions: [],
+        discussion: ["Why would reading lots of text not teach you how to have a conversation?"],
+      },
+      {
+        keyPoints: ["Instruction tuning teaches question-answer format", "Humans write thousands of example conversations"],
+        narrative: "The before/after contrast is powerful. Same AI, completely different behavior — just from seeing examples of good conversations.",
+        definitions: [{ term: "Instruction Tuning", def: "Training the AI on example conversations so it learns to follow instructions and answer questions" }],
+        discussion: [],
+      },
+      {
+        keyPoints: ["RLHF = Reinforcement Learning from Human Feedback", "Humans rate which responses are better"],
+        narrative: "The 'GOOD' reveal is the key moment. Being able to answer isn't enough — the AI needs to learn what a GOOD answer looks like.",
+        definitions: [{ term: "RLHF", def: "Reinforcement Learning from Human Feedback — humans rate AI responses to teach it what 'good' means" }],
+        discussion: ["What makes an answer 'good' vs just 'correct'?"],
+      },
+      empty, // RLHF round 1
+      empty, // RLHF round 2
+      empty, // RLHF round 3
+      {
+        keyPoints: ["Human feedback shapes AI personality", "Different raters = different AI behavior"],
+        narrative: "The personality bars respond to the class's choices. Great moment to discuss: 'Who decides what GOOD means? Is there only one right answer?'",
+        definitions: [],
+        discussion: ["Who should get to decide what 'good' means for AI?", "Would AI from different countries behave differently?"],
+      },
+    ],
+  },
+
+  // ── 9: SectionHook (5 slides) ──
   {
     title: "The Secret: Numbers",
     slides: [
@@ -285,7 +331,56 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 9: SectionEmbeddings (8 slides) ──
+  // ── 10: SectionTokens (7 slides) — 7-8 only ──
+  {
+    title: "Tokens — Not Quite Words",
+    slides: [
+      {
+        keyPoints: ["Tokens are the actual units AI processes", "Not words, not letters — something in between"],
+        narrative: "Kids assumed AI thinks in words. This section reveals the truth: AI thinks in tokens — subword pieces.",
+        definitions: [{ term: "Token", def: "A piece of a word that AI actually processes — shorter words are one token, longer words get split into pieces" }],
+        discussion: ["Why wouldn't AI just use whole words?"],
+      },
+      {
+        keyPoints: ["Vocab size is a design choice", "Too small = too many pieces, too big = too much to learn"],
+        narrative: "The spectrum helps kids understand this is a design tradeoff, not a fixed rule.",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["At 95 tokens, every character is separate", "Way too many pieces for just three words"],
+        narrative: "Watch the characters explode apart. 11 tokens for 'The cat sat' — that's wildly inefficient.",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["At 1M+ tokens, every word is unique", "Too many entries to learn well"],
+        narrative: "The overwhelming grid drives home: you'd need a million unique entries. That's impractical.",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["50K is the sweet spot", "Reusable pieces like 'un-', '-able', '-ing'"],
+        narrative: "The snap-split of 'Unbelievable' into 'Un' + 'believ' + 'able' is the key insight. These pieces show up in other words too!",
+        definitions: [{ term: "Subword Tokenization", def: "Splitting words into reusable pieces — 'unbelievable' becomes 'Un' + 'believ' + 'able'" }],
+        discussion: ["What other words use the piece 'un-'?"],
+      },
+      {
+        keyPoints: ["Interactive tokenization demo", "Kids type words and see them split"],
+        narrative: "Let kids experiment freely. Try long words, compound words, and made-up words. The fallback splits unknown words into 3-char chunks.",
+        definitions: [],
+        discussion: ["Can you find a word that's just one token?"],
+      },
+      {
+        keyPoints: ["50,000 choices for every position", "Like picking one person from a stadium"],
+        narrative: "The stadium visual makes the scale tangible. For every single position in a sentence, AI considers 50,000 options.",
+        definitions: [],
+        discussion: ["How does the AI narrow down from 50,000 to just one?"],
+      },
+    ],
+  },
+
+  // ── 11: SectionEmbeddings (8 slides) ──
   {
     title: "Words in Space",
     slides: [
@@ -325,7 +420,50 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 10: SectionAttention (7 slides) ──
+  // ── 12: SectionBeyond2D (6 slides) — 7-8 only ──
+  {
+    title: "Beyond 2D",
+    slides: [
+      {
+        keyPoints: ["Connect back to the 2D scatter plot", "Words as dots was just the beginning"],
+        narrative: "Reference the scatter plot they saw earlier. 'That was cool, but it was only 2 dimensions. What if we could add more?'",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["1D = just a number line", "Very limited — can only show close vs far"],
+        narrative: "Start simple. Cat and Dog are close, Pizza is far. But there's no room for nuance.",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["2D = two axes", "Words can spread out more — clusters emerge"],
+        narrative: "Now words can cluster by type. King/Queen group, animals group. Better, but still limited.",
+        definitions: [],
+        discussion: [],
+      },
+      {
+        keyPoints: ["3D = a cube of meaning", "Drag to explore — words float in 3D space"],
+        narrative: "Let kids drag the cube around. The physicality of rotating it makes the concept tangible. 'Three dimensions are what we live in — but AI goes way beyond.'",
+        definitions: [],
+        discussion: ["What would a 4th dimension even look like?"],
+      },
+      {
+        keyPoints: ["The counter accelerates from 4 to 12,288", "You can't visualize this — but the math works"],
+        narrative: "The accelerating counter is the wow moment. Let it run. When it hits 12,288, let it sink in. We can't picture it, but the math handles it perfectly.",
+        definitions: [{ term: "High-Dimensional Space", def: "A space with thousands of axes — humans can't visualize it, but math can work in it perfectly" }],
+        discussion: ["Why would more dimensions be better?"],
+      },
+      {
+        keyPoints: ["Cosine similarity measures how similar two words are", "1.0 = same meaning, 0.0 = unrelated"],
+        narrative: "The arrow pairs make cosine similarity visual. Similar words point the same direction. Different words point apart.",
+        definitions: [{ term: "Cosine Similarity", def: "A number from 0 to 1 that measures how similar two word vectors are — by comparing the angle between their arrows" }],
+        discussion: ["What word pairs would have the highest similarity?"],
+      },
+    ],
+  },
+
+  // ── 13: SectionAttention (7 slides) ──
   {
     title: "Attention!",
     slides: [
@@ -375,7 +513,7 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 11: SectionMLP (4 slides) ──
+  // ── 14: SectionMLP (4 slides) ──
   {
     title: "The Thinking Layer",
     slides: [
@@ -408,7 +546,7 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 12: SectionLayers (2 slides) ──
+  // ── 15: SectionLayers (2 slides) ──
   {
     title: "Rinse & Repeat",
     slides: [
@@ -429,7 +567,7 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 13: SectionPredict (5 slides) ──
+  // ── 16: SectionPredict (5 slides) ──
   {
     title: "Predict!",
     slides: [
@@ -468,7 +606,7 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 14: SectionTryIt (2 slides) ──
+  // ── 17: SectionTryIt (2 slides) ──
   {
     title: "Try It Yourself!",
     slides: [
