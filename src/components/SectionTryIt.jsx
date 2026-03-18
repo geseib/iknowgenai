@@ -12,6 +12,7 @@ import {
   Scales,
   Flame,
   Lightbulb,
+  Funnel,
 } from "@phosphor-icons/react";
 import { Card, PresSlide, PresText } from "./shared";
 import { useGrade } from "../data/GradeContext";
@@ -137,6 +138,7 @@ function tempLabel(t) {
 function PredictTab({ color, defaultPrompt }) {
   const [prompt, setPrompt] = useState(defaultPrompt);
   const [temp, setTemp] = useState(1.0);
+  const [topP, setTopP] = useState(0.9);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fact, setFact] = useState("");
@@ -186,7 +188,7 @@ function PredictTab({ color, defaultPrompt }) {
       {/* Temperature slider */}
       <div style={{
         display: "flex", alignItems: "center", gap: 12,
-        marginBottom: 14, padding: "10px 14px",
+        marginBottom: 8, padding: "10px 14px",
         background: "rgba(255,255,255,.04)", borderRadius: 12,
         border: "1px solid rgba(255,255,255,.08)",
       }}>
@@ -215,6 +217,53 @@ function PredictTab({ color, defaultPrompt }) {
         }}>
           {tm.name}
         </div>
+      </div>
+
+      {/* Top-p slider */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 12,
+        marginBottom: 14, padding: "10px 14px",
+        background: "rgba(255,255,255,.04)", borderRadius: 12,
+        border: "1px solid rgba(255,255,255,.08)",
+      }}>
+        <Funnel size={20} weight="duotone" color={topP >= 0.95 ? "rgba(255,255,255,.35)" : "#00bbf9"} />
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 14, color: "rgba(255,255,255,.5)", whiteSpace: "nowrap" }}>
+          Top-p: <span style={{ color: topP >= 0.95 ? "rgba(255,255,255,.6)" : "#00bbf9", fontWeight: 700 }}>{topP.toFixed(2)}</span>
+        </div>
+        <div style={{ flex: 1, position: "relative" }}>
+          <div style={{
+            position: "absolute", top: "50%", left: 0, right: 0, height: 6, borderRadius: 3,
+            transform: "translateY(-50%)", pointerEvents: "none",
+            background: "linear-gradient(to right, #00bbf9 0%, #00bbf9 60%, rgba(255,255,255,.15) 100%)",
+          }} />
+          <input
+            type="range" min="0.1" max="1.0" step="0.05"
+            value={topP}
+            onChange={e => setTopP(parseFloat(e.target.value))}
+            className="temp-slider"
+          />
+        </div>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif", fontSize: 12,
+          padding: "3px 10px", borderRadius: 12,
+          background: topP >= 0.95 ? "rgba(255,255,255,.06)" : "#00bbf920",
+          border: `1px solid ${topP >= 0.95 ? "rgba(255,255,255,.12)" : "#00bbf950"}`,
+          color: topP >= 0.95 ? "rgba(255,255,255,.4)" : "#00bbf9",
+          whiteSpace: "nowrap",
+        }}>
+          {topP >= 0.95 ? "Off" : topP <= 0.3 ? "Tight" : topP <= 0.6 ? "Focused" : "Normal"}
+        </div>
+      </div>
+
+      {/* Explanation of what these controls do */}
+      <div style={{
+        fontFamily: "'Fredoka',sans-serif", fontSize: 13,
+        color: "rgba(255,255,255,.3)", lineHeight: 1.5,
+        marginBottom: 14, padding: "0 4px",
+      }}>
+        <strong style={{ color: "rgba(255,255,255,.45)" }}>Temperature</strong> reshuffles how likely each word is.{" "}
+        <strong style={{ color: "rgba(255,255,255,.45)" }}>Top-p</strong> filters: add up probabilities from most to least likely — once the total reaches your threshold, everything else is cut off.{" "}
+        {topP < 0.95 && <>At <span style={{ color: "#00bbf9" }}>{(topP * 100).toFixed(0)}%</span>, the AI only picks from words that together make up {(topP * 100).toFixed(0)}% of the probability.</>}
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
@@ -250,43 +299,111 @@ function PredictTab({ color, defaultPrompt }) {
         <div style={{ color: "#f15bb5", fontSize: 14, marginBottom: 12 }}>Error: {result.error}</div>
       )}
 
-      {result?.candidates && (
+      {result?.candidates && (() => {
+        // Compute cumulative probabilities and top-p cutoff
+        const topPPct = topP * 100;
+        let cumulative = 0;
+        const enriched = result.candidates.map((c, i) => {
+          cumulative += c.pct;
+          // A candidate is "in" if the cumulative total BEFORE adding it was still below the threshold,
+          // OR it's the very first candidate (always included)
+          const cumulativeBefore = cumulative - c.pct;
+          const included = cumulativeBefore < topPPct || i === 0;
+          return { ...c, cumulative: Math.round(cumulative * 10) / 10, included };
+        });
+        // Find the index where the cutoff line should appear
+        const lastIncludedIdx = enriched.reduce((last, e, i) => e.included ? i : last, 0);
+        const showCutoff = topP < 0.95 && lastIncludedIdx < enriched.length - 1;
+
+        return (
         <Card>
           <div style={{
-            fontSize: 12, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2,
-            color: "rgba(255,255,255,.35)", textTransform: "uppercase", marginBottom: 12,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            marginBottom: 12,
           }}>
-            Real AI predictions:
+            <div style={{
+              fontSize: 12, fontFamily: "'Fredoka',sans-serif", letterSpacing: 2,
+              color: "rgba(255,255,255,.35)", textTransform: "uppercase",
+            }}>
+              Real AI predictions:
+            </div>
+            {topP < 0.95 && (
+              <div style={{
+                fontSize: 12, fontFamily: "'Fredoka',sans-serif",
+                color: "#00bbf9", fontWeight: 600,
+              }}>
+                top-p keeps {enriched.filter(e => e.included).length} of {enriched.length} words
+              </div>
+            )}
           </div>
-          {result.candidates.map((c, i) => {
+          {enriched.map((c, i) => {
             const isTop = i === 0;
+            const dimmed = !c.included && topP < 0.95;
             return (
-              <div key={i} onClick={() => !loading && pickWord(c.token)} style={{
-                display: "flex", alignItems: "center", gap: 12, marginBottom: 8,
-                animation: `fadeUp .3s ${i * 0.05}s ease both`,
-                cursor: "pointer", borderRadius: 8, padding: "4px 6px", margin: "0 -6px",
-                transition: "background .15s ease",
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.06)"}
-                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-              >
-                <div style={{
-                  width: 90, fontFamily: "'Fredoka',sans-serif", fontSize: 17,
-                  color: isTop ? color : "rgba(255,255,255,.5)", flexShrink: 0,
-                  display: "flex", alignItems: "center", gap: 5, fontWeight: isTop ? 700 : 400,
-                }}>
-                  {isTop && <Star size={14} weight="fill" color={color} />}
-                  {c.token}
-                </div>
-                <div style={{ flex: 1, height: 10, background: "rgba(255,255,255,.06)", borderRadius: 5, overflow: "hidden" }}>
+              <div key={i}>
+                {/* Cutoff divider line */}
+                {showCutoff && i === lastIncludedIdx + 1 && (
                   <div style={{
-                    height: "100%", width: `${c.pct}%`, borderRadius: 5,
-                    background: isTop ? color : "rgba(255,255,255,.18)",
-                    transition: "width .35s ease",
-                  }} />
-                </div>
-                <div style={{ width: 50, textAlign: "right", fontSize: 15, color: isTop ? color : "rgba(255,255,255,.4)", fontWeight: isTop ? 700 : 400, flexShrink: 0 }}>
-                  {c.pct}%
+                    display: "flex", alignItems: "center", gap: 8,
+                    margin: "6px 0 8px",
+                    animation: "fadeUp .3s ease both",
+                  }}>
+                    <div style={{ flex: 1, height: 1, background: "#00bbf940" }} />
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif", fontSize: 11,
+                      color: "#00bbf9", whiteSpace: "nowrap", fontWeight: 600,
+                      letterSpacing: 1,
+                    }}>
+                      FILTERED OUT (below top-p {(topP * 100).toFixed(0)}%)
+                    </div>
+                    <div style={{ flex: 1, height: 1, background: "#00bbf940" }} />
+                  </div>
+                )}
+                <div onClick={() => !loading && !dimmed && pickWord(c.token)} style={{
+                  display: "flex", alignItems: "center", gap: 12, marginBottom: 8,
+                  animation: `fadeUp .3s ${i * 0.05}s ease both`,
+                  cursor: dimmed ? "default" : "pointer",
+                  borderRadius: 8, padding: "4px 6px", margin: "0 -6px",
+                  transition: "all .25s ease",
+                  opacity: dimmed ? 0.28 : 1,
+                  filter: dimmed ? "grayscale(0.7)" : "none",
+                }}
+                  onMouseEnter={e => { if (!dimmed) e.currentTarget.style.background = "rgba(255,255,255,.06)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{
+                    width: 90, fontFamily: "'Fredoka',sans-serif", fontSize: 17,
+                    color: isTop ? color : "rgba(255,255,255,.5)", flexShrink: 0,
+                    display: "flex", alignItems: "center", gap: 5, fontWeight: isTop ? 700 : 400,
+                  }}>
+                    {isTop && <Star size={14} weight="fill" color={color} />}
+                    {c.token}
+                  </div>
+                  <div style={{ flex: 1, height: 10, background: "rgba(255,255,255,.06)", borderRadius: 5, overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%", width: `${c.pct}%`, borderRadius: 5,
+                      background: isTop ? color : (dimmed ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.18)"),
+                      transition: "width .35s ease",
+                    }} />
+                  </div>
+                  <div style={{
+                    width: 50, textAlign: "right", fontSize: 15, flexShrink: 0,
+                    color: isTop ? color : "rgba(255,255,255,.4)",
+                    fontWeight: isTop ? 700 : 400,
+                  }}>
+                    {c.pct}%
+                  </div>
+                  {/* Cumulative indicator */}
+                  {topP < 0.95 && (
+                    <div style={{
+                      width: 48, textAlign: "right", fontSize: 11, flexShrink: 0,
+                      fontFamily: "'Fredoka',sans-serif",
+                      color: c.included ? "#00bbf9" : "rgba(255,255,255,.15)",
+                      fontWeight: 600,
+                    }}>
+                      Σ{c.cumulative}%
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -305,7 +422,8 @@ function PredictTab({ color, defaultPrompt }) {
           </div>
           {fact && <DidYouKnow fact={fact} color={color} />}
         </Card>
-      )}
+        );
+      })()}
     </div>
   );
 }
