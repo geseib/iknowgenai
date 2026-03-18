@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { moderate } from "./_moderate.js";
+import { moderate, SAFE_SYSTEM_PROMPT } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "Complete the text with one word. Do not explain. The word must be appropriate for children ages 8-11. Never produce violent, sexual, scary, or inappropriate content." },
+        { role: "system", content: SAFE_SYSTEM_PROMPT + " Complete the text with one word. Do not explain." },
         { role: "user", content: prompt },
       ],
       max_tokens: 1,

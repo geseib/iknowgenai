@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { moderate } from "./_moderate.js";
+import { moderate, SAFE_SYSTEM_PROMPT } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -42,14 +42,7 @@ export default async function handler(req, res) {
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "You are a helpful, kid-friendly assistant for children ages 8-11 in a classroom setting. " +
-            "Keep responses short, positive, and age-appropriate. " +
-            "Never produce content that is violent, scary, sexual, or inappropriate for young children. " +
-            "If asked about inappropriate topics, politely redirect to something fun and educational. " +
-            "Do not discuss weapons, drugs, alcohol, death, horror, or adult themes."
-        },
+        { role: "system", content: SAFE_SYSTEM_PROMPT + " Keep responses short (2-3 sentences max)." },
         { role: "user", content: prompt },
       ],
       max_tokens: Math.min(maxTokens, MAX_OUTPUT_TOKENS),
