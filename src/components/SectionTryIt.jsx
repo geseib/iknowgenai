@@ -161,6 +161,7 @@ function PredictTab({ color, defaultPrompt }) {
       if (data.blocked) {
         setBlocked(true);
         setResult(null);
+        setPrompt(defaultPrompt);
         setLoading(false);
         return;
       }
@@ -477,6 +478,7 @@ function EmbedTab({ color, embedPresets }) {
       const data = await res.json();
       if (data.blocked) {
         setBlocked(true);
+        setInput(DEFAULT_WORDS.join(", "));
         setLoading(false);
         return;
       }
@@ -642,6 +644,7 @@ function GenerateTab({ color }) {
             if (data.blocked) {
               setBlocked(true);
               setOutput("");
+              setPrompt("");
               setFact("");
               setLoading(false);
               return;
@@ -777,6 +780,7 @@ function TokenizeTab({ color }) {
       const data = await res.json();
       if (data.blocked) {
         setBlocked(true);
+        setInput("Unbelievable! The cat sat on the mat.");
         setLoading(false);
         return;
       }
