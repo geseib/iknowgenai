@@ -3,6 +3,9 @@ import { moderate } from "./_moderate.js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Max input prompt length in characters (~200 tokens at 4 chars/token)
+const MAX_PROMPT_LENGTH = 800;
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "POST only" });
@@ -13,10 +16,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "prompt required" });
   }
 
-  // Content safety check
+  // Guard: cap input length to control costs
+  if (prompt.length > MAX_PROMPT_LENGTH) {
+    return res.status(400).json({ error: `Prompt too long (max ${MAX_PROMPT_LENGTH} characters)` });
+  }
+
+  // Layer 1+2: Content safety check on input
   const check = await moderate(prompt);
   if (!check.safe) {
-    return res.status(400).json({ error: check.message });
+    return res.status(200).json({ blocked: true });
   }
 
   try {
@@ -46,11 +54,20 @@ export default async function handler(req, res) {
     const candidates = filtered.map((lp, i) => ({
       token: lp.token.trim(),
       logprob: lp.logprob,
-      pct: Math.round((exps[i] / sumExps) * 1000) / 10, // one decimal place
+      pct: Math.round((exps[i] / sumExps) * 1000) / 10,
     }));
 
+    const chosen = choice.message.content.trim();
+
+    // Layer 3: Check if the output itself is safe
+    // Combine prompt + chosen word to catch context-dependent issues
+    const outputCheck = await moderate(prompt + " " + chosen);
+    if (!outputCheck.safe) {
+      return res.status(200).json({ blocked: true });
+    }
+
     res.status(200).json({
-      chosen: choice.message.content.trim(),
+      chosen,
       candidates,
     });
   } catch (err) {

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   // Content safety check
   const check = await moderate(text);
   if (!check.safe) {
-    return res.status(400).json({ error: check.message });
+    return res.status(200).json({ blocked: true });
   }
 
   try {

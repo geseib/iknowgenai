@@ -141,6 +141,7 @@ function PredictTab({ color, defaultPrompt }) {
   const [topP, setTopP] = useState(0.9);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [fact, setFact] = useState("");
 
   const tm = tempLabel(temp);
@@ -149,6 +150,7 @@ function PredictTab({ color, defaultPrompt }) {
   const predictWith = async (text, autoAppend = false) => {
     setLoading(true);
     setResult(null);
+    setBlocked(false);
     try {
       const res = await fetch("/api/predict", {
         method: "POST",
@@ -156,6 +158,13 @@ function PredictTab({ color, defaultPrompt }) {
         body: JSON.stringify({ prompt: text, temperature: temp }),
       });
       const data = await res.json();
+      if (data.blocked) {
+        // Content wasn't safe for kids — silently reset
+        setBlocked(true);
+        setResult(null);
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.error);
       setResult(data);
       setFact(pickRandom(PREDICT_FACTS));
@@ -303,6 +312,8 @@ function PredictTab({ color, defaultPrompt }) {
         <div style={{ color: "#f15bb5", fontSize: 14, marginBottom: 12 }}>Error: {result.error}</div>
       )}
 
+      {blocked && <BlockedBanner />}
+
       {result?.candidates && (() => {
         // Compute cumulative probabilities and top-p cutoff
         const topPPct = topP * 100;
@@ -432,12 +443,28 @@ function PredictTab({ color, defaultPrompt }) {
   );
 }
 
+/* ── Blocked banner (shared) ──────────────────────────────────────────── */
+function BlockedBanner() {
+  return (
+    <div className="fade-up" style={{
+      padding: "14px 18px", borderRadius: 12,
+      background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.1)",
+      fontFamily: "'Fredoka',sans-serif", fontSize: 15,
+      color: "rgba(255,255,255,.5)", textAlign: "center",
+      marginBottom: 14,
+    }}>
+      Let's try a different topic! How about animals, sports, space, or food?
+    </div>
+  );
+}
+
 /* ── Embed Tab ── */
 function EmbedTab({ color, embedPresets }) {
   const DEFAULT_WORDS = embedPresets[0].words;
   const [input, setInput] = useState(DEFAULT_WORDS.join(", "));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [fact, setFact] = useState("");
 
   const embed = async () => {
@@ -445,6 +472,7 @@ function EmbedTab({ color, embedPresets }) {
     if (words.length < 2) return;
     setLoading(true);
     setResult(null);
+    setBlocked(false);
     try {
       const res = await fetch("/api/embed", {
         method: "POST",
@@ -452,6 +480,11 @@ function EmbedTab({ color, embedPresets }) {
         body: JSON.stringify({ words }),
       });
       const data = await res.json();
+      if (data.blocked) {
+        setBlocked(true);
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.error);
       setResult(data);
       setFact(pickRandom(EMBED_FACTS));
@@ -528,6 +561,8 @@ function EmbedTab({ color, embedPresets }) {
         <div style={{ color: "#f15bb5", fontSize: 14, marginBottom: 12 }}>Error: {result.error}</div>
       )}
 
+      {blocked && <BlockedBanner />}
+
       {result?.words && (
         <Card style={{ position: "relative", height: 320, overflow: "hidden" }}>
           <div style={{
@@ -577,6 +612,7 @@ function GenerateTab({ color }) {
   const [prompt, setPrompt] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [fact, setFact] = useState("");
   const outputRef = useRef(null);
 
@@ -584,6 +620,7 @@ function GenerateTab({ color }) {
     if (!prompt.trim()) return;
     setLoading(true);
     setOutput("");
+    setBlocked(false);
     setFact(pickRandom(GENERATE_FACTS));
     try {
       const res = await fetch("/api/generate", {
@@ -607,6 +644,13 @@ function GenerateTab({ color }) {
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const data = JSON.parse(line.slice(6));
+            if (data.blocked) {
+              setBlocked(true);
+              setOutput("");
+              setFact("");
+              setLoading(false);
+              return;
+            }
             if (data.token) {
               setOutput(prev => prev + data.token);
             }
@@ -665,6 +709,8 @@ function GenerateTab({ color }) {
         </button>
       </div>
 
+      {blocked && <BlockedBanner />}
+
       {output && (
         <Card>
           <div style={{
@@ -719,12 +765,14 @@ function TokenizeTab({ color }) {
   const [input, setInput] = useState("Unbelievable! The cat sat on the mat.");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const [fact, setFact] = useState("");
 
   const tokenize = async () => {
     if (!input.trim()) return;
     setLoading(true);
     setResult(null);
+    setBlocked(false);
     try {
       const res = await fetch("/api/tokenize", {
         method: "POST",
@@ -732,6 +780,11 @@ function TokenizeTab({ color }) {
         body: JSON.stringify({ text: input }),
       });
       const data = await res.json();
+      if (data.blocked) {
+        setBlocked(true);
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.error);
       setResult(data);
       setFact(pickRandom(TOKENIZE_FACTS));
@@ -812,6 +865,8 @@ function TokenizeTab({ color }) {
       {result?.error && (
         <div style={{ color: "#f15bb5", fontSize: 14, marginBottom: 12 }}>Error: {result.error}</div>
       )}
+
+      {blocked && <BlockedBanner />}
 
       {result?.tokens && (
         <Card>

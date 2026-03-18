@@ -67,13 +67,13 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "words array required (min 2)" });
   }
 
-  // Limit to 30 words to control costs
-  const wordList = words.slice(0, 30);
+  // Limit to 20 words to control costs
+  const wordList = words.slice(0, 20);
 
   // Content safety check
   const check = await moderateWords(wordList);
   if (!check.safe) {
-    return res.status(400).json({ error: check.message });
+    return res.status(200).json({ blocked: true });
   }
 
   try {
