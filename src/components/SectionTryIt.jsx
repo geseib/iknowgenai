@@ -146,7 +146,7 @@ function PredictTab({ color, defaultPrompt }) {
   const tm = tempLabel(temp);
   const TempIcon = tm.icon;
 
-  const predictWith = async (text) => {
+  const predictWith = async (text, autoAppend = false) => {
     setLoading(true);
     setResult(null);
     try {
@@ -159,13 +159,17 @@ function PredictTab({ color, defaultPrompt }) {
       if (data.error) throw new Error(data.error);
       setResult(data);
       setFact(pickRandom(PREDICT_FACTS));
+      // Auto-append the chosen word to the prompt so the sentence grows
+      if (autoAppend && data.chosen) {
+        setPrompt(text + " " + data.chosen);
+      }
     } catch (err) {
       setResult({ error: err.message });
     }
     setLoading(false);
   };
 
-  const predict = () => predictWith(prompt);
+  const predict = () => predictWith(prompt, true);
 
   const pickWord = (token) => {
     const next = prompt + " " + token;
