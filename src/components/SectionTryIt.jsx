@@ -14,6 +14,7 @@ import {
   Lightbulb,
   Funnel,
 } from "@phosphor-icons/react";
+import { QRCodeSVG } from "qrcode.react";
 import { Card, PresSlide, PresText } from "./shared";
 import { useGrade } from "../data/GradeContext";
 import { GRADE_EXAMPLES } from "../data/gradeContent";
@@ -976,6 +977,27 @@ export default function SectionTryIt({ color, mode, slide }) {
           <PresText size={26} color="rgba(255,255,255,.55)">
             Now let's use <span style={{ color: "white" }}>real AI</span> — predict words, tokenize text, explore embeddings, and generate.
           </PresText>
+          <div style={{
+            marginTop: 32, display: "flex", flexDirection: "column",
+            alignItems: "center", gap: 12,
+          }}>
+            <div style={{
+              background: "white", borderRadius: 16, padding: 16,
+              display: "inline-flex",
+            }}>
+              <QRCodeSVG
+                value="https://iknowgenai.vercel.app"
+                size={180}
+                level="H"
+              />
+            </div>
+            <span style={{
+              fontFamily: "'Fredoka',sans-serif", fontSize: 16,
+              color: "rgba(255,255,255,.5)",
+            }}>
+              Scan to open on your device
+            </span>
+          </div>
         </PresSlide>
       );
     }
