@@ -986,7 +986,7 @@ export default function SectionTryIt({ color, mode, slide }) {
               display: "inline-flex",
             }}>
               <QRCodeSVG
-                value="https://iknowgenai.vercel.app"
+                value="https://iknowgenai.vercel.app/#try-it"
                 size={180}
                 level="H"
               />
