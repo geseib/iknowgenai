@@ -62,11 +62,18 @@ const PRESENTATION_SKIP = {
 // Custom event for sections to signal they're fully revealed
 const SECTION_DONE_EVENT = "sectionFullyRevealed";
 
+// Map URL hash fragments to section indices
+const HASH_SECTIONS = { "try-it": SECTIONS.length - 1 };
+
 export default function App() {
-  const [mode, setMode] = useState(null);
+  // Check for hash deep-link on initial load
+  const hashTarget = window.location.hash.replace("#", "");
+  const deepLink = HASH_SECTIONS[hashTarget];
+
+  const [mode, setMode] = useState(deepLink != null ? "student" : null);
   const [grade, setGrade] = useState("3-5");
-  const [sec, setSec] = useState(0);
-  const [slide, setSlide] = useState(0);
+  const [sec, setSec] = useState(deepLink != null ? deepLink : 0);
+  const [slide, setSlide] = useState(deepLink != null ? 1 : 0);
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
