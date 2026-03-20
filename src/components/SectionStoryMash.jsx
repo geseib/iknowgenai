@@ -135,7 +135,13 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
 
       {!locked ? (
         <input
-          type={hidden ? "password" : "text"}
+          type="text"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          data-1p-ignore
+          data-lpignore="true"
+          data-form-type="other"
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={config.placeholder}
@@ -145,10 +151,13 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
             borderRadius: 12,
             border: `2px solid ${config.color}40`,
             background: "rgba(0,0,0,.3)",
-            color: "white",
+            color: hidden ? "transparent" : "white",
+            caretColor: "white",
+            textShadow: hidden ? `0 0 12px ${config.color}` : "none",
             fontFamily: "'Fredoka',sans-serif",
             fontSize: 24,
             outline: "none",
+            WebkitTextSecurity: hidden ? "disc" : "none",
           }}
         />
       ) : (
@@ -382,12 +391,33 @@ export default function SectionStoryMash({ color, mode, slide }) {
   /* ── Focus / Classroom / Presentation slide 1 ── */
   return (
     <div className="fade-up">
-      {mode !== "presentation" && (
+      {mode !== "presentation" ? (
         <>
           <Label color={color} mode={mode} text="ICE BREAKER · AI IN ACTION" />
           <H1>Story Mash-Up!</H1>
           <TeacherNote notes={notes} color={color} mode={mode} />
         </>
+      ) : (
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 52,
+            fontWeight: 700,
+            color: "white",
+            lineHeight: 1.1,
+          }}>
+            Story{" "}
+            <span style={{ color, textShadow: `0 0 24px ${color}44` }}>Mash-Up!</span>
+          </div>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: 22,
+            color: "rgba(255,255,255,.35)",
+            marginTop: 8,
+          }}>
+            Enter your secret ingredients below
+          </div>
+        </div>
       )}
 
       <div style={{
