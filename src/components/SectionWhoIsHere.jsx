@@ -13,6 +13,102 @@ import {
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
+/* ── Movie-credits "A.I." cycling text ── */
+const AI_SEQUENCE = [
+  { top: "A . I .", bottom: null },                    // just the letters
+  { top: "Artificial", bottom: "Intelligence" },        // full words
+  { top: "Synthetic", bottom: "Smarts" },
+  { top: "Machine", bottom: "Thinking" },
+  { top: "Digital", bottom: "Brainpower" },
+  { top: "Computer", bottom: "Reasoning" },
+  { top: "Artificial", bottom: "Intelligence" },        // settle back
+];
+
+const CREDIT_COLORS = ["#00f5d4", "#00bbf9", "#fee440", "#f15bb5", "#9b5de5", "#fb5607", "#06d6a0"];
+
+function AICreditsCycler({ color }) {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState("in"); // "in" | "hold" | "out"
+  const settled = index === AI_SEQUENCE.length - 1 && phase === "hold";
+
+  useEffect(() => {
+    if (settled) return;
+    let timer;
+    if (phase === "in") {
+      timer = setTimeout(() => setPhase("hold"), 600);
+    } else if (phase === "hold") {
+      timer = setTimeout(() => setPhase("out"), index === 0 ? 1200 : 900);
+    } else if (phase === "out") {
+      timer = setTimeout(() => {
+        setIndex(i => i + 1);
+        setPhase("in");
+      }, 500);
+    }
+    return () => clearTimeout(timer);
+  }, [phase, index, settled]);
+
+  const entry = AI_SEQUENCE[index];
+  const creditColor = CREDIT_COLORS[index % CREDIT_COLORS.length];
+
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        marginBottom: 24,
+        minHeight: entry.bottom ? 120 : 80,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        key={index}
+        style={{
+          animation: phase === "in"
+            ? "creditFadeIn .5s ease forwards"
+            : phase === "out"
+            ? "creditFadeOut .45s ease forwards"
+            : "none",
+          opacity: phase === "hold" || settled ? 1 : undefined,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: entry.bottom ? 2 : 0,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Fredoka',sans-serif",
+            fontSize: index === 0 ? 72 : 52,
+            fontWeight: 700,
+            color: settled ? color : creditColor,
+            letterSpacing: index === 0 ? 16 : 2,
+            lineHeight: 1.2,
+            transition: "font-size .3s ease, letter-spacing .3s ease",
+          }}
+        >
+          {entry.top}
+        </span>
+        {entry.bottom && (
+          <span
+            style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 52,
+              fontWeight: 700,
+              color: settled ? color : creditColor,
+              letterSpacing: 2,
+              lineHeight: 1.2,
+            }}
+          >
+            {entry.bottom}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const examples = [
   { Icon: SpeakerHigh,     label: "Siri or Alexa",       desc: "Voice assistants" },
   { Icon: FilmSlate,       label: "Netflix / YouTube",   desc: "Video suggestions" },
@@ -61,6 +157,7 @@ export default function SectionWhoIsHere({ color, mode, slide }) {
       return (
         <PresSlide>
           <div className="fade-up">
+            <AICreditsCycler color={color} />
             <PresText size={52}>
               Have <span style={{ color }}>YOU</span> ever used AI?
             </PresText>
@@ -203,6 +300,7 @@ export default function SectionWhoIsHere({ color, mode, slide }) {
 
       {/* ── Step 0: Big question ── */}
       <div style={{ minHeight: "50vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <AICreditsCycler color={color} />
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
           fontSize: 30,
