@@ -85,26 +85,26 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
 
   return (
     <Card style={{
-      padding: "16px 18px",
+      padding: "24px 26px",
       borderColor: revealed ? `${config.color}60` : "rgba(255,255,255,.09)",
       background: revealed ? `${config.color}10` : "rgba(255,255,255,.05)",
       transition: "all .4s ease",
       flex: 1,
-      minWidth: 200,
+      minWidth: 240,
     }}>
       <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        marginBottom: 10,
+        marginBottom: 14,
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 8,
+          display: "flex", alignItems: "center", gap: 10,
         }}>
-          <UserCircle size={22} weight="duotone" color={config.color} />
+          <UserCircle size={32} weight="duotone" color={config.color} />
           <span style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 14,
+            fontSize: 22,
             fontWeight: 600,
             color: config.color,
           }}>
@@ -119,16 +119,16 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
               color: "rgba(255,255,255,.4)", display: "flex", alignItems: "center",
             }}
           >
-            {hidden ? <EyeSlash size={18} /> : <Eye size={18} />}
+            {hidden ? <EyeSlash size={24} /> : <Eye size={24} />}
           </button>
         )}
       </div>
 
       <div style={{
         fontFamily: "'Fredoka',sans-serif",
-        fontSize: 12,
+        fontSize: 18,
         color: "rgba(255,255,255,.4)",
-        marginBottom: 8,
+        marginBottom: 10,
       }}>
         Enter {config.prompt}:
       </div>
@@ -141,27 +141,27 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
           placeholder={config.placeholder}
           style={{
             width: "100%",
-            padding: "10px 14px",
-            borderRadius: 10,
-            border: `1px solid ${config.color}40`,
+            padding: "14px 18px",
+            borderRadius: 12,
+            border: `2px solid ${config.color}40`,
             background: "rgba(0,0,0,.3)",
             color: "white",
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 16,
+            fontSize: 24,
             outline: "none",
           }}
         />
       ) : (
         <div style={{
-          padding: "10px 14px",
-          borderRadius: 10,
+          padding: "14px 18px",
+          borderRadius: 12,
           background: revealed ? `${config.color}15` : "rgba(0,0,0,.3)",
-          border: `1px solid ${revealed ? config.color + "60" : "rgba(255,255,255,.1)"}`,
+          border: `2px solid ${revealed ? config.color + "60" : "rgba(255,255,255,.1)"}`,
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: 18,
+          fontSize: 26,
           fontWeight: 600,
           color: revealed ? config.color : "rgba(255,255,255,.2)",
-          minHeight: 42,
+          minHeight: 54,
           transition: "all .4s ease",
           animation: revealed ? "popIn .4s cubic-bezier(.34,1.56,.64,1) forwards" : "none",
         }}>
@@ -300,13 +300,78 @@ export default function SectionStoryMash({ color, mode, slide }) {
       return (
         <PresSlide>
           <div className="fade-up" style={{ textAlign: "center" }}>
-            <MagicWand size={56} weight="duotone" color={color} style={{ marginBottom: 16 }} />
-            <PresText size={48} color={color}>
-              Story Mash-Up!
-            </PresText>
-            <PresText size={28}>
-              3 kids. 3 secret ingredients. 1 AI story.
-            </PresText>
+            {/* Big cinematic title */}
+            <div style={{
+              position: "relative",
+              display: "inline-block",
+              marginBottom: 20,
+            }}>
+              <MagicWand size={72} weight="duotone" color={color} style={{
+                marginBottom: 12,
+                filter: `drop-shadow(0 0 20px ${color}66)`,
+              }} />
+            </div>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 80,
+              fontWeight: 700,
+              color: "white",
+              lineHeight: 1.1,
+              marginBottom: 8,
+              animation: "popIn .6s cubic-bezier(.34,1.56,.64,1) forwards",
+            }}>
+              Story{" "}
+              <span style={{
+                color,
+                textShadow: `0 0 30px ${color}44`,
+              }}>
+                Mash-Up!
+              </span>
+            </div>
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 24,
+              marginTop: 20,
+              marginBottom: 16,
+            }}>
+              {SLOT_CONFIG.map((s, i) => (
+                <div key={i} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 20px",
+                  borderRadius: 12,
+                  background: `${s.color}15`,
+                  border: `2px solid ${s.color}40`,
+                  animation: `fadeUp .4s ${0.3 + i * 0.15}s ease both`,
+                }}>
+                  <UserCircle size={28} weight="duotone" color={s.color} />
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 22,
+                    color: s.color,
+                    fontWeight: 600,
+                  }}>
+                    {s.prompt}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 32,
+              color: "rgba(255,255,255,.4)",
+              marginTop: 16,
+              animation: "fadeUp .5s .8s ease both",
+            }}>
+              3 kids &middot; 3 secret ingredients &middot; 1 AI story
+            </div>
+            <Lightning size={48} weight="fill" color={color} style={{
+              marginTop: 20,
+              opacity: 0.5,
+              animation: "fadeUp .5s 1s ease both",
+            }} />
           </div>
         </PresSlide>
       );
@@ -327,7 +392,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
 
       <div style={{
         marginTop: mode === "presentation" ? 0 : 24,
-        maxWidth: 800,
+        maxWidth: 900,
         margin: "0 auto",
       }}>
         {/* ── Top: 3 secret input boxes ── */}
@@ -360,15 +425,15 @@ export default function SectionStoryMash({ color, mode, slide }) {
               style={{
                 background: allFilled ? color : "rgba(255,255,255,.1)",
                 color: allFilled ? "#000" : "rgba(255,255,255,.3)",
-                fontSize: 18,
-                padding: "14px 36px",
+                fontSize: 24,
+                padding: "16px 44px",
                 cursor: allFilled ? "pointer" : "not-allowed",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 10,
               }}
             >
-              <MagicWand size={20} weight="bold" />
+              <MagicWand size={26} weight="bold" />
               Lock it in &amp; Mash!
             </button>
           </div>
@@ -385,20 +450,20 @@ export default function SectionStoryMash({ color, mode, slide }) {
         {/* ── Story output box ── */}
         {phase !== "input" && (
           <Card style={{
-            padding: "24px 28px",
+            padding: "32px 36px",
             borderColor: phase === "done" ? `${color}50` : "rgba(255,255,255,.09)",
             background: phase === "done" ? `${color}08` : "rgba(255,255,255,.05)",
             transition: "all .5s ease",
             animation: (phase === "generating" || phase === "done") ? "fadeUp .5s ease" : "none",
             textAlign: "center",
-            minHeight: 120,
+            minHeight: 160,
           }}>
             {(phase === "locked" || phase === "revealing") && (
               <div style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: 22,
+                fontSize: 28,
                 color: "rgba(255,255,255,.3)",
-                padding: "20px 0",
+                padding: "30px 0",
               }}>
                 {phase === "locked" ? "Locking in secrets…" : `Revealing ingredient ${revealIdx + 1} of 3…`}
               </div>
@@ -409,13 +474,13 @@ export default function SectionStoryMash({ color, mode, slide }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 12,
-                padding: "20px 0",
+                gap: 14,
+                padding: "30px 0",
               }}>
-                <Sparkle size={24} weight="duotone" color={color} className="spin" />
+                <Sparkle size={32} weight="duotone" color={color} className="spin" />
                 <span style={{
                   fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 20,
+                  fontSize: 26,
                   color: "rgba(255,255,255,.5)",
                 }}>
                   AI is writing your story…
@@ -426,9 +491,9 @@ export default function SectionStoryMash({ color, mode, slide }) {
             {story && (
               <div ref={storyRef} style={{
                 fontFamily: "'Nunito',sans-serif",
-                fontSize: 20,
+                fontSize: 26,
                 color: "rgba(255,255,255,.85)",
-                lineHeight: 1.7,
+                lineHeight: 1.75,
                 textAlign: "left",
               }}>
                 {story}
@@ -440,8 +505,8 @@ export default function SectionStoryMash({ color, mode, slide }) {
               <div style={{
                 display: "flex",
                 justifyContent: "center",
-                gap: 12,
-                marginTop: 20,
+                gap: 14,
+                marginTop: 24,
               }}>
                 <button
                   onClick={readAloud}
@@ -449,15 +514,15 @@ export default function SectionStoryMash({ color, mode, slide }) {
                   style={{
                     background: speaking ? `${color}cc` : color,
                     color: "#000",
-                    fontSize: 16,
-                    padding: "12px 28px",
+                    fontSize: 22,
+                    padding: "14px 32px",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 8,
+                    gap: 10,
                     boxShadow: speaking ? `0 0 20px ${color}44` : "none",
                   }}
                 >
-                  <SpeakerHigh size={20} weight="bold" />
+                  <SpeakerHigh size={24} weight="bold" />
                   {speaking ? "Reading…" : "Read it Out Loud!"}
                 </button>
                 <button
@@ -466,14 +531,14 @@ export default function SectionStoryMash({ color, mode, slide }) {
                   style={{
                     background: "rgba(255,255,255,.1)",
                     color: "rgba(255,255,255,.7)",
-                    fontSize: 16,
-                    padding: "12px 28px",
+                    fontSize: 22,
+                    padding: "14px 32px",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 8,
+                    gap: 10,
                   }}
                 >
-                  <ArrowClockwise size={20} weight="bold" />
+                  <ArrowClockwise size={24} weight="bold" />
                   Play Again
                 </button>
               </div>
