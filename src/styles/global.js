@@ -37,6 +37,9 @@ export const ALL_CSS = `
     0%{opacity:1;transform:translateY(0) scale(1)}
     100%{opacity:0;transform:translateY(-18px) scale(.95)}
   }
+  @keyframes cursorBlink {
+    0%,100%{opacity:1} 50%{opacity:0}
+  }
   .fade-up { animation: fadeUp .45s ease forwards; }
   .wow-reveal { animation: wowReveal .6s cubic-bezier(.34,1.56,.64,1) forwards; }
   @keyframes snapSplit { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
