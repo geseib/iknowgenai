@@ -11,6 +11,7 @@ import ModeSelect from "./components/ModeSelect";
 import Glossary from "./components/Glossary";
 import KnowledgeCheck from "./components/KnowledgeCheck";
 import SectionWhoIsHere from "./components/SectionWhoIsHere";
+import SectionStoryMash from "./components/SectionStoryMash";
 import SectionWhatIsAI from "./components/SectionWhatIsAI";
 import SectionProgramsVsAI from "./components/SectionProgramsVsAI";
 import SectionHowItLearns from "./components/SectionHowItLearns";
@@ -31,6 +32,7 @@ import SectionTryIt from "./components/SectionTryIt";
 
 const SECTIONS = [
   SectionWhoIsHere,
+  SectionStoryMash,
   SectionWhatIsAI,
   SectionProgramsVsAI,
   SectionBrainVsAI,
@@ -55,8 +57,8 @@ const DEFAULT_SLIDES = GRADE_CONFIG["3-5"].presentationSlides;
 
 // Sections with a "skip to takeaway" button — maps section index → takeaway slide
 const PRESENTATION_SKIP = {
-  2: 5,   // SectionProgramsVsAI → insight slide
-  3: 7,   // SectionBrainVsAI → insight slide
+  3: 5,   // SectionProgramsVsAI → insight slide
+  4: 7,   // SectionBrainVsAI → insight slide
 };
 
 // Custom event for sections to signal they're fully revealed

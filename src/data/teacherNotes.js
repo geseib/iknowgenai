@@ -31,7 +31,26 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 1: SectionWhatIsAI (2 slides) ──
+  // ── 1: SectionStoryMash (2 slides) ──
+  {
+    title: "Story Mash-Up!",
+    slides: [
+      {
+        keyPoints: ["Pure engagement hook — no teaching yet", "Let kids experience AI magic before explaining it"],
+        narrative: "This is a 'wow' moment. Pick 3 volunteers and have each secretly enter a character, a place, or an event. The class watches as the AI weaves the random ingredients into a real story. After the reveal, just ask: 'How did it know how to do that?' Let the question hang.",
+        definitions: [],
+        discussion: ["How did the computer know how to make a story from those random things?", "Could you have written a story from those three ingredients? How would yours be different?"],
+      },
+      {
+        keyPoints: ["AI can create coherent text from random inputs", "This is the same technology behind ChatGPT, Claude, etc."],
+        narrative: "You can run this 2-3 times if the class is loving it. Each round takes about 90 seconds. The sillier the inputs, the more fun the story. If kids are shy, offer suggestions: 'a dancing taco', 'on the surface of the sun', 'gravity reverses'.",
+        definitions: [],
+        discussion: ["What would happen if we gave the AI the same three things again — would we get the same story?", "What makes a good story? Did the AI include those things?"],
+      },
+    ],
+  },
+
+  // ── 2: SectionWhatIsAI (2 slides) ──
   {
     title: "What IS AI?",
     slides: [
