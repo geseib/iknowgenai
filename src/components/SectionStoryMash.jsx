@@ -8,6 +8,9 @@ import {
   EyeSlash,
   Sparkle,
   MagicWand,
+  ArrowRight,
+  ChatCircleDots,
+  TextAa,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
@@ -32,6 +35,103 @@ const SLOT_CONFIG = [
     color: "#f15bb5",
   },
 ];
+
+/* ── Word-by-word demo: shows how AI builds a sentence one word at a time ── */
+const DEMO_WORDS = [
+  "Once", "upon", "a", "time,", "a", "talking", "pizza",
+  "landed", "on", "the", "moon", "and", "everything",
+  "turned", "to", "jello."
+];
+
+function WordByWordDemo({ color }) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    // Auto-start after a brief pause
+    const startTimer = setTimeout(() => setStarted(true), 800);
+    return () => clearTimeout(startTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!started || count >= DEMO_WORDS.length) return;
+    const timer = setTimeout(() => setCount(c => c + 1), 350);
+    return () => clearTimeout(timer);
+  }, [count, started]);
+
+  return (
+    <div style={{ marginTop: 32 }}>
+      {/* The sentence building area */}
+      <div style={{
+        background: "rgba(255,255,255,.05)",
+        border: "1px solid rgba(255,255,255,.12)",
+        borderRadius: 20,
+        padding: "32px 36px",
+        minHeight: 140,
+        textAlign: "left",
+        marginBottom: 24,
+      }}>
+        <div style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px 10px",
+          alignItems: "center",
+        }}>
+          {DEMO_WORDS.slice(0, count).map((word, i) => (
+            <span
+              key={i}
+              style={{
+                fontFamily: "'Fredoka',sans-serif",
+                fontSize: 32,
+                fontWeight: 600,
+                color: i === count - 1 ? color : "white",
+                padding: "6px 14px",
+                borderRadius: 10,
+                background: i === count - 1 ? `${color}20` : "transparent",
+                border: i === count - 1 ? `2px solid ${color}50` : "2px solid transparent",
+                animation: i === count - 1 ? "popIn .3s cubic-bezier(.34,1.56,.64,1) forwards" : "none",
+                transition: "color .3s ease, background .3s ease",
+              }}
+            >
+              {word}
+            </span>
+          ))}
+          {count < DEMO_WORDS.length && (
+            <span style={{
+              display: "inline-block",
+              width: 3,
+              height: 36,
+              background: color,
+              borderRadius: 2,
+              animation: "cursorBlink .6s step-end infinite",
+              marginLeft: 2,
+            }} />
+          )}
+        </div>
+      </div>
+
+      {/* Explanation underneath */}
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 12,
+      }}>
+        <TextAa size={28} weight="duotone" color={color} />
+        <span style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 24,
+          color: "rgba(255,255,255,.5)",
+        }}>
+          {count < DEMO_WORDS.length
+            ? `Word ${count + 1} of ${DEMO_WORDS.length} — predicting the next one...`
+            : "Done! Each word was a prediction based on all the words before it."
+          }
+        </span>
+      </div>
+    </div>
+  );
+}
 
 const notes = [
   "This is a pure engagement hook — no teaching yet, just wonder. Let the kids experience what AI can do before explaining how.",
@@ -385,7 +485,159 @@ export default function SectionStoryMash({ color, mode, slide }) {
         </PresSlide>
       );
     }
-    // slide 1: the interactive app (same as focus mode but full-screen)
+    // slide 1: the interactive app (falls through to the return below)
+
+    /* ── Slide 2: What just happened? ── */
+    if (slide === 2) {
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ textAlign: "center", maxWidth: 850 }}>
+            <ChatCircleDots size={56} weight="duotone" color={color} style={{ marginBottom: 16 }} />
+            <PresText size={44} color="white">
+              Wait — what just happened?
+            </PresText>
+            <div style={{
+              marginTop: 36,
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+              textAlign: "left",
+            }}>
+              {/* Step 1: We gave it a prompt */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 18,
+                padding: "20px 28px",
+                borderRadius: 16,
+                background: "rgba(255,255,255,.06)",
+                border: "1px solid rgba(255,255,255,.12)",
+                animation: "fadeUp .4s .2s ease both",
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: `${color}25`, border: `2px solid ${color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, fontWeight: 700, color }}>1</span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 28, color: "white", fontWeight: 600 }}>
+                    You gave AI a <span style={{ color }}>prompt</span>
+                  </div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "rgba(255,255,255,.45)", marginTop: 4 }}>
+                    The 3 secret ingredients were combined into instructions for the AI
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2: AI read the words */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 18,
+                padding: "20px 28px",
+                borderRadius: 16,
+                background: "rgba(255,255,255,.06)",
+                border: "1px solid rgba(255,255,255,.12)",
+                animation: "fadeUp .4s .4s ease both",
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: `${color}25`, border: `2px solid ${color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, fontWeight: 700, color }}>2</span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 28, color: "white", fontWeight: 600 }}>
+                    AI read your words and <span style={{ color }}>started writing</span>
+                  </div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "rgba(255,255,255,.45)", marginTop: 4 }}>
+                    It didn't plan the whole story — it predicted one word at a time
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Word by word */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 18,
+                padding: "20px 28px",
+                borderRadius: 16,
+                background: "rgba(255,255,255,.06)",
+                border: "1px solid rgba(255,255,255,.12)",
+                animation: "fadeUp .4s .6s ease both",
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: `${color}25`, border: `2px solid ${color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, fontWeight: 700, color }}>3</span>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 28, color: "white", fontWeight: 600 }}>
+                    Each word led to the <span style={{ color }}>next word</span>
+                  </div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 20, color: "rgba(255,255,255,.45)", marginTop: 4 }}>
+                    Like finishing someone's sentence — but doing it hundreds of times in a row
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+
+    /* ── Slide 3: Word-by-word visual ── */
+    if (slide === 3) {
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ textAlign: "center", maxWidth: 900 }}>
+            <PresText size={36} color="white">
+              The AI wrote your story like this:
+            </PresText>
+            <WordByWordDemo color={color} />
+          </div>
+        </PresSlide>
+      );
+    }
+
+    /* ── Slide 4: The big question ── */
+    if (slide === 4) {
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ textAlign: "center" }}>
+            <Sparkle size={56} weight="duotone" color={color} style={{ marginBottom: 16 }} />
+            <PresText size={44} color="white">
+              But <span style={{ color }}>how</span> does it know which word comes next?
+            </PresText>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 28,
+              color: "rgba(255,255,255,.4)",
+              marginTop: 24,
+              lineHeight: 1.5,
+              maxWidth: 700,
+              fontStyle: "italic",
+            }}>
+              That's exactly what we're going to find out today.
+            </div>
+            <ArrowRight size={40} weight="bold" color={color} style={{
+              marginTop: 28,
+              opacity: 0.5,
+              animation: "fadeUp .5s .5s ease both",
+            }} />
+          </div>
+        </PresSlide>
+      );
+    }
   }
 
   /* ── Focus / Classroom / Presentation slide 1 ── */
