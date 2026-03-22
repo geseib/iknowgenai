@@ -616,6 +616,7 @@ export default function App() {
         open={teacherOpen}
         onToggle={() => setTeacherOpen(o => !o)}
         notes={currentNotes}
+        connections={activeNOTES[sec]?.connections}
         sectionTitle={activeTITLES[sec]}
         slideLabel={`Slide ${slide + 1} of ${PRESENTATION_SLIDES[sec]}`}
         color={color}

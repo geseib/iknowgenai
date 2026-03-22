@@ -1,7 +1,8 @@
 // Per-slide teacher notes for every section.
 // Each entry maps to SECTIONS[i] and contains a slides[] array matching PRESENTATION_SLIDES[i].
 // Fields: keyPoints (string[]), narrative (string), definitions ({term,def}[]), discussion (string[]),
-//         simplification (string|null) — where we simplified for kids; what the real story is
+//         simplification (string|null) — where we simplified for kids; what the real story is,
+//         connections ({subject,note}[]) — ties to school subjects kids already know
 
 const empty = { keyPoints: [], narrative: "", definitions: [], discussion: [] };
 
@@ -9,6 +10,10 @@ export const TEACHER_NOTES = [
   // ── 0: SectionWhoIsHere (3 slides) ──
   {
     title: "Who's Used AI?",
+    connections: [
+      { subject: "ELA", note: "Making predictions — when you read a story and guess what happens next, that's a skill AI uses too" },
+      { subject: "Social Studies", note: "Technology in daily life — how tools change how people work, communicate, and learn" },
+    ],
     slides: [
       {
         keyPoints: ["Surface existing experience", "Most kids have interacted with AI already"],
@@ -34,6 +39,11 @@ export const TEACHER_NOTES = [
   // ── 1: SectionStoryMash (6 slides) ──
   {
     title: "Story Mash-Up!",
+    connections: [
+      { subject: "ELA", note: "Story elements — character, setting, event are the same building blocks kids learn in creative writing" },
+      { subject: "ELA", note: "Sequencing and narrative structure — AI builds a story word by word, like writing a sentence from left to right" },
+      { subject: "Art", note: "Creative collaboration — using tools to make something new, like using paint or instruments" },
+    ],
     slides: [
       {
         keyPoints: ["Generative AI is AI that creates new things", "This is what changed recently — AI went from sorting and recommending to creating"],
@@ -78,6 +88,10 @@ export const TEACHER_NOTES = [
   // ── 2: SectionWhatIsAI (2 slides) ──
   {
     title: "What IS AI?",
+    connections: [
+      { subject: "Science", note: "Observation and patterns — scientists look for patterns in data to understand the world, just like AI does" },
+      { subject: "Math", note: "Sorting and classifying — grouping objects by shared properties is something kids do in math and AI does with data" },
+    ],
     slides: [
       {
         keyPoints: ["Get the class guessing before revealing", "All three answers are partly right"],
@@ -94,9 +108,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 2: SectionProgramsVsAI (6 slides) ──
+  // ── 3: SectionProgramsVsAI (6 slides) ──
   {
     title: "Rules vs Learning",
+    connections: [
+      { subject: "Math", note: "Algorithms — step-by-step instructions for solving a problem, like long division. Traditional programs are algorithms; AI learns its own" },
+      { subject: "Science", note: "Hypothesis testing — scientists guess, test, and revise. AI does the same: guess, check, adjust weights" },
+      { subject: "ELA", note: "Context clues — figuring out what a word means from the words around it, just like AI uses context" },
+    ],
     slides: [
       {
         keyPoints: ["Traditional programming = explicit rules", "AI = learns patterns from data"],
@@ -122,9 +141,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 3: SectionBrainVsAI (8 slides) ──
+  // ── 4: SectionBrainVsAI (8 slides) ──
   {
     title: "Brain vs AI",
+    connections: [
+      { subject: "Science", note: "The brain and nervous system — neurons send electrical signals, and AI 'neurons' are math operations inspired by real ones" },
+      { subject: "Health", note: "Emotions and empathy — understanding that AI can mimic emotions in text but doesn't feel them connects to social-emotional learning" },
+      { subject: "ELA", note: "Author's voice and creativity — is AI remixing patterns 'creative' the same way an author is?" },
+    ],
     slides: [
       {
         keyPoints: ["Brains and AI are different, not better/worse", "AI processes differently from humans"],
@@ -162,9 +186,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 4: SectionWhatIsLLM (5 slides) ──
+  // ── 5: SectionWhatIsLLM (5 slides) ──
   {
     title: "What's an LLM?",
+    connections: [
+      { subject: "Math", note: "Large numbers and scale — trillions of words connects to place value and understanding big numbers" },
+      { subject: "ELA", note: "Vocabulary and word meaning — 'model' is a multiple-meaning word (fashion model, model airplane, mathematical model)" },
+      { subject: "Science", note: "Models in science — scientists build models of weather, volcanoes, the solar system. An LLM is a model of language" },
+    ],
     slides: [
       {
         keyPoints: ["LLM = Large Language Model", "Three words, each matters"],
@@ -200,9 +229,13 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 5: SectionMeetModels (4 slides) ──
+  // ── 6: SectionMeetModels (4 slides) ──
   {
     title: "Meet the Models",
+    connections: [
+      { subject: "Social Studies", note: "Competition and innovation — companies competing to build the best AI is like the space race or car manufacturers" },
+      { subject: "ELA", note: "Compare and contrast — comparing ChatGPT, Claude, Llama, and Gemini uses the same skill as comparing characters in a book" },
+    ],
     slides: [
       {
         keyPoints: ["ChatGPT was the breakout moment for AI", "1 million users in 5 days"],
@@ -235,9 +268,13 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 6: SectionTheBridge (3 slides) ──
+  // ── 7: SectionTheBridge (3 slides) ──
   {
     title: "The Big Question",
+    connections: [
+      { subject: "Science", note: "Systems and processes — a pipeline with steps is like the water cycle or food chain, where each stage feeds the next" },
+      { subject: "Math", note: "Input → process → output — the same function machine concept from math class" },
+    ],
     slides: [
       {
         keyPoints: ["Training = reading the entire internet", "Took months and thousands of computers"],
@@ -262,9 +299,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 7: SectionHowItLearns (11 slides) ──
+  // ── 8: SectionHowItLearns (11 slides) ──
   {
     title: "How AI Learns",
+    connections: [
+      { subject: "Science", note: "Trial and error — the scientific method uses guess → test → revise, just like AI training uses guess → check → adjust" },
+      { subject: "Math", note: "Getting closer to the right answer — like estimation in math, each round the AI's guess gets more accurate" },
+      { subject: "PE/Music", note: "Practice makes progress — learning to shoot a basketball or play piano means adjusting based on feedback, just like AI adjusts its weights" },
+    ],
     slides: [
       {
         keyPoints: ["AI learns by guessing, checking, and adjusting"],
@@ -290,9 +332,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 8: SectionThreeSteps (9 slides) — 7-8 only ──
+  // ── 9: SectionThreeSteps (9 slides) — 7-8 only ──
   {
     title: "Three Steps to Helpful AI",
+    connections: [
+      { subject: "ELA", note: "Drafting and revision — writers do rough draft → edit → polish, just like AI does pre-training → tuning → RLHF" },
+      { subject: "Social Studies", note: "Ethics and fairness — who gets to decide what 'good' means for AI? Connects to discussions about rules, laws, and values" },
+      { subject: "Math", note: "Ranking and ordering — rating which response is better uses comparison and ordering skills" },
+    ],
     slides: [
       {
         keyPoints: ["Pre-training alone isn't enough", "AI reads the internet but doesn't know how to be helpful"],
@@ -336,9 +383,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 9: SectionHook (5 slides) ──
+  // ── 10: SectionHook (5 slides) ──
   {
     title: "The Secret: Numbers",
+    connections: [
+      { subject: "Math", note: "Number lines and coordinates — words becoming numbers is like plotting points on a number line or coordinate grid" },
+      { subject: "Science", note: "Measurement — scientists turn observations into numbers (temperature, weight, speed). AI turns words into numbers the same way" },
+      { subject: "ELA", note: "Describing with adjectives — when kids describe 'cat' with fur, whiskers, purring, they're identifying features. AI does the same thing with numbers" },
+    ],
     slides: [
       {
         keyPoints: ["Humans experience words with all senses", "AI only has numbers"],
@@ -375,9 +427,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 10: SectionTokens (7 slides) — 7-8 only ──
+  // ── 11: SectionTokens (7 slides) — 7-8 only ──
   {
     title: "Tokens — Not Quite Words",
+    connections: [
+      { subject: "ELA", note: "Prefixes, suffixes, and root words — 'un-believe-able' splits the same way in English class and in AI tokenization" },
+      { subject: "Math", note: "Efficiency and trade-offs — the vocab size spectrum is an optimization problem, just like choosing the right unit of measurement" },
+      { subject: "ELA", note: "Syllables — breaking words into syllables is similar to how tokenizers break words into subword pieces" },
+    ],
     slides: [
       {
         keyPoints: ["Tokens are the actual units AI processes", "Not words, not letters — something in between"],
@@ -424,9 +481,15 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 11: SectionEmbeddings (8 slides) ──
+  // ── 12: SectionEmbeddings (8 slides) ──
   {
     title: "Words in Space",
+    connections: [
+      { subject: "Math", note: "Coordinate grids and graphing — the scatter plot is an X-Y coordinate grid, just like in math class. Each word has an (x, y) position" },
+      { subject: "Math", note: "Horizontal and vertical axes — the X axis goes left-right, Y axis goes up-down. Each axis measures a different quality of the word" },
+      { subject: "Science", note: "Classification and grouping — animals, vehicles, and royalty cluster together, just like classifying organisms in science" },
+      { subject: "ELA", note: "Synonyms and antonyms — words that are close in meaning are close on the graph. Words with opposite meanings are far apart" },
+    ],
     slides: [
       {
         keyPoints: ["Similar meanings = close together in space"],
@@ -464,9 +527,15 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 12: SectionBeyond2D (6 slides) — 7-8 only ──
+  // ── 13: SectionBeyond2D (6 slides) — 7-8 only ──
   {
     title: "Beyond 2D",
+    connections: [
+      { subject: "Math", note: "1D, 2D, 3D geometry — number lines (1D), flat graphs (2D), and 3D shapes directly map to the dimension progression here" },
+      { subject: "Math", note: "Measurement with multiple units — describing something with height AND weight AND speed is like using multiple dimensions" },
+      { subject: "Science", note: "Describing objects with multiple properties — color, size, texture, hardness. More properties = more complete description, like more dimensions" },
+      { subject: "Math (7-8)", note: "Cosine similarity connects to angles and trigonometry — the angle between two arrows tells you how similar they are" },
+    ],
     slides: [
       {
         keyPoints: ["Connect back to the 2D scatter plot", "Words as dots was just the beginning"],
@@ -507,9 +576,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 13: SectionAttention (7 slides) ──
+  // ── 14: SectionAttention (7 slides) ──
   {
     title: "Attention!",
+    connections: [
+      { subject: "ELA", note: "Multiple-meaning words (homonyms) — 'bat', 'bank', 'bark', 'ring' all have different meanings depending on context, just like in vocabulary lessons" },
+      { subject: "ELA", note: "Context clues — figuring out an unknown word's meaning from surrounding words is exactly what attention does" },
+      { subject: "Reading", note: "Reading comprehension — understanding what a sentence means requires paying attention to how all the words relate, not just reading one word at a time" },
+    ],
     slides: [
       {
         keyPoints: ["'Bat' has two completely different meanings", "Context is everything"],
@@ -557,9 +631,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 14: SectionMLP (4 slides) ──
+  // ── 15: SectionMLP (4 slides) ──
   {
     title: "The Thinking Layer",
+    connections: [
+      { subject: "ELA", note: "21 Questions game — narrowing down by asking yes/no questions is how the MLP checks what it knows about each word" },
+      { subject: "Math", note: "Expanding and compressing — the 12,288 → 49,152 → 12,288 pattern is like multiplying then dividing. Brainstorm big, then narrow down" },
+      { subject: "Science", note: "Memory recall — when you see a test question, your brain searches everything you've learned. MLP does the same with its weights" },
+    ],
     slides: [
       {
         keyPoints: ["MLP connects what it's reading to everything it ever learned", "Attention finds relationships, MLP thinks about them"],
@@ -590,9 +669,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 15: SectionLayers (2 slides) ──
+  // ── 16: SectionLayers (2 slides) ──
   {
     title: "Rinse & Repeat",
+    connections: [
+      { subject: "ELA", note: "Levels of understanding — letters → words → sentences → paragraphs → themes mirrors the layer progression from spelling to reasoning" },
+      { subject: "Science", note: "Building complexity from simple parts — atoms → molecules → cells → organisms. Each layer adds a level of organization" },
+      { subject: "Math", note: "Repeated operations — doing the same two steps (attention + MLP) 96 times is like iteration or loops in math" },
+    ],
     slides: [
       {
         keyPoints: ["Many layers — each pass makes understanding richer", "Early layers = spelling, late layers = reasoning"],
@@ -611,9 +695,15 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 16: SectionPredict (5 slides) ──
+  // ── 17: SectionPredict (5 slides) ──
   {
     title: "Predict!",
+    connections: [
+      { subject: "Math", note: "Probability and percentages — the ranked word list shows percentages, just like probability in math (42% chance = 42 out of 100)" },
+      { subject: "ELA", note: "Word choice — writers pick the best word from many options. AI does the same thing, but with math instead of feeling" },
+      { subject: "Science", note: "Variables and controls — temperature is a variable that changes the outcome, just like in a science experiment" },
+      { subject: "Math", note: "Bar graphs — the probability bars are a horizontal bar graph, a data representation skill from math class" },
+    ],
     slides: [
       {
         keyPoints: ["After 96 layers, the model picks ONE word", "But how?"],
@@ -650,9 +740,14 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 17: SectionTryIt (2 slides) ──
+  // ── 18: SectionTryIt (2 slides) ──
   {
     title: "Try It Yourself!",
+    connections: [
+      { subject: "Science", note: "Hands-on experimentation — testing hypotheses by trying different inputs and observing results is the scientific method in action" },
+      { subject: "ELA", note: "Word relationships — the embedding explorer lets kids test synonyms, antonyms, and word categories they've learned" },
+      { subject: "Math", note: "Data visualization — the scatter plots and probability bars are real-time data representations" },
+    ],
     slides: [
       {
         keyPoints: ["Hands-on demo with real AI", "Three tools: Predict, Word Space, Generate"],
