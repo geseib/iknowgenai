@@ -253,7 +253,7 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 6: SectionMeetModels (4 slides) ──
+  // ── 6: SectionMeetModels (2 slides) ──
   {
     title: "Meet the Models",
     connections: [
@@ -262,26 +262,16 @@ export const TEACHER_NOTES = [
     ],
     slides: [
       {
-        keyPoints: ["ChatGPT was the breakout moment for AI", "1 million users in 5 days"],
-        narrative: "Ask: 'Has anyone heard of any of these?' before revealing. ChatGPT: emphasize the speed of adoption — 1 million users in 5 days.",
-        definitions: [{ term: "ChatGPT", def: "An LLM chatbot made by OpenAI — the most well-known AI assistant" }],
-        discussion: ["Has anyone used ChatGPT? What did you use it for?"],
-      },
-      {
-        keyPoints: ["Claude is made by Anthropic", "This app was built with Claude's help"],
-        narrative: "This is a great moment to tell the class they're interacting with Anthropic's work right now through this app.",
-        definitions: [{ term: "Claude", def: "An LLM made by Anthropic, focused on being helpful and safe" }],
-        discussion: [],
-      },
-      {
-        keyPoints: ["Multiple companies build their own AI", "Open source vs closed source"],
-        narrative: "Llama: 'open source' is worth explaining. Imagine if the recipe for your favorite food was secret vs. shared with everyone.",
+        keyPoints: ["Several companies have built their own LLMs", "ChatGPT, Claude, Llama, and Gemini are the main players", "Open source (Llama) vs closed source is a key distinction"],
+        narrative: "The cards scroll automatically — let the class watch them cycle. Ask: 'Has anyone heard of any of these?' ChatGPT had 1M users in 5 days. Claude (Anthropic) helped build this app. Llama (Meta) is open source — like sharing the recipe. Gemini (Google) is built into Search.",
         definitions: [
+          { term: "ChatGPT", def: "An LLM chatbot made by OpenAI — the most well-known AI assistant" },
+          { term: "Claude", def: "An LLM made by Anthropic, focused on being helpful and safe" },
           { term: "Llama", def: "Meta's open-source LLM — anyone can download and modify it" },
           { term: "Gemini", def: "Google's LLM, built into Search and other Google products" },
           { term: "Open Source", def: "Software whose code is freely available for anyone to use and modify" },
         ],
-        discussion: ["If these companies are all building AI, are they competing? Why make their own version?"],
+        discussion: ["Has anyone used ChatGPT? What did you use it for?", "If these companies are all building AI, are they competing? Why make their own version?"],
       },
       {
         keyPoints: ["BILLIONS of words — but HOW does that teach it to write?"],

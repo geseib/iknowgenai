@@ -71,7 +71,7 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-function ModelCard({ model, pres }) {
+function ModelCard({ model, pres, compact }) {
   return (
     <div
       style={{
@@ -79,44 +79,90 @@ function ModelCard({ model, pres }) {
         overflow: "hidden",
         background: `${model.color}15`,
         border: `2px solid ${model.color}`,
-        padding: "24px 20px",
+        padding: compact ? "18px 16px" : "24px 20px",
+        width: compact ? 340 : "100%",
         maxWidth: 480,
-        width: "100%",
+        flexShrink: 0,
       }}
     >
-      <div style={{ textAlign: "center", marginBottom: 16 }}>
-        <SealCheck size={48} weight="duotone" color={model.color} style={{ marginBottom: 8 }} />
+      <div style={{ textAlign: "center", marginBottom: compact ? 10 : 16 }}>
+        <SealCheck size={compact ? 36 : 48} weight="duotone" color={model.color} style={{ marginBottom: 6 }} />
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: 28,
+          fontSize: compact ? 22 : 28,
           color: "white",
-          marginBottom: 4,
+          marginBottom: 2,
         }}>
           {model.name}
         </div>
-        <div style={{ fontSize: pres ? 18 : 16, color: "rgba(255,255,255,.4)", marginBottom: 10 }}>
+        <div style={{ fontSize: compact ? 14 : (pres ? 18 : 16), color: "rgba(255,255,255,.4)", marginBottom: 6 }}>
           {model.org}
         </div>
-        <div style={{ fontSize: 18, color: model.color, lineHeight: 1.4 }}>
+        <div style={{ fontSize: compact ? 14 : 18, color: model.color, lineHeight: 1.4 }}>
           {model.tagline}
         </div>
       </div>
 
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: compact ? 10 : 16 }}>
         {model.facts.map((fact, fi) => (
           <div key={fi} style={{
             display: "flex",
-            gap: 10,
-            marginBottom: 10,
-            fontSize: pres ? 22 : 18,
+            gap: 8,
+            marginBottom: compact ? 6 : 10,
+            fontSize: compact ? 14 : (pres ? 22 : 18),
             color: "rgba(255,255,255,.75)",
-            lineHeight: 1.5,
+            lineHeight: 1.45,
           }}>
-            <span style={{ color: model.color, flexShrink: 0, fontSize: pres ? 22 : 18 }}>&rarr;</span>
+            <span style={{ color: model.color, flexShrink: 0 }}>&rarr;</span>
             {fact}
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ── Carousel: cards drift right-to-left in a continuous loop ── */
+function ModelCarousel() {
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let raf;
+    let pos = 0;
+    const speed = 0.4; // pixels per frame
+
+    const animate = () => {
+      pos += speed;
+      // Each card is ~356px (340 + 16 gap). Total for 4 cards = ~1424px
+      const singleSet = el.scrollWidth / 2;
+      if (pos >= singleSet) pos -= singleSet;
+      el.scrollLeft = pos;
+      raf = requestAnimationFrame(animate);
+    };
+
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // Duplicate the cards so the loop is seamless
+  const allModels = [...models, ...models];
+
+  return (
+    <div
+      ref={scrollRef}
+      style={{
+        display: "flex",
+        gap: 16,
+        overflow: "hidden",
+        width: "100%",
+        padding: "8px 0",
+      }}
+    >
+      {allModels.map((m, i) => (
+        <ModelCard key={i} model={m} compact />
+      ))}
     </div>
   );
 }
@@ -160,42 +206,23 @@ export default function SectionMeetModels({ color, mode, slide }) {
 
   /* ── Presentation mode ── */
   if (mode === "presentation") {
-    /* Slide 0: ChatGPT */
+    /* Slide 0: All models in a scrolling carousel */
     if (slide === 0) {
       return (
         <PresSlide>
-          <div style={{ fontSize: 32, color: "rgba(255,255,255,.55)", textAlign: "center", marginBottom: 28 }}>
-            Several companies have built their own AI
-          </div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <ModelCard model={models[0]} pres />
+          <div className="fade-up" style={{ width: "100%", maxWidth: 960 }}>
+            <PresText size={32} color="rgba(255,255,255,.55)">
+              Several companies have built their own AI
+            </PresText>
+            <div style={{ marginTop: 28 }}>
+              <ModelCarousel />
+            </div>
           </div>
         </PresSlide>
       );
     }
-    /* Slide 1: Claude */
+    /* Slide 1: What they all have in common + dramatic bridge */
     if (slide === 1) {
-      return (
-        <PresSlide>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <ModelCard model={models[1]} pres />
-          </div>
-        </PresSlide>
-      );
-    }
-    /* Slide 2: Llama + Gemini side by side */
-    if (slide === 2) {
-      return (
-        <PresSlide>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-            <ModelCard model={models[2]} pres />
-            <ModelCard model={models[3]} pres />
-          </div>
-        </PresSlide>
-      );
-    }
-    /* Slide 3: What they all have in common + dramatic bridge */
-    if (slide === 3) {
       return (
         <PresSlide>
           <Lightbulb size={36} weight="duotone" color={color} style={{ display: "block", margin: "0 auto 16px" }} />
