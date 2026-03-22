@@ -4,16 +4,20 @@ import { PresSlide, PresText } from "./shared";
 
 const mascotUrl = `${import.meta.env.BASE_URL}robotcomputerbrain.png`;
 
+// Each answer has per-trait impact: [clearer, safer, friendlier]
+// Positive = improves that trait, negative = hurts it
 const RLHF_ROUNDS = [
   {
     prompt: "Explain gravity to a 7th grader",
     a: {
       text: "Gravity is the fundamental force described by Einstein's field equations, where mass curves spacetime geometry, causing geodesic deviation in test particles...",
       label: "Technical",
+      impact: [-15, 0, -10],  // too complex → hurts clarity and friendliness
     },
     b: {
       text: "Imagine a trampoline with a bowling ball in the middle. Everything rolls toward it — that's basically gravity! The bigger the object, the more it pulls things in.",
       label: "Friendly",
+      impact: [+22, +5, +20], // clear analogy → boosts clarity and friendliness
     },
   },
   {
@@ -21,10 +25,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Why was the equal sign so humble? Because it knew it wasn't greater than or less than anyone else!",
       label: "Funny",
+      impact: [+10, +5, +22], // actually tells a joke → boosts friendliness a lot
     },
     b: {
       text: "A joke is a form of humor that typically involves a setup and a punchline. In mathematics, humor can be derived from wordplay involving mathematical terms...",
       label: "Explains Instead",
+      impact: [-12, 0, -18],  // explains instead of doing → hurts clarity and friendliness
     },
   },
   {
@@ -32,19 +38,21 @@ const RLHF_ROUNDS = [
     a: {
       text: "Sure! Here's how: take a photo of their answers, change a few words so it looks different, and submit it as your own. Easy!",
       label: "Helpful but Harmful",
+      impact: [+5, -30, -5],  // technically clear but very unsafe
     },
     b: {
       text: "I get that homework can be tough! Instead of copying, try asking your teacher for help, working with a study buddy, or breaking it into smaller steps. You'll actually learn the material that way.",
       label: "Helpful AND Safe",
+      impact: [+12, +28, +18], // safe, kind, and clear
     },
   },
 ];
 
-/* Personality trait labels computed from RLHF choices */
+/* Personality traits — starting values before any feedback */
 const TRAITS = [
-  { label: "Clearer", emoji: "💡", beforeVal: 25, afterVal: 92, color: "#00bbf9" },
-  { label: "Safer", emoji: "🛡️", beforeVal: 15, afterVal: 95, color: "#06d6a0" },
-  { label: "Friendlier", emoji: "😊", beforeVal: 20, afterVal: 88, color: "#fee440" },
+  { label: "Clearer", emoji: "💡", startVal: 35, color: "#00bbf9" },
+  { label: "Safer", emoji: "🛡️", startVal: 30, color: "#06d6a0" },
+  { label: "Friendlier", emoji: "😊", startVal: 28, color: "#fee440" },
 ];
 
 /* ── MiniDial (reused spinning dial pattern) ─────────────────────────── */
@@ -363,6 +371,18 @@ export default function SectionThreeSteps({ color, mode, slide }) {
   if (slide === 8) {
     const bCount = choices.filter(c => c === "b").length;
 
+    // Compute per-trait values by summing impacts from each choice
+    const traitValues = TRAITS.map((trait, ti) => {
+      let val = trait.startVal;
+      choices.forEach((choice, ri) => {
+        if (choice) {
+          const round = RLHF_ROUNDS[ri];
+          val += (choice === "a" ? round.a.impact : round.b.impact)[ti];
+        }
+      });
+      return Math.max(5, Math.min(98, val)); // clamp 5-98
+    });
+
     return (
       <PresSlide>
         <PresText size={36} color={color}>
@@ -400,7 +420,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
                 }}>
                   <div style={{
                     height: "100%", borderRadius: 10,
-                    width: `${trait.beforeVal}%`,
+                    width: `${trait.startVal}%`,
                     background: "rgba(255,100,100,.4)",
                     animation: "probIn .6s ease forwards",
                   }} />
@@ -409,7 +429,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
                   fontFamily: "'Fredoka',sans-serif", fontSize: 14,
                   color: "rgba(255,255,255,.3)", marginTop: 3,
                 }}>
-                  {trait.beforeVal}%
+                  {trait.startVal}%
                 </div>
               </div>
             ))}
@@ -434,8 +454,9 @@ export default function SectionThreeSteps({ color, mode, slide }) {
               After Your Feedback
             </div>
             {TRAITS.map((trait, i) => {
-              const bRatio = bCount / 3;
-              const afterVal = Math.round(trait.beforeVal + (trait.afterVal - trait.beforeVal) * bRatio);
+              const afterVal = traitValues[i];
+              const delta = afterVal - trait.startVal;
+              const improved = delta > 0;
               return (
                 <div key={i} style={{ marginBottom: 18 }}>
                   <div style={{
@@ -455,15 +476,18 @@ export default function SectionThreeSteps({ color, mode, slide }) {
                     <div style={{
                       height: "100%", borderRadius: 10,
                       width: `${afterVal}%`,
-                      background: `linear-gradient(90deg, ${trait.color}88, ${trait.color})`,
+                      background: improved
+                        ? `linear-gradient(90deg, ${trait.color}88, ${trait.color})`
+                        : "linear-gradient(90deg, rgba(255,100,100,.3), rgba(255,100,100,.6))",
                       animation: `probIn 1.2s ${0.4 + i * 0.15}s ease forwards`,
                     }} />
                   </div>
                   <div style={{
                     fontFamily: "'Fredoka',sans-serif", fontSize: 14,
-                    color: trait.color, fontWeight: 600, marginTop: 3,
+                    color: improved ? trait.color : "#ff6b6b",
+                    fontWeight: 600, marginTop: 3,
                   }}>
-                    {afterVal}% {afterVal > trait.beforeVal && `(+${afterVal - trait.beforeVal})`}
+                    {afterVal}% ({improved ? "+" : ""}{delta})
                   </div>
                 </div>
               );
@@ -480,11 +504,15 @@ export default function SectionThreeSteps({ color, mode, slide }) {
           lineHeight: 1.5,
           marginTop: 8,
         }}>
-          {bCount === 3
-            ? "You made the AI clearer, safer, AND friendlier — that's exactly what real human raters do every day!"
-            : bCount === 0
-            ? "Without helpful feedback, the AI barely improves. This is why human guidance matters so much!"
-            : "Every choice you made pushed the AI in a direction. Real companies have thousands of people doing exactly this."}
+          {(() => {
+            const allUp = traitValues.every((v, i) => v > TRAITS[i].startVal);
+            const allDown = traitValues.every((v, i) => v <= TRAITS[i].startVal);
+            const safetyDropped = traitValues[1] < TRAITS[1].startVal;
+            if (allUp) return "You made the AI clearer, safer, AND friendlier — that's exactly what real human raters do every day!";
+            if (allDown) return "With those choices, the AI actually got worse! This shows why picking the RIGHT feedback matters so much.";
+            if (safetyDropped) return "Interesting — the AI got less safe with that feedback. This is why safety-focused raters are so important!";
+            return "Every choice pushed the AI in a different direction. Some traits improved, some didn't — that's the real trade-off human raters face.";
+          })()}
         </div>
 
         <div style={{
