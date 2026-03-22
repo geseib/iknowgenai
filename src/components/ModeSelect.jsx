@@ -3,7 +3,7 @@ import {
   GameController,
   Book,
   Exam,
-  Shuffle,
+  Flag,
 } from "@phosphor-icons/react";
 import { GRADE_CONFIG } from "../data/gradeConfig";
 import { GRADES } from "../data/GradeContext";
@@ -27,7 +27,7 @@ const modes = [
   },
 ];
 
-export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flowVersion, onFlowChange }) {
+export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags }) {
   const gc = GRADE_CONFIG[grade];
   const totalSlides = gc.presentationSlides.reduce((a, b) => a + b, 0);
   const activeSections = gc.presentationSlides.filter(n => n > 0).length;
@@ -127,47 +127,32 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flo
         </div>
 
         {/* Resource buttons */}
-        <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 28 }}>
+        <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
           <button onClick={() => onSelect("glossary")} className="ghost-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px" }}>
             <Book size={18} weight="duotone" /> Glossary
           </button>
           <button onClick={() => onSelect("quiz")} className="ghost-btn" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px" }}>
             <Exam size={18} weight="duotone" /> Knowledge Check
           </button>
-        </div>
-
-        {/* Flow version toggle */}
-        {onFlowChange && (
-          <div style={{ marginTop: 24 }}>
-            <button
-              onClick={() => onFlowChange(flowVersion === "v2" ? "v1" : "v2")}
-              className="ghost-btn"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 14,
-                padding: "10px 20px",
-                margin: "0 auto",
-                borderColor: flowVersion === "v2" ? "#9b5de540" : "rgba(255,255,255,.12)",
-                background: flowVersion === "v2" ? "#9b5de515" : "rgba(255,255,255,.07)",
-              }}
-            >
-              <Shuffle size={18} weight="duotone" color={flowVersion === "v2" ? "#9b5de5" : "rgba(255,255,255,.5)"} />
-              {flowVersion === "v2" ? "Proposed Flow (v2)" : "Current Flow (v1)"}
-            </button>
-            {flowVersion === "v2" && (
-              <div style={{
-                fontSize: 12,
-                color: "#9b5de5",
-                marginTop: 8,
-                lineHeight: 1.5,
-              }}>
-                Preview: reorganized groups and section order
-              </div>
+          <button onClick={() => onSelect("flags")} className="ghost-btn" style={{
+            display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px",
+            borderColor: flags?.flowVersion ? "#fb560740" : "rgba(255,255,255,.12)",
+            background: flags?.flowVersion ? "#fb560712" : undefined,
+          }}>
+            <Flag size={18} weight="duotone" color={flags?.flowVersion ? "#fb5607" : undefined} /> Flags
+            {flags?.flowVersion && (
+              <span style={{
+                fontSize: 10,
+                background: "#fb5607",
+                color: "#000",
+                borderRadius: 8,
+                padding: "2px 6px",
+                fontWeight: 700,
+                fontFamily: "'Fredoka',sans-serif",
+              }}>v2</span>
             )}
-          </div>
-        )}
+          </button>
+        </div>
 
         <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>
           {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}
