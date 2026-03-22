@@ -294,10 +294,10 @@ function LayerAnimation({ color, onDone, pres }) {
   const showBeams = phase === "attention" || (phase === "scrolling" && scrollSub === "attn");
   const showMlp = phase === "mlp" || (phase === "scrolling" && scrollSub === "mlp");
 
-  const phaseLabel = phase === "attention" ? "Attention — words look at each other"
-    : phase === "mlp" ? "MLP — asks questions about each word"
-    : phase === "scrolling" && scrollSub === "attn" ? "Attention (words look at each other)"
-    : phase === "scrolling" && scrollSub === "mlp" ? "MLP (asks questions)"
+  const phaseLabel = phase === "attention" ? "Looking — words check in with each other"
+    : phase === "mlp" ? "Thinking — asking questions about what it sees"
+    : phase === "scrolling" && scrollSub === "attn" ? "Looking"
+    : phase === "scrolling" && scrollSub === "mlp" ? "Thinking"
     : phase === "output" ? "Done!"
     : "Ready";
 
@@ -308,41 +308,44 @@ function LayerAnimation({ color, onDone, pres }) {
         background: "rgba(255,255,255,.04)",
         border: `2px solid ${color}30`,
         borderRadius: 20,
-        padding: "28px 24px",
+        padding: pres ? "36px 32px" : "28px 24px",
         position: "relative",
         overflow: "hidden",
+        minHeight: pres ? 500 : "auto",
       }}
     >
       {/* Layer counter */}
       <div style={{
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 24,
       }}>
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: pres ? 20 : 16,
-          color: "rgba(255,255,255,.4)",
-          marginBottom: 4,
+          fontSize: pres ? 28 : 20,
+          color: scrollSub === "attn" ? `${color}aa` : "rgba(255,255,255,.5)",
+          marginBottom: 6,
+          fontWeight: 600,
+          transition: "color .15s ease",
         }}>
           {phaseLabel}
         </div>
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: pres ? 18 : 14,
+          fontSize: pres ? 22 : 16,
           color: "rgba(255,255,255,.3)",
         }}>
           Layer
         </div>
         <div style={{
           fontFamily: "'Fredoka',sans-serif",
-          fontSize: phase === "scrolling" ? 56 : 40,
+          fontSize: phase === "scrolling" ? (pres ? 72 : 56) : (pres ? 52 : 40),
           fontWeight: 700,
           color,
           transition: "font-size .2s ease",
           lineHeight: 1.1,
         }}>
           {layerNum}
-          <span style={{ fontSize: 20, fontWeight: 400, color: "rgba(255,255,255,.3)" }}> / 96</span>
+          <span style={{ fontSize: pres ? 26 : 20, fontWeight: 400, color: "rgba(255,255,255,.3)" }}> / 96</span>
         </div>
       </div>
 
@@ -393,7 +396,7 @@ function LayerAnimation({ color, onDone, pres }) {
         <div style={{
           display: "flex",
           justifyContent: "center",
-          gap: 12,
+          gap: pres ? 16 : 12,
           position: "relative",
           zIndex: 2,
         }}>
@@ -403,11 +406,11 @@ function LayerAnimation({ color, onDone, pres }) {
               ref={el => wordRefs.current[i] = el}
               style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: 22,
+                fontSize: pres ? 30 : 22,
                 fontWeight: 600,
                 color: (showBeams && activeBeams.some(([a, b]) => a === i || b === i))
                   ? color : "white",
-                padding: "10px 16px",
+                padding: pres ? "14px 22px" : "10px 16px",
                 borderRadius: 12,
                 background: (showBeams && activeBeams.some(([a, b]) => a === i || b === i))
                   ? `${color}20` : "rgba(255,255,255,.08)",
@@ -429,52 +432,55 @@ function LayerAnimation({ color, onDone, pres }) {
         <div style={{
           display: "flex",
           justifyContent: "center",
-          gap: 8,
-          marginBottom: 16,
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 20,
+          marginTop: 12,
           animation: "fadeUp .3s ease",
         }}>
-          <ChatCircleDots size={24} weight="duotone" color={color} />
+          <ChatCircleDots size={pres ? 36 : 24} weight="duotone" color={color} />
           <span style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 16,
+            fontSize: pres ? 26 : 18,
             color: "rgba(255,255,255,.5)",
           }}>
-            Words checking in with each other...
+            Looking — words checking in with each other...
           </span>
         </div>
       )}
 
       {/* MLP nodes — visible during mlp phase AND scrolling mlp sub-phase */}
       {showMlp && (
-        <div>
+        <div style={{ marginTop: 12, paddingBottom: 8 }}>
           {phase === "mlp" && (
             <div style={{
               display: "flex",
               justifyContent: "center",
-              gap: 8,
-              marginBottom: 16,
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 20,
             }}>
-              <Brain size={24} weight="duotone" color={color} />
+              <Brain size={pres ? 36 : 24} weight="duotone" color={color} />
               <span style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: 16,
+                fontSize: pres ? 26 : 18,
                 color: "rgba(255,255,255,.5)",
               }}>
-                Thinking about what it all means...
+                Thinking — asking questions about what it sees...
               </span>
             </div>
           )}
           <div style={{
             display: "flex",
             justifyContent: "center",
-            gap: 10,
+            gap: pres ? 16 : 10,
           }}>
             {[0, 1, 2, 3, 4].map(i => (
               <div
                 key={i}
                 style={{
-                  width: 36,
-                  height: 36,
+                  width: pres ? 52 : 36,
+                  height: pres ? 52 : 36,
                   borderRadius: "50%",
                   background: mlpNodes.includes(i) ? `${color}40` : "rgba(255,255,255,.06)",
                   border: `2px solid ${mlpNodes.includes(i) ? color : "rgba(255,255,255,.1)"}`,
@@ -486,26 +492,46 @@ function LayerAnimation({ color, onDone, pres }) {
                 }}
               >
                 {mlpNodes.includes(i) && (
-                  <Lightning size={18} weight="fill" color={color} />
+                  <Lightning size={pres ? 26 : 18} weight="fill" color={color} />
                 )}
               </div>
             ))}
           </div>
-          {/* Flashing question during MLP sub-phase of scrolling */}
+          {/* Flashing question — the star of the show */}
           {currentQuestion && phase === "scrolling" && scrollSub === "mlp" && (
             <div
               key={currentQuestion}
               style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: pres ? 32 : 15,
-                color: `${color}cc`,
+                fontSize: pres ? 40 : 22,
+                color: `${color}`,
                 textAlign: "center",
-                marginTop: pres ? 16 : 10,
+                marginTop: pres ? 24 : 14,
+                marginBottom: pres ? 8 : 4,
                 fontStyle: "italic",
+                fontWeight: 600,
                 animation: "fadeUp .15s ease",
+                textShadow: pres ? `0 0 20px ${color}33` : "none",
+                minHeight: pres ? 56 : 32,
               }}
             >
               "{currentQuestion}"
+            </div>
+          )}
+          {/* Show question during initial slow MLP phase too */}
+          {phase === "mlp" && (
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: pres ? 36 : 20,
+              color,
+              textAlign: "center",
+              marginTop: pres ? 20 : 12,
+              fontStyle: "italic",
+              fontWeight: 600,
+              animation: "fadeUp .3s ease",
+              minHeight: pres ? 50 : 28,
+            }}>
+              "Is this spelled right?"
             </div>
           )}
         </div>
@@ -537,22 +563,22 @@ function LayerAnimation({ color, onDone, pres }) {
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
               opacity: scrollSub === "attn" ? 1 : 0.25,
               transition: "opacity .08s",
             }}>
-              <ChatCircleDots size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>Attention <span style={{ fontSize: pres ? 13 : 11, opacity: 0.6 }}>(look at each other)</span></span>
+              <ChatCircleDots size={pres ? 28 : 20} weight="duotone" color={color} />
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 24 : 16, fontWeight: 600, color: scrollSub === "attn" ? color : "rgba(255,255,255,.5)" }}>Looking</span>
             </div>
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
               opacity: scrollSub === "mlp" ? 1 : 0.25,
               transition: "opacity .08s",
             }}>
-              <Brain size={20} weight="duotone" color={color} />
-              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 14, color: "rgba(255,255,255,.5)" }}>MLP <span style={{ fontSize: pres ? 13 : 11, opacity: 0.6 }}>(ask questions)</span></span>
+              <Brain size={pres ? 28 : 20} weight="duotone" color={color} />
+              <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 24 : 16, fontWeight: 600, color: scrollSub === "mlp" ? color : "rgba(255,255,255,.5)" }}>Thinking</span>
             </div>
           </div>
         </div>
@@ -566,29 +592,29 @@ function LayerAnimation({ color, onDone, pres }) {
         }}>
           <div style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 16,
+            fontSize: pres ? 24 : 16,
             color: "rgba(255,255,255,.4)",
-            marginBottom: 8,
+            marginBottom: 12,
           }}>
-            After 96 layers, the next word is...
+            After 96 layers of looking &amp; thinking, the next word is...
           </div>
           <div style={{
             display: "inline-block",
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 48,
+            fontSize: pres ? 64 : 48,
             fontWeight: 700,
             color: "#000",
             background: color,
-            padding: "12px 36px",
+            padding: pres ? "16px 48px" : "12px 36px",
             borderRadius: 16,
           }}>
             {OUTPUT_WORD}
           </div>
           <div style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: 18,
+            fontSize: pres ? 26 : 18,
             color: "rgba(255,255,255,.5)",
-            marginTop: 12,
+            marginTop: 16,
           }}>
             "The cat sat on the <strong style={{ color }}>{OUTPUT_WORD}</strong>"
           </div>
@@ -691,7 +717,7 @@ export default function SectionLayers({ color, mode, slide }) {
           lineHeight: 1.4,
           marginBottom: 16,
         }}>
-          One round of Attention <span style={{ fontSize: 18, opacity: 0.5 }}>(words look at each other)</span> + MLP <span style={{ fontSize: 18, opacity: 0.5 }}>(asks questions)</span> isn't enough.
+          One round of <strong style={{ color }}>Looking</strong> <span style={{ fontSize: 18, opacity: 0.5 }}>(words check in with each other)</span> + <strong style={{ color }}>Thinking</strong> <span style={{ fontSize: 18, opacity: 0.5 }}>(asking questions)</span> isn't enough.
         </div>
 
         <div style={{

@@ -31,10 +31,17 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 1: SectionStoryMash (2 slides) ──
+  // ── 1: SectionStoryMash (6 slides) ──
   {
     title: "Story Mash-Up!",
     slides: [
+      {
+        keyPoints: ["Generative AI is AI that creates new things", "This is what changed recently — AI went from sorting and recommending to creating"],
+        narrative: "Until recently, the AI we talked about — Siri, Netflix, YouTube — was good at recognizing and recommending things. But around 2017, researchers invented a new kind of AI architecture called the Transformer. By November 2022, ChatGPT brought this to the world — 100 million people used it in just 2 months. This new AI doesn't just sort or recommend — it creates. Stories, pictures, music, code. That's called Generative AI, or GenAI.",
+        definitions: [{ term: "Generative AI (GenAI)", def: "AI that can create new content — text, images, music, code — rather than just recognizing or recommending existing things" }],
+        discussion: ["What's the difference between AI that recommends a video and AI that writes a story?", "Can you think of anything you've seen that was created by AI?"],
+        simplification: "We're saying 'AI learned to create' which is a simplification. GenAI models don't truly understand or create with intent — they generate outputs based on patterns learned from massive datasets. The Transformer architecture (2017) and scale of training data are the real breakthroughs.",
+      },
       {
         keyPoints: ["Pure engagement hook — no teaching yet", "Let kids experience AI magic before explaining it"],
         narrative: "This is a 'wow' moment. Pick 3 volunteers and have each secretly enter a character, a place, or an event. The class watches as the AI weaves the random ingredients into a real story. After the reveal, just ask: 'How did it know how to do that?' Let the question hang.",
@@ -46,6 +53,24 @@ export const TEACHER_NOTES = [
         narrative: "You can run this 2-3 times if the class is loving it. Each round takes about 90 seconds. The sillier the inputs, the more fun the story. If kids are shy, offer suggestions: 'a dancing taco', 'on the surface of the sun', 'gravity reverses'.",
         definitions: [],
         discussion: ["What would happen if we gave the AI the same three things again — would we get the same story?", "What makes a good story? Did the AI include those things?"],
+      },
+      {
+        keyPoints: ["A prompt is instructions for the AI", "AI predicts one word at a time — it doesn't plan the whole story first", "Each word is chosen based on all the words before it"],
+        narrative: "NOW you connect the dots. 'Remember those 3 things you typed in? We combined them into a message called a PROMPT. The AI read that prompt and then started guessing what word should come next — one word at a time. It didn't plan the whole story first!'",
+        definitions: [{ term: "Prompt", def: "The instructions or question you give to AI — what starts the whole process" }],
+        discussion: ["When you write a story, do you plan it all out first or figure it out as you go?", "How is that similar to or different from what AI does?"],
+      },
+      {
+        keyPoints: ["Word-by-word prediction is how ALL text AI works", "The visual shows it's not magic — it's a process"],
+        narrative: "Walk through the animation slowly. Point out how each new word only makes sense because of the words before it. 'The AI doesn't know the ending when it starts. It picks ONE word, then uses that to pick the next one, and the next one...'",
+        definitions: [],
+        discussion: ["Can you finish this sentence: 'The dog chased the ___'? How did you know what word comes next?", "You just did what AI does! You predicted the next word based on what came before."],
+      },
+      {
+        keyPoints: ["Set up curiosity for the rest of the lesson", "Don't answer yet — let the question motivate the next sections"],
+        narrative: "This is the hook for everything that follows. 'So the AI predicts the next word. But HOW does it know which word to pick? That's what we're going to figure out today.' Pause here. Let the question hang.",
+        definitions: [],
+        discussion: ["How do YOU decide what word comes next when you're talking?", "Do you think the AI understands the story, or is it just really good at guessing?"],
       },
     ],
   },

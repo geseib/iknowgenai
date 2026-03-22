@@ -6,7 +6,7 @@ export const GRADE_CONFIG = {
     presTextSizeMultiplier: 1.15,
     presentationSlides: [
       2,  // 0: Who's Used AI? — simplified
-      2,  // 1: Story Mash-Up! — intro + interactive
+      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
       2,  // 2: What IS AI? — simplified
       3,  // 3: Rules vs Learning — 1 pair only
       4,  // 4: Brain vs AI — emotions only
@@ -33,7 +33,7 @@ export const GRADE_CONFIG = {
     presTextSizeMultiplier: 1.0,
     presentationSlides: [
       3,  // 0: Who's Used AI?
-      2,  // 1: Story Mash-Up!
+      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
       2,  // 2: What IS AI?
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
@@ -60,7 +60,7 @@ export const GRADE_CONFIG = {
     presTextSizeMultiplier: 0.95,
     presentationSlides: [
       3,  // 0: Who's Used AI?
-      2,  // 1: Story Mash-Up!
+      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
       2,  // 2: What IS AI?
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
