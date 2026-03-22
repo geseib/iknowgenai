@@ -88,6 +88,14 @@ export default function App() {
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Track mobile state
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isTeacherMode = mode === "teacher";
   const isPres = mode === "student" || mode === "teacher";
@@ -570,18 +578,21 @@ export default function App() {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Content — shifts left when teacher drawer is open (desktop only) */}
       <div
+        className="pres-content"
         style={{
           maxWidth: isPres ? 960 : 780,
           margin: "0 auto",
-          padding: isPres ? "0 40px" : (isMinimal ? "32px 28px 72px" : "88px 28px 96px"),
+          padding: isPres ? "0 40px" : "88px 28px 96px",
+          paddingRight: (teacherOpen && !isMobile) ? 360 : (isPres ? 40 : 28),
           position: "relative",
           zIndex: 10,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
+          transition: "padding-right .3s cubic-bezier(.4,0,.2,1)",
         }}
         key={`${sec}-${slide}`}
       >
@@ -589,7 +600,7 @@ export default function App() {
       </div>
 
       {/* Footer nav */}
-      <div style={{
+      <div className="pres-footer" style={{
         position: "fixed", bottom: 0, left: 0, right: 0, padding: "13px 22px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "transparent", zIndex: 100,
