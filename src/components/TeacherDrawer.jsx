@@ -7,6 +7,7 @@ import {
   ListBullets,
   Warning,
   Link,
+  Code,
 } from "@phosphor-icons/react";
 
 export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, slideLabel, color, isTeacherMode, connections }) {
@@ -15,7 +16,8 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
     notes.narrative ||
     notes.definitions?.length > 0 ||
     notes.discussion?.length > 0 ||
-    notes.simplification
+    notes.simplification ||
+    notes.behindTheScenes
   ) || connections?.length > 0;
 
   return (
@@ -160,6 +162,90 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
                 }}>
                   {notes.narrative}
                 </div>
+              </div>
+            )}
+
+            {/* Behind the Scenes — prompt breakdown */}
+            {notes?.behindTheScenes && (
+              <div style={{ marginBottom: 18 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, letterSpacing: 2, textTransform: "uppercase",
+                  color: "#fee44099", marginBottom: 8,
+                }}>
+                  <Code size={14} weight="duotone" color="#fee440" />
+                  Behind the Scenes
+                </div>
+                <div style={{
+                  fontSize: 12,
+                  color: "rgba(255,255,255,.5)",
+                  lineHeight: 1.5,
+                  marginBottom: 10,
+                }}>
+                  {notes.behindTheScenes.intro}
+                </div>
+                {notes.behindTheScenes.messages.map((msg, i) => {
+                  const roleColors = { system: "#9b5de5", user: "#00bbf9", assistant: "#06d6a0" };
+                  const rc = roleColors[msg.role] || "#fee440";
+                  return (
+                    <div key={i} style={{
+                      marginBottom: 10,
+                      padding: "10px 12px",
+                      background: `${rc}08`,
+                      borderRadius: 10,
+                      borderLeft: `3px solid ${rc}50`,
+                    }}>
+                      <div style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        marginBottom: 4,
+                      }}>
+                        <span style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: rc,
+                          textTransform: "uppercase",
+                          letterSpacing: 1.5,
+                          padding: "2px 6px",
+                          borderRadius: 4,
+                          background: `${rc}18`,
+                        }}>
+                          {msg.role}
+                        </span>
+                        <span style={{ fontSize: 11, color: "rgba(255,255,255,.4)", fontWeight: 600 }}>
+                          {msg.label}
+                        </span>
+                      </div>
+                      {msg.desc && (
+                        <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", marginBottom: 6, fontStyle: "italic" }}>
+                          {msg.desc}
+                        </div>
+                      )}
+                      <div style={{
+                        fontSize: 11,
+                        color: "rgba(255,255,255,.6)",
+                        lineHeight: 1.55,
+                        fontFamily: "'Nunito', monospace",
+                        whiteSpace: "pre-wrap",
+                        padding: "6px 8px",
+                        background: "rgba(0,0,0,.2)",
+                        borderRadius: 6,
+                      }}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  );
+                })}
+                {notes.behindTheScenes.note && (
+                  <div style={{
+                    fontSize: 11,
+                    color: "rgba(255,255,255,.35)",
+                    lineHeight: 1.5,
+                    fontStyle: "italic",
+                    marginTop: 6,
+                  }}>
+                    {notes.behindTheScenes.note}
+                  </div>
+                )}
               </div>
             )}
 

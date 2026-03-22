@@ -69,6 +69,30 @@ export const TEACHER_NOTES = [
         narrative: "NOW you connect the dots. 'Remember those 3 things you typed in? We combined them into a message called a PROMPT. The AI read that prompt and then started guessing what word should come next — one word at a time. It didn't plan the whole story first!'",
         definitions: [{ term: "Prompt", def: "The instructions or question you give to AI — what starts the whole process" }],
         discussion: ["When you write a story, do you plan it all out first or figure it out as you go?", "How is that similar to or different from what AI does?"],
+        behindTheScenes: {
+          intro: "Here's exactly what was sent to the AI to generate that story:",
+          messages: [
+            {
+              role: "system",
+              label: "System Prompt",
+              desc: "Sets the AI's personality and rules — the student never sees this",
+              content: "You are a fun, imaginative storyteller for kids ages 5-14. Write a short, entertaining story (4-6 sentences) that creatively combines these three random ingredients the students gave you. Be silly, surprising, and age-appropriate. Don't mention that you were given ingredients — just tell the story naturally.",
+            },
+            {
+              role: "user",
+              label: "User Prompt",
+              desc: "Built from the 3 secret ingredients — this is the actual request",
+              content: "Write a fun short story that includes all three of these:\n1. Character: {what Player 1 entered}\n2. Place: {what Player 2 entered}\n3. What happens: {what Player 3 entered}",
+            },
+            {
+              role: "assistant",
+              label: "Assistant Response",
+              desc: "The AI generates this word by word — it's not pre-written",
+              content: "(The story you just saw — generated one word at a time)",
+            },
+          ],
+          note: "This is the standard chat format used by all LLMs: system sets the rules, user asks the question, assistant responds. The system prompt is invisible to the user — it's like whispering instructions to an actor before they go on stage.",
+        },
       },
       {
         keyPoints: ["Word-by-word prediction is how ALL text AI works", "The visual shows it's not magic — it's a process"],
