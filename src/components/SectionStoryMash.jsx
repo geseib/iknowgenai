@@ -14,7 +14,12 @@ import {
   PencilLine,
   ImageSquare,
   MusicNotes,
+  QrCode,
+  Keyboard,
+  CheckCircle,
+  WifiHigh,
 } from "@phosphor-icons/react";
+import { QRCodeSVG } from "qrcode.react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
 /* ── Prompts by slot ── */
@@ -284,15 +289,26 @@ function SecretInput({ config, value, onChange, locked, revealed, onReveal }) {
   );
 }
 
+/* ── Build join URL from current window location ── */
+function buildJoinUrl(code) {
+  const origin = window.location.origin;
+  const path = window.location.pathname;
+  return `${origin}${path}?join=${code}`;
+}
+
 /* ── Main component ── */
 export default function SectionStoryMash({ color, mode, slide }) {
   const [inputs, setInputs] = useState(["", "", ""]);
-  const [phase, setPhase] = useState("input"); // input | locked | revealing | generating | done
+  const [phase, setPhase] = useState("entry-select"); // entry-select | remote-waiting | input | locked | revealing | generating | done
+  const [entryMode, setEntryMode] = useState(null); // null | "remote" | "manual"
+  const [roomCode, setRoomCode] = useState(null);
+  const [roomStatus, setRoomStatus] = useState(null); // { character, place, event, *_claimed }
   const [revealIdx, setRevealIdx] = useState(-1);
   const [story, setStory] = useState("");
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const storyRef = useRef(null);
+  const pollRef = useRef(null);
 
   const allFilled = inputs.every(v => v.trim().length > 0);
 
@@ -304,10 +320,77 @@ export default function SectionStoryMash({ color, mode, slide }) {
     });
   };
 
+  /* ── Create room for remote entry ── */
+  const startRemote = async () => {
+    try {
+      const res = await fetch("/api/room-create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.code) {
+        setRoomCode(data.code);
+        setEntryMode("remote");
+        setPhase("remote-waiting");
+        setRoomStatus({ character: "", place: "", event: "", character_claimed: false, place_claimed: false, event_claimed: false });
+      }
+    } catch (err) {
+      // If remote fails, fall back to manual
+      setEntryMode("manual");
+      setPhase("input");
+    }
+  };
+
+  /* ── Poll for remote entries ── */
+  useEffect(() => {
+    if (phase !== "remote-waiting" || !roomCode) return;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/room-status?code=${roomCode}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setRoomStatus(data);
+
+        // Check if all 3 entries are filled
+        if (data.character && data.place && data.event) {
+          setInputs([data.character, data.place, data.event]);
+          setPhase("locked");
+          // Auto-start reveal
+          setTimeout(() => { setRevealIdx(0); setPhase("revealing"); }, 600);
+        }
+      } catch (_) {}
+    };
+
+    poll(); // immediate first check
+    pollRef.current = setInterval(poll, 2500);
+    return () => clearInterval(pollRef.current);
+  }, [phase, roomCode]);
+
+  /* ── Start manual entry ── */
+  const startManual = () => {
+    setEntryMode("manual");
+    setPhase("input");
+  };
+
+  /* ── Switch from remote to manual ── */
+  const switchToManual = () => {
+    clearInterval(pollRef.current);
+    // Carry over any entries that already came in via remote
+    if (roomStatus) {
+      setInputs([
+        roomStatus.character || "",
+        roomStatus.place || "",
+        roomStatus.event || "",
+      ]);
+    }
+    setEntryMode("manual");
+    setPhase("input");
+  };
+
   /* ── Reveal sequence ── */
   const startReveal = () => {
     setPhase("locked");
-    // Reveal each input one at a time
     setTimeout(() => { setRevealIdx(0); setPhase("revealing"); }, 600);
   };
 
@@ -398,8 +481,12 @@ export default function SectionStoryMash({ color, mode, slide }) {
   /* ── Reset ── */
   const reset = () => {
     window.speechSynthesis?.cancel();
+    clearInterval(pollRef.current);
     setInputs(["", "", ""]);
-    setPhase("input");
+    setPhase("entry-select");
+    setEntryMode(null);
+    setRoomCode(null);
+    setRoomStatus(null);
     setRevealIdx(-1);
     setStory("");
     setLoading(false);
@@ -748,7 +835,9 @@ export default function SectionStoryMash({ color, mode, slide }) {
     }
   }
 
-  /* ── Focus / Classroom / Presentation slide 1 ── */
+  /* ── Focus / Classroom / Presentation slide 2 ── */
+  const ROLE_KEYS = ["character", "place", "event"];
+
   return (
     <div className="fade-up">
       {mode !== "presentation" ? (
@@ -769,14 +858,6 @@ export default function SectionStoryMash({ color, mode, slide }) {
             Story{" "}
             <span style={{ color, textShadow: `0 0 24px ${color}44` }}>Mash-Up!</span>
           </div>
-          <div style={{
-            fontFamily: "'Fredoka',sans-serif",
-            fontSize: 22,
-            color: "rgba(255,255,255,.35)",
-            marginTop: 8,
-          }}>
-            Enter your secret ingredients below
-          </div>
         </div>
       )}
 
@@ -785,155 +866,469 @@ export default function SectionStoryMash({ color, mode, slide }) {
         maxWidth: 900,
         margin: "0 auto",
       }}>
-        {/* ── Top: 3 secret input boxes ── */}
-        <div style={{
-          display: "flex",
-          gap: 14,
-          marginBottom: 0,
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}>
-          {SLOT_CONFIG.map((cfg, i) => (
-            <SecretInput
-              key={i}
-              config={cfg}
-              value={inputs[i]}
-              onChange={v => setInput(i, v)}
-              locked={phase !== "input"}
-              revealed={revealIdx >= i}
-            />
-          ))}
-        </div>
+        {/* ── Entry mode selection ── */}
+        {phase === "entry-select" && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 24,
+              color: "rgba(255,255,255,.45)",
+              marginBottom: 28,
+            }}>
+              How should players enter their secret ingredients?
+            </div>
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 20,
+              flexWrap: "wrap",
+            }}>
+              <button
+                onClick={startRemote}
+                className="cta-btn"
+                style={{
+                  background: `${color}15`,
+                  border: `2px solid ${color}50`,
+                  color: "white",
+                  fontSize: 22,
+                  padding: "28px 36px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 12,
+                  minWidth: 220,
+                  borderRadius: 20,
+                }}
+              >
+                <QrCode size={48} weight="duotone" color={color} />
+                <span style={{ fontWeight: 700 }}>Remote Entry</span>
+                <span style={{ fontSize: 16, color: "rgba(255,255,255,.35)", fontWeight: 400 }}>
+                  Kids scan a QR code on their phones
+                </span>
+              </button>
+              <button
+                onClick={startManual}
+                className="cta-btn"
+                style={{
+                  background: "rgba(255,255,255,.05)",
+                  border: "2px solid rgba(255,255,255,.15)",
+                  color: "white",
+                  fontSize: 22,
+                  padding: "28px 36px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 12,
+                  minWidth: 220,
+                  borderRadius: 20,
+                }}
+              >
+                <Keyboard size={48} weight="duotone" color="rgba(255,255,255,.5)" />
+                <span style={{ fontWeight: 700 }}>Type Here</span>
+                <span style={{ fontSize: 16, color: "rgba(255,255,255,.35)", fontWeight: 400 }}>
+                  Enter ingredients on this computer
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* ── Lock button ── */}
-        {phase === "input" && (
-          <div style={{ textAlign: "center", marginTop: 20 }}>
+        {/* ── Remote entry: QR code + waiting ── */}
+        {phase === "remote-waiting" && roomCode && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 40,
+              alignItems: "center",
+              flexWrap: "wrap",
+              marginBottom: 32,
+            }}>
+              {/* QR code */}
+              <div>
+                <div style={{
+                  background: "white",
+                  borderRadius: 20,
+                  padding: 20,
+                  display: "inline-block",
+                  marginBottom: 16,
+                }}>
+                  <QRCodeSVG
+                    value={buildJoinUrl(roomCode)}
+                    size={200}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 16,
+                  color: "rgba(255,255,255,.3)",
+                }}>
+                  Scan to join
+                </div>
+              </div>
+
+              {/* Room code */}
+              <div>
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 18,
+                  color: "rgba(255,255,255,.35)",
+                  marginBottom: 8,
+                  textTransform: "uppercase",
+                  letterSpacing: 2,
+                }}>
+                  Room Code
+                </div>
+                <div style={{
+                  fontFamily: "'Fredoka',sans-serif",
+                  fontSize: 72,
+                  fontWeight: 700,
+                  color,
+                  letterSpacing: 12,
+                  textShadow: `0 0 30px ${color}44`,
+                }}>
+                  {roomCode}
+                </div>
+              </div>
+            </div>
+
+            {/* Status indicators */}
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 16,
+              marginBottom: 28,
+              flexWrap: "wrap",
+            }}>
+              {SLOT_CONFIG.map((cfg, i) => {
+                const roleKey = ROLE_KEYS[i];
+                const claimed = roomStatus?.[`${roleKey}_claimed`];
+                const filled = roomStatus?.[roleKey] && roomStatus[roleKey].length > 0;
+                return (
+                  <Card key={i} style={{
+                    padding: "18px 24px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    minWidth: 200,
+                    borderColor: filled ? `${cfg.color}60` : claimed ? `${cfg.color}30` : "rgba(255,255,255,.09)",
+                    background: filled ? `${cfg.color}12` : "rgba(255,255,255,.03)",
+                    transition: "all .4s ease",
+                  }}>
+                    <UserCircle size={28} weight="duotone" color={cfg.color} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontFamily: "'Fredoka',sans-serif",
+                        fontSize: 18,
+                        fontWeight: 600,
+                        color: cfg.color,
+                      }}>
+                        {cfg.label}: {cfg.prompt}
+                      </div>
+                      <div style={{
+                        fontFamily: "'Fredoka',sans-serif",
+                        fontSize: 14,
+                        color: "rgba(255,255,255,.35)",
+                        marginTop: 2,
+                      }}>
+                        {filled ? "Ready!" : claimed ? "Typing…" : "Waiting for player…"}
+                      </div>
+                    </div>
+                    {filled ? (
+                      <CheckCircle size={28} weight="fill" color={cfg.color} />
+                    ) : claimed ? (
+                      <WifiHigh size={22} weight="duotone" color={cfg.color} style={{ animation: "cursorBlink 1s step-end infinite" }} />
+                    ) : (
+                      <div style={{
+                        width: 22, height: 22, borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,.15)",
+                      }} />
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Waiting indicator + fallback */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              marginBottom: 16,
+            }}>
+              <Sparkle size={22} weight="duotone" color={color} className="spin" />
+              <span style={{
+                fontFamily: "'Fredoka',sans-serif",
+                fontSize: 20,
+                color: "rgba(255,255,255,.35)",
+              }}>
+                Waiting for all 3 entries…
+              </span>
+            </div>
             <button
-              onClick={startReveal}
-              disabled={!allFilled}
-              className="cta-btn"
+              onClick={switchToManual}
               style={{
-                background: allFilled ? color : "rgba(255,255,255,.1)",
-                color: allFilled ? "#000" : "rgba(255,255,255,.3)",
-                fontSize: 24,
-                padding: "16px 44px",
-                cursor: allFilled ? "pointer" : "not-allowed",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
+                background: "none",
+                border: "none",
+                color: "rgba(255,255,255,.3)",
+                fontSize: 16,
+                fontFamily: "'Fredoka',sans-serif",
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: 4,
               }}
             >
-              <MagicWand size={26} weight="bold" />
-              Lock it in &amp; Mash!
+              Switch to typing on this computer instead
             </button>
           </div>
         )}
 
+        {/* ── Manual input (simplified — no hiding) ── */}
+        {phase === "input" && (
+          <>
+            <div style={{
+              display: "flex",
+              gap: 14,
+              marginBottom: 0,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}>
+              {SLOT_CONFIG.map((cfg, i) => (
+                <Card key={i} style={{
+                  padding: "24px 26px",
+                  flex: 1,
+                  minWidth: 240,
+                  borderColor: inputs[i] ? `${cfg.color}40` : "rgba(255,255,255,.09)",
+                  background: inputs[i] ? `${cfg.color}08` : "rgba(255,255,255,.05)",
+                  transition: "all .3s ease",
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginBottom: 14,
+                  }}>
+                    <UserCircle size={32} weight="duotone" color={cfg.color} />
+                    <span style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 22,
+                      fontWeight: 600,
+                      color: cfg.color,
+                    }}>
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 18,
+                    color: "rgba(255,255,255,.4)",
+                    marginBottom: 10,
+                  }}>
+                    Enter {cfg.prompt}:
+                  </div>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-form-type="other"
+                    value={inputs[i]}
+                    onChange={e => setInput(i, e.target.value)}
+                    placeholder={cfg.placeholder}
+                    style={{
+                      width: "100%",
+                      padding: "14px 18px",
+                      borderRadius: 12,
+                      border: `2px solid ${cfg.color}40`,
+                      background: "rgba(0,0,0,.3)",
+                      color: "white",
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 24,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </Card>
+              ))}
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 20 }}>
+              <button
+                onClick={startReveal}
+                disabled={!allFilled}
+                className="cta-btn"
+                style={{
+                  background: allFilled ? color : "rgba(255,255,255,.1)",
+                  color: allFilled ? "#000" : "rgba(255,255,255,.3)",
+                  fontSize: 24,
+                  padding: "16px 44px",
+                  cursor: allFilled ? "pointer" : "not-allowed",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <MagicWand size={26} weight="bold" />
+                Lock it in &amp; Mash!
+              </button>
+            </div>
+          </>
+        )}
+
         {/* ── Lightning bolt connector ── */}
-        {phase !== "input" && (
+        {!["entry-select", "remote-waiting", "input"].includes(phase) && (
           <LightningBolt
             firing={phase === "generating" || phase === "done"}
             color={color}
           />
         )}
 
-        {/* ── Story output box ── */}
-        {phase !== "input" && (
-          <Card style={{
-            padding: "32px 36px",
-            borderColor: phase === "done" ? `${color}50` : "rgba(255,255,255,.09)",
-            background: phase === "done" ? `${color}08` : "rgba(255,255,255,.05)",
-            transition: "all .5s ease",
-            animation: (phase === "generating" || phase === "done") ? "fadeUp .5s ease" : "none",
-            textAlign: "center",
-            minHeight: 160,
-          }}>
+        {/* ── Reveal / generate / story ── */}
+        {!["entry-select", "remote-waiting", "input"].includes(phase) && (
+          <>
+            {/* Show the 3 entries during reveal */}
             {(phase === "locked" || phase === "revealing") && (
               <div style={{
-                fontFamily: "'Fredoka',sans-serif",
-                fontSize: 28,
-                color: "rgba(255,255,255,.3)",
-                padding: "30px 0",
+                display: "flex",
+                gap: 14,
+                marginBottom: 16,
+                flexWrap: "wrap",
+                justifyContent: "center",
               }}>
-                {phase === "locked" ? "Locking in secrets…" : `Revealing ingredient ${revealIdx + 1} of 3…`}
+                {SLOT_CONFIG.map((cfg, i) => (
+                  <Card key={i} style={{
+                    padding: "16px 22px",
+                    flex: 1,
+                    minWidth: 200,
+                    borderColor: revealIdx >= i ? `${cfg.color}60` : "rgba(255,255,255,.09)",
+                    background: revealIdx >= i ? `${cfg.color}10` : "rgba(255,255,255,.05)",
+                    transition: "all .4s ease",
+                    textAlign: "center",
+                  }}>
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 16,
+                      color: cfg.color,
+                      fontWeight: 600,
+                      marginBottom: 6,
+                    }}>
+                      {cfg.label}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Fredoka',sans-serif",
+                      fontSize: 24,
+                      fontWeight: 600,
+                      color: revealIdx >= i ? cfg.color : "rgba(255,255,255,.15)",
+                      animation: revealIdx === i ? "popIn .4s cubic-bezier(.34,1.56,.64,1) forwards" : "none",
+                    }}>
+                      {revealIdx >= i ? inputs[i] : "● ● ●"}
+                    </div>
+                  </Card>
+                ))}
               </div>
             )}
 
-            {phase === "generating" && !story && (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 14,
-                padding: "30px 0",
-              }}>
-                <Sparkle size={32} weight="duotone" color={color} className="spin" />
-                <span style={{
+            <Card style={{
+              padding: "32px 36px",
+              borderColor: phase === "done" ? `${color}50` : "rgba(255,255,255,.09)",
+              background: phase === "done" ? `${color}08` : "rgba(255,255,255,.05)",
+              transition: "all .5s ease",
+              animation: (phase === "generating" || phase === "done") ? "fadeUp .5s ease" : "none",
+              textAlign: "center",
+              minHeight: 160,
+            }}>
+              {(phase === "locked" || phase === "revealing") && (
+                <div style={{
                   fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 26,
-                  color: "rgba(255,255,255,.5)",
+                  fontSize: 28,
+                  color: "rgba(255,255,255,.3)",
+                  padding: "30px 0",
                 }}>
-                  AI is writing your story…
-                </span>
-              </div>
-            )}
+                  {phase === "locked" ? "Locking in secrets…" : `Revealing ingredient ${revealIdx + 1} of 3…`}
+                </div>
+              )}
 
-            {story && (
-              <div ref={storyRef} style={{
-                fontFamily: "'Nunito',sans-serif",
-                fontSize: 26,
-                color: "rgba(255,255,255,.85)",
-                lineHeight: 1.75,
-                textAlign: "left",
-              }}>
-                {story}
-              </div>
-            )}
+              {phase === "generating" && !story && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 14,
+                  padding: "30px 0",
+                }}>
+                  <Sparkle size={32} weight="duotone" color={color} className="spin" />
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 26,
+                    color: "rgba(255,255,255,.5)",
+                  }}>
+                    AI is writing your story…
+                  </span>
+                </div>
+              )}
 
-            {/* ── Action buttons ── */}
-            {phase === "done" && story && (
-              <div style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 14,
-                marginTop: 24,
-              }}>
-                <button
-                  onClick={readAloud}
-                  className="cta-btn"
-                  style={{
-                    background: speaking ? `${color}cc` : color,
-                    color: "#000",
-                    fontSize: 22,
-                    padding: "14px 32px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                    boxShadow: speaking ? `0 0 20px ${color}44` : "none",
-                  }}
-                >
-                  <SpeakerHigh size={24} weight="bold" />
-                  {speaking ? "Reading…" : "Read it Out Loud!"}
-                </button>
-                <button
-                  onClick={reset}
-                  className="cta-btn"
-                  style={{
-                    background: "rgba(255,255,255,.1)",
-                    color: "rgba(255,255,255,.7)",
-                    fontSize: 22,
-                    padding: "14px 32px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                  }}
-                >
-                  <ArrowClockwise size={24} weight="bold" />
-                  Play Again
-                </button>
-              </div>
-            )}
-          </Card>
+              {story && (
+                <div ref={storyRef} style={{
+                  fontFamily: "'Nunito',sans-serif",
+                  fontSize: 26,
+                  color: "rgba(255,255,255,.85)",
+                  lineHeight: 1.75,
+                  textAlign: "left",
+                }}>
+                  {story}
+                </div>
+              )}
+
+              {/* ── Action buttons ── */}
+              {phase === "done" && story && (
+                <div style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 14,
+                  marginTop: 24,
+                }}>
+                  <button
+                    onClick={readAloud}
+                    className="cta-btn"
+                    style={{
+                      background: speaking ? `${color}cc` : color,
+                      color: "#000",
+                      fontSize: 22,
+                      padding: "14px 32px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      boxShadow: speaking ? `0 0 20px ${color}44` : "none",
+                    }}
+                  >
+                    <SpeakerHigh size={24} weight="bold" />
+                    {speaking ? "Reading…" : "Read it Out Loud!"}
+                  </button>
+                  <button
+                    onClick={reset}
+                    className="cta-btn"
+                    style={{
+                      background: "rgba(255,255,255,.1)",
+                      color: "rgba(255,255,255,.7)",
+                      fontSize: 22,
+                      padding: "14px 32px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <ArrowClockwise size={24} weight="bold" />
+                    Play Again
+                  </button>
+                </div>
+              )}
+            </Card>
+          </>
         )}
       </div>
     </div>

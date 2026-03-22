@@ -29,6 +29,10 @@ import SectionMLP from "./components/SectionMLP";
 import SectionLayers from "./components/SectionLayers";
 import SectionPredict from "./components/SectionPredict";
 import SectionTryIt from "./components/SectionTryIt";
+import JoinRoom from "./components/JoinRoom";
+
+// If ?join=CODE is in the URL, render the mobile join page instead
+const JOIN_CODE = new URLSearchParams(window.location.search).get("join");
 
 const SECTIONS = [
   SectionWhoIsHere,
@@ -68,6 +72,11 @@ const SECTION_DONE_EVENT = "sectionFullyRevealed";
 const HASH_SECTIONS = { "try-it": SECTIONS.length - 1 };
 
 export default function App() {
+  // If ?join=CODE is in the URL, render the mobile join page
+  if (JOIN_CODE) {
+    return <JoinRoom code={JOIN_CODE.toUpperCase()} />;
+  }
+
   // Check for hash deep-link on initial load
   const hashTarget = window.location.hash.replace("#", "");
   const deepLink = HASH_SECTIONS[hashTarget];
