@@ -16,7 +16,7 @@ const FLAGS = [
     Icon: Shuffle,
     color: "#9b5de5",
     type: "toggle",
-    defaultValue: false,
+    defaultValue: true,
   },
   {
     key: "teacherDrawerPush",
