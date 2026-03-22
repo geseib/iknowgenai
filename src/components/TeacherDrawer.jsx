@@ -6,16 +6,17 @@ import {
   ChatCircleDots,
   ListBullets,
   Warning,
+  Link,
 } from "@phosphor-icons/react";
 
-export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, slideLabel, color, isTeacherMode }) {
+export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, slideLabel, color, isTeacherMode, connections }) {
   const hasContent = notes && (
     notes.keyPoints?.length > 0 ||
     notes.narrative ||
     notes.definitions?.length > 0 ||
     notes.discussion?.length > 0 ||
     notes.simplification
-  );
+  ) || connections?.length > 0;
 
   return (
     <>
@@ -207,6 +208,47 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
                   }}>
                     <span style={{ color: `${color}88`, flexShrink: 0 }}>{i + 1}.</span>
                     <span>"{q}"</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Connections to School Subjects */}
+            {connections?.length > 0 && (
+              <div style={{ marginTop: 18, marginBottom: 18 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, letterSpacing: 2, textTransform: "uppercase",
+                  color: "#06d6a099", marginBottom: 8,
+                }}>
+                  <Link size={14} weight="duotone" color="#06d6a0" />
+                  Connections
+                </div>
+                {connections.map((c, i) => (
+                  <div key={i} style={{
+                    marginBottom: 8,
+                    padding: "8px 10px",
+                    background: "rgba(6,214,160,.06)",
+                    borderRadius: 8,
+                    border: "1px solid rgba(6,214,160,.15)",
+                  }}>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "#06d6a0",
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                    }}>
+                      {c.subject}
+                    </span>
+                    <div style={{
+                      fontSize: 12,
+                      color: "rgba(255,255,255,.5)",
+                      marginTop: 3,
+                      lineHeight: 1.5,
+                    }}>
+                      {c.note}
+                    </div>
                   </div>
                 ))}
               </div>
