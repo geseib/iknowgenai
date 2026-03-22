@@ -34,7 +34,8 @@ import JoinRoom from "./components/JoinRoom";
 // If ?join=CODE is in the URL, render the mobile join page instead
 const JOIN_CODE = new URLSearchParams(window.location.search).get("join");
 
-const SECTIONS = [
+// ── V1: Current section order ──
+const SECTIONS_V1 = [
   SectionWhoIsHere,
   SectionStoryMash,
   SectionWhatIsAI,
@@ -56,6 +57,78 @@ const SECTIONS = [
   SectionTryIt,
 ];
 
+// ── V2: Proposed reordering ──
+// Changes: BrainVsAI stays in group 1, HowItLearns+ThreeSteps move before TheBridge
+const SECTIONS_V2 = [
+  SectionWhoIsHere,     // 0  — Group 1: What Is AI?
+  SectionStoryMash,     // 1
+  SectionWhatIsAI,      // 2
+  SectionProgramsVsAI,  // 3
+  SectionBrainVsAI,     // 4  — now in group 1 (was group 2)
+  SectionWhatIsLLM,     // 5  — Group 2: Meet the LLMs
+  SectionMeetModels,    // 6
+  SectionHowItLearns,   // 7  — moved up (was 8)
+  SectionThreeSteps,    // 8  — moved up (was 9)
+  SectionTheBridge,     // 9  — Group 3: Inside the Machine (was 7, now opens the deep dive)
+  SectionHook,          // 10
+  SectionTokens,        // 11
+  SectionEmbeddings,    // 12
+  SectionBeyond2D,      // 13
+  SectionAttention,     // 14
+  SectionMLP,           // 15 — Group 4: How AI Writes
+  SectionLayers,        // 16
+  SectionPredict,       // 17
+  SectionTryIt,         // 18 — Group 5: Try It!
+];
+
+// V2 index mapping: v2Position → v1Position (for slide count remapping)
+const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+// V2 groups and titles
+const GROUPS_V2 = [
+  { name: "What Is AI?",        start: 0,  end: 4  },
+  { name: "Meet the LLMs",      start: 5,  end: 8  },
+  { name: "Inside the Machine", start: 9,  end: 14 },
+  { name: "How AI Writes",      start: 15, end: 17 },
+  { name: "Try It!",            start: 18, end: 18 },
+];
+
+const TITLES_V2 = [
+  "Who's Used AI?",          // 0
+  "Story Mash-Up!",          // 1
+  "What IS AI?",             // 2
+  "Rules vs Learning",       // 3
+  "Brain vs AI",             // 4
+  "What's an LLM?",          // 5
+  "Meet the Models",         // 6
+  "How AI Learns",           // 7 (was index 8)
+  "Three Steps to Helpful AI", // 8 (was index 9)
+  "The Big Question",        // 9 (was index 7)
+  "Numbers & Words",         // 10
+  "Tokens — Not Quite Words",// 11
+  "Words in Space",          // 12
+  "Beyond 2D",               // 13
+  "Attention!",              // 14
+  "The Thinking Layer",      // 15
+  "Rinse & Repeat",          // 16
+  "Predict!",                // 17
+  "Try It Yourself!",        // 18
+];
+
+// Remap colors for v2 ordering
+const COLORS_V2 = V2_TO_V1.map(oldIdx => COLORS[oldIdx % COLORS.length]);
+
+// Remap grade slide counts for v2
+function getV2Slides(gradeKey) {
+  const original = GRADE_CONFIG[gradeKey].presentationSlides;
+  return V2_TO_V1.map(oldIdx => original[oldIdx] || 0);
+}
+
+// Remap teacher notes for v2
+function getV2TeacherNotes() {
+  return V2_TO_V1.map(oldIdx => TEACHER_NOTES[oldIdx] || {});
+}
+
 // Default slide counts (3-5 grade level) — overridden by GRADE_CONFIG
 const DEFAULT_SLIDES = GRADE_CONFIG["3-5"].presentationSlides;
 
@@ -69,7 +142,7 @@ const PRESENTATION_SKIP = {
 const SECTION_DONE_EVENT = "sectionFullyRevealed";
 
 // Map URL hash fragments to section indices
-const HASH_SECTIONS = { "try-it": SECTIONS.length - 1 };
+const HASH_SECTIONS = { "try-it": SECTIONS_V1.length - 1 };
 
 export default function App() {
   // If ?join=CODE is in the URL, render the mobile join page
@@ -81,6 +154,7 @@ export default function App() {
   const hashTarget = window.location.hash.replace("#", "");
   const deepLink = HASH_SECTIONS[hashTarget];
 
+  const [flowVersion, setFlowVersion] = useState("v1");
   const [mode, setMode] = useState(deepLink != null ? "student" : null);
   const [grade, setGrade] = useState("3-5");
   const [sec, setSec] = useState(deepLink != null ? deepLink : 0);
@@ -97,9 +171,18 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const isV2 = flowVersion === "v2";
+  const SECTIONS = isV2 ? SECTIONS_V2 : SECTIONS_V1;
+  const activeGROUPS = isV2 ? GROUPS_V2 : GROUPS;
+  const activeTITLES = isV2 ? TITLES_V2 : TITLES;
+  const activeCOLORS = isV2 ? COLORS_V2 : COLORS;
+  const activeNOTES = isV2 ? getV2TeacherNotes() : TEACHER_NOTES;
+
   const isTeacherMode = mode === "teacher";
   const isPres = mode === "student" || mode === "teacher";
-  const PRESENTATION_SLIDES = GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES;
+  const PRESENTATION_SLIDES = isV2
+    ? getV2Slides(grade)
+    : (GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES);
 
   // Open teacher drawer automatically when entering teacher mode
   useEffect(() => {
@@ -170,12 +253,12 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [mode, next, prev, navOpen, teacherOpen]);
 
-  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} />;
+  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flowVersion={flowVersion} onFlowChange={setFlowVersion} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
   if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
 
-  const color = COLORS[sec % COLORS.length];
-  const currentGroup = GROUPS.find(g => sec >= g.start && sec <= g.end);
+  const color = activeCOLORS[sec % activeCOLORS.length];
+  const currentGroup = activeGROUPS.find(g => sec >= g.start && sec <= g.end);
 
   // Progress — always slide-based
   const totalSlideCount = PRESENTATION_SLIDES.reduce((a, b) => a + b, 0);
@@ -183,7 +266,7 @@ export default function App() {
   const progressPct = Math.round((currentSlideNum / totalSlideCount) * 100);
 
   // Teacher notes for current slide
-  const currentNotes = TEACHER_NOTES[sec]?.slides?.[slide] || {};
+  const currentNotes = activeNOTES[sec]?.slides?.[slide] || {};
 
   const stars = Array.from({ length: 80 }, (_, i) => ({
     x: ((i * 137.508) % 100).toFixed(2),
@@ -334,8 +417,8 @@ export default function App() {
 
             {/* Groups and sections */}
             <div style={{ padding: "6px 0 16px" }}>
-              {GROUPS.map((group, gi) => {
-                const groupColor = COLORS[group.start % COLORS.length];
+              {activeGROUPS.map((group, gi) => {
+                const groupColor = activeCOLORS[group.start % activeCOLORS.length];
                 return (
                   <div key={gi}>
                     {/* Group header */}
@@ -369,7 +452,7 @@ export default function App() {
                     ).map(si => {
                       const isActive = si === sec;
                       const isDone = done.has(si);
-                      const sColor = COLORS[si % COLORS.length];
+                      const sColor = activeCOLORS[si % activeCOLORS.length];
                       const totalSlidesInSec = PRESENTATION_SLIDES[si] || 1;
                       const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
                       const pct = (slidesDone / totalSlidesInSec) * 100;
@@ -424,7 +507,7 @@ export default function App() {
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                             }}>
-                              {TITLES[si]}
+                              {activeTITLES[si]}
                             </div>
                             {(isActive || isDone) && (
                               <div style={{
@@ -530,7 +613,7 @@ export default function App() {
         open={teacherOpen}
         onToggle={() => setTeacherOpen(o => !o)}
         notes={currentNotes}
-        sectionTitle={TITLES[sec]}
+        sectionTitle={activeTITLES[sec]}
         slideLabel={`Slide ${slide + 1} of ${PRESENTATION_SLIDES[sec]}`}
         color={color}
         isTeacherMode={isTeacherMode}
