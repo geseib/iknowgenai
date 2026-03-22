@@ -30,6 +30,7 @@ import SectionLayers from "./components/SectionLayers";
 import SectionPredict from "./components/SectionPredict";
 import SectionTryIt from "./components/SectionTryIt";
 import JoinRoom from "./components/JoinRoom";
+import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 
 // If ?join=CODE is in the URL, render the mobile join page instead
 const JOIN_CODE = new URLSearchParams(window.location.search).get("join");
@@ -154,7 +155,7 @@ export default function App() {
   const hashTarget = window.location.hash.replace("#", "");
   const deepLink = HASH_SECTIONS[hashTarget];
 
-  const [flowVersion, setFlowVersion] = useState("v1");
+  const [flags, setFlags] = useState(loadFlags);
   const [mode, setMode] = useState(deepLink != null ? "student" : null);
   const [grade, setGrade] = useState("3-5");
   const [sec, setSec] = useState(deepLink != null ? deepLink : 0);
@@ -162,16 +163,17 @@ export default function App() {
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const isMobile = flags.mobileOptimized && windowWidth <= 768;
 
-  // Track mobile state
+  // Track window width
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const isV2 = flowVersion === "v2";
+  const isV2 = flags.flowVersion;
   const SECTIONS = isV2 ? SECTIONS_V2 : SECTIONS_V1;
   const activeGROUPS = isV2 ? GROUPS_V2 : GROUPS;
   const activeTITLES = isV2 ? TITLES_V2 : TITLES;
@@ -253,7 +255,8 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [mode, next, prev, navOpen, teacherOpen]);
 
-  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flowVersion={flowVersion} onFlowChange={setFlowVersion} />;
+  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} />;
+  if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
   if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
 
@@ -668,7 +671,7 @@ export default function App() {
           maxWidth: isPres ? 960 : 780,
           margin: "0 auto",
           padding: isPres ? "0 40px" : "88px 28px 96px",
-          paddingRight: (teacherOpen && !isMobile) ? 360 : (isPres ? 40 : 28),
+          paddingRight: (teacherOpen && !isMobile && flags.teacherDrawerPush) ? 360 : (isPres ? 40 : 28),
           position: "relative",
           zIndex: 10,
           minHeight: "100vh",
