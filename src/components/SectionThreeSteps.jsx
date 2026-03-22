@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowClockwise } from "@phosphor-icons/react";
 import { PresSlide, PresText } from "./shared";
 
 const mascotUrl = `${import.meta.env.BASE_URL}robotcomputerbrain.png`;
@@ -41,9 +42,9 @@ const RLHF_ROUNDS = [
 
 /* Personality trait labels computed from RLHF choices */
 const TRAITS = [
-  { label: "Clarity", aVal: 20, bVal: 90 },
-  { label: "Friendliness", aVal: 15, bVal: 85 },
-  { label: "Safety", aVal: 10, bVal: 95 },
+  { label: "Clearer", emoji: "💡", beforeVal: 25, afterVal: 92, color: "#00bbf9" },
+  { label: "Safer", emoji: "🛡️", beforeVal: 15, afterVal: 95, color: "#06d6a0" },
+  { label: "Friendlier", emoji: "😊", beforeVal: 20, afterVal: 88, color: "#fee440" },
 ];
 
 /* ── MiniDial (reused spinning dial pattern) ─────────────────────────── */
@@ -273,19 +274,19 @@ export default function SectionThreeSteps({ color, mode, slide }) {
         STAGE 3
       </div>
       <PresText size={44} color={color}>
-        Learning from Feedback
+        Learning from Human Feedback
       </PresText>
       <PresText size={30} color="rgba(255,255,255,.6)">
-        It can answer... but is it <em>actually</em> helpful?
+        It can answer... but is it <em>clear</em>? <em>Safe</em>? <em>Friendly</em>?
       </PresText>
       <div className="wow-reveal" style={{
-        fontFamily: "'Fredoka',sans-serif", fontSize: 56, fontWeight: 700,
+        fontFamily: "'Fredoka',sans-serif", fontSize: 52, fontWeight: 700,
         color, lineHeight: 1.2,
       }}>
-        Humans teach it what GOOD means.
+        Humans are shaping AI<br />to be better for everyone.
       </div>
       <PresText size={24} color="rgba(255,255,255,.4)">
-        Let's play the rating game. You're the human teacher!
+        Your turn! You're the human teacher — pick the better response.
       </PresText>
     </PresSlide>
   );
@@ -358,68 +359,168 @@ export default function SectionThreeSteps({ color, mode, slide }) {
     );
   }
 
-  // Slide 8: Results — personality dials shift
+  // Slide 8: Results — before/after bars with animation + retry
   if (slide === 8) {
-    // Compute how many "b" choices (the "better" answers)
     const bCount = choices.filter(c => c === "b").length;
 
     return (
       <PresSlide>
         <PresText size={36} color={color}>
-          Your feedback shaped the AI's personality!
+          Your feedback shaped the AI!
         </PresText>
 
         <div style={{
-          display: "flex", flexDirection: "column", gap: 16,
-          maxWidth: 600, width: "100%",
+          display: "flex", gap: 32, maxWidth: 800, width: "100%",
+          justifyContent: "center",
         }}>
-          {TRAITS.map((trait, i) => {
-            // Blend between a and b values based on choices
-            const bRatio = bCount / 3;
-            const val = Math.round(trait.aVal + (trait.bVal - trait.aVal) * bRatio);
-            return (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 16,
-              }}>
+          {/* Before column */}
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif", fontSize: 18, fontWeight: 700,
+              color: "#ff6b6b", textTransform: "uppercase", letterSpacing: 2,
+              textAlign: "center", marginBottom: 16,
+            }}>
+              Before Human Feedback
+            </div>
+            {TRAITS.map((trait, i) => (
+              <div key={i} style={{ marginBottom: 18 }}>
                 <div style={{
-                  fontFamily: "'Fredoka',sans-serif", fontSize: 22, fontWeight: 600,
-                  color: "white", minWidth: 140, textAlign: "right",
+                  display: "flex", alignItems: "center", gap: 8, marginBottom: 6,
                 }}>
-                  {trait.label}
+                  <span style={{ fontSize: 20 }}>{trait.emoji}</span>
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif", fontSize: 18, color: "rgba(255,255,255,.5)",
+                  }}>
+                    {trait.label}
+                  </span>
                 </div>
                 <div style={{
-                  flex: 1, height: 16, borderRadius: 8,
-                  background: "rgba(255,255,255,.08)", overflow: "hidden",
+                  height: 20, borderRadius: 10,
+                  background: "rgba(255,255,255,.06)", overflow: "hidden",
                 }}>
                   <div style={{
-                    height: "100%", borderRadius: 8,
-                    width: `${val}%`,
-                    background: color,
-                    animation: "probIn .8s ease forwards",
+                    height: "100%", borderRadius: 10,
+                    width: `${trait.beforeVal}%`,
+                    background: "rgba(255,100,100,.4)",
+                    animation: "probIn .6s ease forwards",
                   }} />
                 </div>
                 <div style={{
-                  fontFamily: "'Fredoka',sans-serif", fontSize: 20,
-                  color: "rgba(255,255,255,.5)", minWidth: 50,
+                  fontFamily: "'Fredoka',sans-serif", fontSize: 14,
+                  color: "rgba(255,255,255,.3)", marginTop: 3,
                 }}>
-                  {val}%
+                  {trait.beforeVal}%
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Arrow */}
+          <div style={{
+            display: "flex", alignItems: "center",
+            fontFamily: "'Fredoka',sans-serif", fontSize: 40, color,
+            animation: "fadeUp .5s .3s ease both",
+          }}>
+            →
+          </div>
+
+          {/* After column */}
+          <div style={{ flex: 1 }}>
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif", fontSize: 18, fontWeight: 700,
+              color: "#06d6a0", textTransform: "uppercase", letterSpacing: 2,
+              textAlign: "center", marginBottom: 16,
+            }}>
+              After Your Feedback
+            </div>
+            {TRAITS.map((trait, i) => {
+              const bRatio = bCount / 3;
+              const afterVal = Math.round(trait.beforeVal + (trait.afterVal - trait.beforeVal) * bRatio);
+              return (
+                <div key={i} style={{ marginBottom: 18 }}>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 8, marginBottom: 6,
+                  }}>
+                    <span style={{ fontSize: 20 }}>{trait.emoji}</span>
+                    <span style={{
+                      fontFamily: "'Fredoka',sans-serif", fontSize: 18, color: "white", fontWeight: 600,
+                    }}>
+                      {trait.label}
+                    </span>
+                  </div>
+                  <div style={{
+                    height: 20, borderRadius: 10,
+                    background: "rgba(255,255,255,.06)", overflow: "hidden",
+                  }}>
+                    <div style={{
+                      height: "100%", borderRadius: 10,
+                      width: `${afterVal}%`,
+                      background: `linear-gradient(90deg, ${trait.color}88, ${trait.color})`,
+                      animation: `probIn 1.2s ${0.4 + i * 0.15}s ease forwards`,
+                    }} />
+                  </div>
+                  <div style={{
+                    fontFamily: "'Fredoka',sans-serif", fontSize: 14,
+                    color: trait.color, fontWeight: 600, marginTop: 3,
+                  }}>
+                    {afterVal}% {afterVal > trait.beforeVal && `(+${afterVal - trait.beforeVal})`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <PresText size={24} color="rgba(255,255,255,.5)">
+        <div className="fade-up" style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 22,
+          color: "rgba(255,255,255,.55)",
+          textAlign: "center",
+          maxWidth: 650,
+          lineHeight: 1.5,
+          marginTop: 8,
+        }}>
           {bCount === 3
-            ? "You picked all the helpful, safe answers — the AI learned to be friendly AND responsible!"
+            ? "You made the AI clearer, safer, AND friendlier — that's exactly what real human raters do every day!"
             : bCount === 0
-            ? "Interesting choices! The AI learned a very different personality. This is why human feedback matters!"
-            : "A mix of choices! Every human rater shapes the AI a little differently."}
-        </PresText>
+            ? "Without helpful feedback, the AI barely improves. This is why human guidance matters so much!"
+            : "Every choice you made pushed the AI in a direction. Real companies have thousands of people doing exactly this."}
+        </div>
 
-        <PresText size={20} color="rgba(255,255,255,.3)">
-          Real AI companies have thousands of human raters doing exactly this.
-        </PresText>
+        <div style={{
+          fontFamily: "'Fredoka',sans-serif",
+          fontSize: 18,
+          color,
+          fontWeight: 600,
+          marginTop: 4,
+        }}>
+          Humans are shaping AI to be better for humanity — one rating at a time.
+        </div>
+
+        {/* Retry button */}
+        <button
+          onClick={() => {
+            setChoices([null, null, null]);
+            // Signal to go back to slide 5 (first RLHF round)
+            // We dispatch a custom event that App.jsx listens for
+            window.dispatchEvent(new CustomEvent("jumpToSlide", { detail: 5 }));
+          }}
+          className="cta-btn"
+          style={{
+            background: "rgba(255,255,255,.08)",
+            border: `1px solid rgba(255,255,255,.15)`,
+            color: "rgba(255,255,255,.6)",
+            fontSize: 18,
+            padding: "12px 28px",
+            marginTop: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <ArrowClockwise size={20} weight="bold" />
+          Try Again with Different Choices
+        </button>
       </PresSlide>
     );
   }

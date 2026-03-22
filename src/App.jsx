@@ -255,6 +255,13 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [mode, next, prev, navOpen, teacherOpen]);
 
+  // Listen for jumpToSlide events from components (e.g. retry button)
+  useEffect(() => {
+    const handler = (e) => setSlide(e.detail);
+    window.addEventListener("jumpToSlide", handler);
+    return () => window.removeEventListener("jumpToSlide", handler);
+  }, []);
+
   if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} />;
   if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
