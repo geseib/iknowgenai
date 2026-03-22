@@ -11,6 +11,9 @@ import {
   ArrowRight,
   ChatCircleDots,
   TextAa,
+  PencilLine,
+  ImageSquare,
+  MusicNotes,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 
@@ -405,7 +408,112 @@ export default function SectionStoryMash({ color, mode, slide }) {
 
   /* ── Presentation mode ── */
   if (mode === "presentation") {
+    /* ── Slide 0: GenAI intro splash ── */
     if (slide === 0) {
+      const genaiExamples = [
+        { Icon: PencilLine, label: "Write stories", delay: 0.6 },
+        { Icon: ImageSquare, label: "Draw pictures", delay: 0.75 },
+        { Icon: MusicNotes, label: "Compose music", delay: 0.9 },
+      ];
+      return (
+        <PresSlide>
+          <div className="fade-up" style={{ textAlign: "center" }}>
+            {/* Subtitle lead-in */}
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 30,
+              color: "rgba(255,255,255,.45)",
+              marginBottom: 20,
+              animation: "fadeUp .5s .1s ease both",
+            }}>
+              But recently, AI learned something new…
+            </div>
+
+            {/* Big GenAI splash */}
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 120,
+              fontWeight: 700,
+              lineHeight: 1,
+              marginBottom: 8,
+              animation: "popIn .7s .3s cubic-bezier(.34,1.56,.64,1) both",
+            }}>
+              <span style={{ color: "white" }}>Gen</span>
+              <span style={{
+                color,
+                textShadow: `0 0 40px ${color}55, 0 0 80px ${color}30`,
+              }}>AI</span>
+            </div>
+
+            {/* Glow line under the title */}
+            <div style={{
+              width: 200,
+              height: 4,
+              borderRadius: 2,
+              background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+              margin: "0 auto 28px",
+              animation: "fadeUp .5s .5s ease both",
+            }} />
+
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 36,
+              color: "white",
+              fontWeight: 600,
+              marginBottom: 28,
+              animation: "fadeUp .5s .5s ease both",
+            }}>
+              AI that can <span style={{ color }}>create</span>
+            </div>
+
+            {/* Example badges */}
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 20,
+              marginBottom: 32,
+            }}>
+              {genaiExamples.map((ex, i) => (
+                <div key={i} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 24px",
+                  borderRadius: 14,
+                  background: `${color}12`,
+                  border: `2px solid ${color}35`,
+                  animation: `fadeUp .4s ${ex.delay}s ease both`,
+                }}>
+                  <ex.Icon size={28} weight="duotone" color={color} />
+                  <span style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 24,
+                    color: "rgba(255,255,255,.8)",
+                  }}>
+                    {ex.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              fontFamily: "'Fredoka',sans-serif",
+              fontSize: 26,
+              color: "rgba(255,255,255,.35)",
+              fontStyle: "italic",
+              maxWidth: 650,
+              margin: "0 auto",
+              lineHeight: 1.5,
+              animation: "fadeUp .5s 1.1s ease both",
+            }}>
+              Let's see it in action…
+            </div>
+          </div>
+        </PresSlide>
+      );
+    }
+
+    if (slide === 1) {
       return (
         <PresSlide>
           <div className="fade-up" style={{ textAlign: "center" }}>
@@ -485,10 +593,10 @@ export default function SectionStoryMash({ color, mode, slide }) {
         </PresSlide>
       );
     }
-    // slide 1: the interactive app (falls through to the return below)
+    // slide 2: the interactive app (falls through to the return below)
 
-    /* ── Slide 2: What just happened? ── */
-    if (slide === 2) {
+    /* ── Slide 3: What just happened? ── */
+    if (slide === 3) {
       return (
         <PresSlide>
           <div className="fade-up" style={{ textAlign: "center", maxWidth: 850 }}>
@@ -595,8 +703,8 @@ export default function SectionStoryMash({ color, mode, slide }) {
       );
     }
 
-    /* ── Slide 3: Word-by-word visual ── */
-    if (slide === 3) {
+    /* ── Slide 4: Word-by-word visual ── */
+    if (slide === 4) {
       return (
         <PresSlide>
           <div className="fade-up" style={{ textAlign: "center", maxWidth: 900 }}>
@@ -609,8 +717,8 @@ export default function SectionStoryMash({ color, mode, slide }) {
       );
     }
 
-    /* ── Slide 4: The big question ── */
-    if (slide === 4) {
+    /* ── Slide 5: The big question ── */
+    if (slide === 5) {
       return (
         <PresSlide>
           <div className="fade-up" style={{ textAlign: "center" }}>

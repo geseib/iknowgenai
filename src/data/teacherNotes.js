@@ -31,10 +31,17 @@ export const TEACHER_NOTES = [
     ],
   },
 
-  // ── 1: SectionStoryMash (5 slides) ──
+  // ── 1: SectionStoryMash (6 slides) ──
   {
     title: "Story Mash-Up!",
     slides: [
+      {
+        keyPoints: ["Generative AI is AI that creates new things", "This is what changed recently — AI went from sorting and recommending to creating"],
+        narrative: "Until recently, the AI we talked about — Siri, Netflix, YouTube — was good at recognizing and recommending things. But around 2017, researchers invented a new kind of AI architecture called the Transformer. By November 2022, ChatGPT brought this to the world — 100 million people used it in just 2 months. This new AI doesn't just sort or recommend — it creates. Stories, pictures, music, code. That's called Generative AI, or GenAI.",
+        definitions: [{ term: "Generative AI (GenAI)", def: "AI that can create new content — text, images, music, code — rather than just recognizing or recommending existing things" }],
+        discussion: ["What's the difference between AI that recommends a video and AI that writes a story?", "Can you think of anything you've seen that was created by AI?"],
+        simplification: "We're saying 'AI learned to create' which is a simplification. GenAI models don't truly understand or create with intent — they generate outputs based on patterns learned from massive datasets. The Transformer architecture (2017) and scale of training data are the real breakthroughs.",
+      },
       {
         keyPoints: ["Pure engagement hook — no teaching yet", "Let kids experience AI magic before explaining it"],
         narrative: "This is a 'wow' moment. Pick 3 volunteers and have each secretly enter a character, a place, or an event. The class watches as the AI weaves the random ingredients into a real story. After the reveal, just ask: 'How did it know how to do that?' Let the question hang.",
