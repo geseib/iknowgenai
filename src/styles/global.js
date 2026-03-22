@@ -88,4 +88,16 @@ export const ALL_CSS = `
   .mode-card:hover { transform:translateY(-4px); }
   ::-webkit-scrollbar{width:4px}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+  /* ── Mobile responsive ── */
+  @media (max-width: 768px) {
+    .pres-content {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      max-width: 100% !important;
+    }
+    .pres-footer {
+      padding: 10px 12px !important;
+    }
+  }
 `;

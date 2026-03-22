@@ -3,6 +3,7 @@ import {
   GameController,
   Book,
   Exam,
+  Shuffle,
 } from "@phosphor-icons/react";
 import { GRADE_CONFIG } from "../data/gradeConfig";
 import { GRADES } from "../data/GradeContext";
@@ -26,7 +27,7 @@ const modes = [
   },
 ];
 
-export default function ModeSelect({ onSelect, grade, onGradeChange, allCss }) {
+export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flowVersion, onFlowChange }) {
   const gc = GRADE_CONFIG[grade];
   const totalSlides = gc.presentationSlides.reduce((a, b) => a + b, 0);
   const activeSections = gc.presentationSlides.filter(n => n > 0).length;
@@ -134,6 +135,39 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss }) {
             <Exam size={18} weight="duotone" /> Knowledge Check
           </button>
         </div>
+
+        {/* Flow version toggle */}
+        {onFlowChange && (
+          <div style={{ marginTop: 24 }}>
+            <button
+              onClick={() => onFlowChange(flowVersion === "v2" ? "v1" : "v2")}
+              className="ghost-btn"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 14,
+                padding: "10px 20px",
+                margin: "0 auto",
+                borderColor: flowVersion === "v2" ? "#9b5de540" : "rgba(255,255,255,.12)",
+                background: flowVersion === "v2" ? "#9b5de515" : "rgba(255,255,255,.07)",
+              }}
+            >
+              <Shuffle size={18} weight="duotone" color={flowVersion === "v2" ? "#9b5de5" : "rgba(255,255,255,.5)"} />
+              {flowVersion === "v2" ? "Proposed Flow (v2)" : "Current Flow (v1)"}
+            </button>
+            {flowVersion === "v2" && (
+              <div style={{
+                fontSize: 12,
+                color: "#9b5de5",
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}>
+                Preview: reorganized groups and section order
+              </div>
+            )}
+          </div>
+        )}
 
         <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>
           {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}

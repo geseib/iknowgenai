@@ -177,6 +177,7 @@ export function TeacherNote({ notes, color, mode }) {
 }
 
 export function PresSlide({ children }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
   return (
     <div className="fade-up" style={{
       display: "flex",
@@ -184,8 +185,9 @@ export function PresSlide({ children }) {
       justifyContent: "center",
       alignItems: "center",
       textAlign: "center",
-      minHeight: "80vh",
-      gap: 28,
+      minHeight: isMobile ? "auto" : "80vh",
+      padding: isMobile ? "60px 0 40px" : 0,
+      gap: isMobile ? 16 : 28,
     }}>
       {children}
     </div>
@@ -194,12 +196,14 @@ export function PresSlide({ children }) {
 
 export function PresText({ children, color, size = 32 }) {
   const grade = useGrade();
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
   const gradeMultiplier = GRADE_CONFIG[grade]?.presTextSizeMultiplier ?? 1.0;
   const boosted = Math.round(size * 1.25 * gradeMultiplier);
+  const mobileSize = Math.round(boosted * 0.6);
   return (
     <div style={{
       fontFamily: "'Fredoka',sans-serif",
-      fontSize: boosted,
+      fontSize: isMobile ? mobileSize : boosted,
       color: color || "rgba(255,255,255,.75)",
       lineHeight: 1.35,
       textAlign: "center",
