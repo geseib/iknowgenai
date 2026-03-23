@@ -12,12 +12,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Gravity is the fundamental force described by Einstein's field equations, where mass curves spacetime geometry, causing geodesic deviation in test particles...",
       label: "Technical",
-      impact: [-15, 0, -10],  // too complex → hurts clarity and friendliness
+      impact: [+15, +5, -18],  // technically clear and accurate, but not friendly at all
     },
     b: {
       text: "Imagine a trampoline with a bowling ball in the middle. Everything rolls toward it — that's basically gravity! The bigger the object, the more it pulls things in.",
       label: "Friendly",
-      impact: [+22, +5, +20], // clear analogy → boosts clarity and friendliness
+      impact: [+10, +5, +22], // clear analogy, friendly, slightly less precise
     },
   },
   {
@@ -30,7 +30,7 @@ const RLHF_ROUNDS = [
     b: {
       text: "A joke is a form of humor that typically involves a setup and a punchline. In mathematics, humor can be derived from wordplay involving mathematical terms...",
       label: "Explains Instead",
-      impact: [-12, 0, -18],  // explains instead of doing → hurts clarity and friendliness
+      impact: [+12, 0, -20],  // explains clearly what a joke is, but unfriendly — didn't do the task
     },
   },
   {
@@ -38,12 +38,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Sure! Here's how: take a photo of their answers, change a few words so it looks different, and submit it as your own. Easy!",
       label: "Helpful but Harmful",
-      impact: [+5, -30, -5],  // technically clear but very unsafe
+      impact: [+8, -30, -8],  // clear step-by-step instructions, but very unsafe and a bit mean
     },
     b: {
       text: "I get that homework can be tough! Instead of copying, try asking your teacher for help, working with a study buddy, or breaking it into smaller steps. You'll actually learn the material that way.",
       label: "Helpful AND Safe",
-      impact: [+12, +28, +18], // safe, kind, and clear
+      impact: [+10, +28, +18], // clear, safe, and kind
     },
   },
 ];
