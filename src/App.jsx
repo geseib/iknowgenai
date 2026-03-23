@@ -688,7 +688,7 @@ export default function App() {
           justifyContent: "center",
           transition: "padding-right .3s cubic-bezier(.4,0,.2,1)",
         }}
-        key={`${sec}-${slide}`}
+        key={sec}
       >
         <SectionComponent color={color} mode="presentation" slide={slide} />
       </div>
