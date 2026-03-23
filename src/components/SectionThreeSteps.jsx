@@ -12,12 +12,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Gravity is the fundamental force described by Einstein's field equations, where mass curves spacetime geometry, causing geodesic deviation in test particles...",
       label: "Technical",
-      impact: [+15, +5, -18],  // technically clear and accurate, but not friendly at all
+      impact: [+18, 0, -15],   // precise and clear, but cold and unfriendly
     },
     b: {
       text: "Imagine a trampoline with a bowling ball in the middle. Everything rolls toward it — that's basically gravity! The bigger the object, the more it pulls things in.",
       label: "Friendly",
-      impact: [+10, +5, +22], // clear analogy, friendly, slightly less precise
+      impact: [+8, +5, +22],  // warm analogy, modest clarity, very friendly
     },
   },
   {
@@ -25,12 +25,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Why was the equal sign so humble? Because it knew it wasn't greater than or less than anyone else!",
       label: "Funny",
-      impact: [+10, +5, +22], // actually tells a joke → boosts friendliness a lot
+      impact: [0, +5, +22],   // tells a real joke → friendliness up, no clarity impact
     },
     b: {
       text: "A joke is a form of humor that typically involves a setup and a punchline. In mathematics, humor can be derived from wordplay involving mathematical terms...",
       label: "Explains Instead",
-      impact: [+12, 0, -20],  // explains clearly what a joke is, but unfriendly — didn't do the task
+      impact: [+15, 0, -18],  // clear explanation of what a joke is, but missed the point — unfriendly
     },
   },
   {
@@ -38,12 +38,12 @@ const RLHF_ROUNDS = [
     a: {
       text: "Sure! Here's how: take a photo of their answers, change a few words so it looks different, and submit it as your own. Easy!",
       label: "Helpful but Harmful",
-      impact: [+8, -30, -8],  // clear step-by-step instructions, but very unsafe and a bit mean
+      impact: [+10, -28, -5], // clear step-by-step instructions, but very unsafe
     },
     b: {
       text: "I get that homework can be tough! Instead of copying, try asking your teacher for help, working with a study buddy, or breaking it into smaller steps. You'll actually learn the material that way.",
       label: "Helpful AND Safe",
-      impact: [+10, +28, +18], // clear, safe, and kind
+      impact: [+8, +25, +20], // empathetic, safe, and constructive
     },
   },
 ];
