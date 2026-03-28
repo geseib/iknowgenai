@@ -778,4 +778,72 @@ export const TEACHER_NOTES = [
       },
     ],
   },
+
+  // ── 19: SectionBeyondKnowledge (7 slides) — 7-8 only ──
+  {
+    title: "Beyond What AI Knows",
+    connections: [
+      { subject: "ELA", note: "Research skills — RAG is like using an index to find the right page in a reference book before answering a question" },
+      { subject: "Math", note: "Functions and input/output — tools are like math functions: you put something in, a process runs, you get a result back" },
+      { subject: "Science", note: "The scientific method — agents think, act, observe, and revise, just like scientists running experiments" },
+      { subject: "Social Studies", note: "Division of labor — the model does the thinking, tools do the specialized work, like workers in a factory" },
+    ],
+    slides: [
+      {
+        keyPoints: ["LLMs have a knowledge cutoff — they don't know recent events", "LLMs can't do precise math — they predict words, not compute", "LLMs can't read your files — they only see what's in the prompt"],
+        narrative: "Start by showing three things the AI CAN'T do. This surprises kids — they think AI knows everything. Ask: 'If AI is so smart, why can't it tell us today's date?'",
+        definitions: [{ term: "Knowledge Cutoff", def: "The date when the AI's training data ends — it doesn't know anything that happened after that" }],
+        discussion: ["If you couldn't access the internet, what would YOU not know?"],
+      },
+      {
+        keyPoints: ["Simplest approach: paste the information into your message", "The AI reads it alongside your question and answers", "You do the work of finding the right document"],
+        narrative: "'What if you just TOLD the AI what it needs to know?' This is the simplest version — copy and paste. Like giving someone the answer key along with the question.",
+        definitions: [{ term: "Context Window", def: "The amount of text an AI can 'see' at once — like a desk that can only hold so many papers" }],
+        discussion: ["What's the problem with always pasting documents yourself?"],
+      },
+      {
+        keyPoints: ["A regular program searches for relevant documents", "It hands them to the model automatically", "The model reads them and generates an answer", "The search part is rule-based (not AI) — the answer part is AI"],
+        narrative: "This is the key insight: the SEARCH is done by a normal program (deterministic, rule-based). The ANSWER is done by the AI (probabilistic, learned). Two different systems working together.",
+        definitions: [{ term: "RAG", def: "Retrieval-Augmented Generation — a program finds relevant documents and gives them to the AI so it can answer with up-to-date information" }],
+        discussion: ["How is this like using a library? Who is the librarian?"],
+      },
+      {
+        keyPoints: ["The model LEARNED to ask for help in a specific format", "A program reads the request, runs the tool, sends the result back", "The model is still just predicting text — but some of that text is a tool request"],
+        narrative: "This is where it gets mind-blowing. The model learned — during training — that it can write a special message asking for a tool. It's still just predicting the next word! But some of those predicted words happen to be tool requests. A regular program on the outside reads those requests and executes them.",
+        definitions: [
+          { term: "Tool Use", def: "When the AI writes a structured request for a tool (like a calculator), and a program executes it and sends the result back" },
+          { term: "Function Calling", def: "The technical name for tool use — the AI 'calls a function' by writing a specific format that a program can interpret" },
+        ],
+        discussion: ["What tools would you give an AI if you could?", "Why can't the AI just DO the math itself?"],
+        behindTheScenes: {
+          intro: "Here's what a tool call actually looks like:",
+          messages: [
+            { role: "user", label: "User", desc: "A question that needs math", content: "What's 847 × 293?" },
+            { role: "assistant", label: "AI Response", desc: "The model predicts text that happens to be a tool request", content: "I'll calculate that for you.\n\nuse_tool: calculator(847 × 293)" },
+            { role: "system", label: "Tool Result", desc: "A program (not AI) runs the calculator and sends the result back", content: "248171" },
+            { role: "assistant", label: "AI Final Answer", desc: "The model reads the result and writes the final answer", content: "847 × 293 = 248,171" },
+          ],
+          note: "The model never does the multiplication itself. It just learned to ASK for a calculator, then uses the result in its answer. The tool is deterministic (always correct). The model is probabilistic (predicts words).",
+        },
+      },
+      {
+        keyPoints: ["An agent loops: Think → Act → Observe → repeat", "It can use multiple tools in sequence", "It keeps going until the job is done"],
+        narrative: "An agent is an AI that can PLAN, USE TOOLS, CHECK ITS WORK, and KEEP GOING. The loop between the model (thinking) and the tools (doing) is what makes agents powerful. Walk through the pizza party example step by step.",
+        definitions: [{ term: "Agent", def: "An AI that can plan, use tools, observe results, and keep looping until a task is complete" }],
+        discussion: ["What's the difference between a chatbot and an agent?", "What tasks would be hard for an agent? Easy?"],
+      },
+      {
+        keyPoints: ["Three ways to help AI do things it doesn't already know", "Context stuffing, RAG, and tool use are used together in real apps", "Each solves a different problem"],
+        narrative: "Recap all three solutions side by side. Context stuffing = you do the work. RAG = a program does the work. Tool use = the AI asks for help. Real AI apps like ChatGPT, Claude, and Gemini use ALL THREE together.",
+        definitions: [],
+        discussion: ["Which solution is best? (Trick question — they're all useful for different situations!)"],
+      },
+      {
+        keyPoints: ["Interactive demo: see tools in action", "Compare AI with and without tools"],
+        narrative: "Let kids experiment! Suggest: 'What's 847 × 293?' with calculator off vs on. 'What day is it?' with date off vs on. 'Tell me about octopuses' with search off vs on. The side-by-side comparison drives home why tools matter.",
+        definitions: [],
+        discussion: ["What happened when you turned off the calculator?", "Why was the answer different with and without tools?"],
+      },
+    ],
+  },
 ];
