@@ -125,7 +125,6 @@ function WordByWordDemo({ color }) {
         alignItems: "center",
         gap: 12,
       }}>
-        <TextAa size={28} weight="duotone" color={color} />
         <span style={{
           fontFamily: "'Fredoka',sans-serif",
           fontSize: 24,
