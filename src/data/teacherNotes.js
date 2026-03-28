@@ -839,10 +839,15 @@ export const TEACHER_NOTES = [
         discussion: ["Which solution is best? (Trick question — they're all useful for different situations!)"],
       },
       {
-        keyPoints: ["Interactive demo: see tools in action", "Compare AI with and without tools"],
-        narrative: "Let kids experiment! Suggest: 'What's 847 × 293?' with calculator off vs on. 'What day is it?' with date off vs on. 'Tell me about octopuses' with search off vs on. The side-by-side comparison drives home why tools matter.",
+        keyPoints: ["Interactive demo: see tools in action", "Compare AI with and without tools", "Hover over each tool to see what it does"],
+        narrative: "Each tool toggle has a 'Try' sample question underneath — click it to pre-fill. Hover over any tool for a few seconds to see a tooltip explaining exactly what it does and what data it has. The side-by-side comparison shows both with and without tools at the same time.",
         definitions: [],
-        discussion: ["What happened when you turned off the calculator?", "Why was the answer different with and without tools?"],
+        discussion: ["What happened when you turned off the calculator?", "Why was the answer different with and without tools?", "What other tools would you want to give AI?"],
+        sampleQuestions: [
+          { tool: "Calculator", questions: ["What's 847 × 293?", "What's 15% of 230?", "If pizza is $12 and I have $50, how many can I buy?"] },
+          { tool: "Today's Date", questions: ["What day is it today?", "Is it a weekend?", "What month are we in?"] },
+          { tool: "Doc Search", questions: ["How many hearts does an octopus have?", "How far is the moon?", "What's the fastest animal?", "When was the Transformer invented?", "How was AI trained?", "How tall is the Burj Khalifa?"] },
+        ],
       },
     ],
   },

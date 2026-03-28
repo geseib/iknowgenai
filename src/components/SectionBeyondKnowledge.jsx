@@ -716,11 +716,22 @@ export default function SectionBeyondKnowledge({ color, mode, slide }) {
 
   /* ── Slide 6: Interactive — Mission Control ── */
   if (slide === 6) {
-    const suggestions = [
-      "What's 847 × 293?",
-      "What day is it today?",
-      "Tell me about octopuses",
-      "How many pizzas for 23 kids?",
+    const TOOL_INFO = [
+      {
+        key: "calculator", Icon: Calculator, label: "Calculator", c: "#00bbf9",
+        desc: "Does exact math — addition, multiplication, division. The AI writes the expression, the calculator returns the precise answer.",
+        tryIt: "What's 847 × 293?",
+      },
+      {
+        key: "get_date", Icon: CalendarBlank, label: "Today's Date", c: "#fb5607",
+        desc: "Returns the current date and time. Without this, the AI has no idea what day it is — its training data has a cutoff.",
+        tryIt: "What day is it today?",
+      },
+      {
+        key: "search_docs", Icon: MagnifyingGlass, label: "Doc Search", c: "#06d6a0",
+        desc: "Searches a mini knowledge base with facts about: octopuses, the moon, pizza parties, AI training, transformers, and world records.",
+        tryIt: "How many hearts does an octopus have?",
+      },
     ];
 
     return (
@@ -738,34 +749,87 @@ export default function SectionBeyondKnowledge({ color, mode, slide }) {
             </div>
           </div>
 
-          {/* Tool toggles */}
+          {/* Tool toggles with sample questions */}
           <div style={{
             display: "flex", gap: 12, justifyContent: "center",
             marginBottom: 20, flexWrap: "wrap",
           }}>
-            {[
-              { key: "calculator", Icon: Calculator, label: "Calculator", c: "#00bbf9" },
-              { key: "get_date", Icon: CalendarBlank, label: "Today's Date", c: "#fb5607" },
-              { key: "search_docs", Icon: MagnifyingGlass, label: "Doc Search", c: "#06d6a0" },
-            ].map(t => (
-              <button
-                key={t.key}
-                onClick={() => toggleTool(t.key)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "10px 18px", borderRadius: 12,
-                  background: tools[t.key] ? `${t.c}15` : "rgba(255,255,255,.03)",
-                  border: `2px solid ${tools[t.key] ? t.c + "50" : "rgba(255,255,255,.1)"}`,
-                  cursor: "pointer", transition: "all .2s ease",
-                  fontFamily: "'Fredoka',sans-serif", fontSize: 15,
-                  color: tools[t.key] ? "white" : "rgba(255,255,255,.3)",
+            {TOOL_INFO.map(t => (
+              <div key={t.key} style={{ position: "relative" }}
+                onMouseEnter={e => {
+                  const tip = e.currentTarget.querySelector('.tool-tip');
+                  if (tip) tip.style.opacity = '1';
+                  if (tip) tip.style.pointerEvents = 'auto';
+                }}
+                onMouseLeave={e => {
+                  const tip = e.currentTarget.querySelector('.tool-tip');
+                  if (tip) tip.style.opacity = '0';
+                  if (tip) tip.style.pointerEvents = 'none';
+                }}
+              >
+                <button
+                  onClick={() => toggleTool(t.key)}
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                    padding: "12px 20px", borderRadius: 14,
+                    background: tools[t.key] ? `${t.c}15` : "rgba(255,255,255,.03)",
+                    border: `2px solid ${tools[t.key] ? t.c + "50" : "rgba(255,255,255,.1)"}`,
+                    cursor: "pointer", transition: "all .2s ease",
+                    fontFamily: "'Fredoka',sans-serif",
+                    color: tools[t.key] ? "white" : "rgba(255,255,255,.3)",
+                    minWidth: 160,
+                  }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {tools[t.key]
+                      ? <ToggleRight size={22} weight="fill" color={t.c} />
+                      : <ToggleLeft size={22} weight="bold" color="rgba(255,255,255,.2)" />}
+                    <t.Icon size={18} weight="duotone" color={tools[t.key] ? t.c : "rgba(255,255,255,.25)"} />
+                    <span style={{ fontSize: 15 }}>{t.label}</span>
+                  </div>
+                  <button
+                    onClick={e => { e.stopPropagation(); setQuery(t.tryIt); }}
+                    style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      fontFamily: "'Fredoka',sans-serif", fontSize: 11,
+                      color: tools[t.key] ? `${t.c}99` : "rgba(255,255,255,.2)",
+                      fontStyle: "italic", padding: 0, marginTop: 2,
+                    }}
+                  >
+                    Try: "{t.tryIt}"
+                  </button>
+                </button>
+
+                {/* Hover tooltip */}
+                <div className="tool-tip" style={{
+                  position: "absolute", top: "100%", left: "50%",
+                  transform: "translateX(-50%)", marginTop: 8,
+                  width: 280, padding: "14px 16px", borderRadius: 14,
+                  background: "rgba(10,10,28,.97)", backdropFilter: "blur(12px)",
+                  border: `1px solid ${t.c}40`,
+                  boxShadow: `0 8px 32px rgba(0,0,0,.5), 0 0 20px ${t.c}15`,
+                  opacity: 0, pointerEvents: "none",
+                  transition: "opacity .25s ease",
+                  zIndex: 50,
                 }}>
-                {tools[t.key]
-                  ? <ToggleRight size={22} weight="fill" color={t.c} />
-                  : <ToggleLeft size={22} weight="bold" color="rgba(255,255,255,.2)" />}
-                <t.Icon size={18} weight="duotone" color={tools[t.key] ? t.c : "rgba(255,255,255,.25)"} />
-                {t.label}
-              </button>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
+                  }}>
+                    <t.Icon size={20} weight="duotone" color={t.c} />
+                    <span style={{
+                      fontFamily: "'Fredoka',sans-serif", fontSize: 15,
+                      fontWeight: 700, color: t.c,
+                    }}>
+                      {t.label}
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: "rgba(255,255,255,.6)",
+                    lineHeight: 1.55, fontFamily: "'Nunito',sans-serif",
+                  }}>
+                    {t.desc}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -802,23 +866,33 @@ export default function SectionBeyondKnowledge({ color, mode, slide }) {
             </button>
           </div>
 
-          {/* Suggestion chips */}
+          {/* Suggestion chips grouped by tool */}
           {!showComparison && steps.length === 0 && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-              {suggestions.map((s, i) => (
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16, justifyContent: "center" }}>
+              {[
+                { q: "What's 847 × 293?", c: "#00bbf9" },
+                { q: "What's 15% of 230?", c: "#00bbf9" },
+                { q: "What day is it today?", c: "#fb5607" },
+                { q: "How many hearts does an octopus have?", c: "#06d6a0" },
+                { q: "How far is the moon?", c: "#06d6a0" },
+                { q: "What's the fastest animal?", c: "#06d6a0" },
+                { q: "How many pizzas for 23 kids?", c: "#06d6a0" },
+              ].map((s, i) => (
                 <button
                   key={i}
-                  onClick={() => setQuery(s)}
+                  onClick={() => setQuery(s.q)}
                   style={{
-                    padding: "6px 14px", borderRadius: 20,
-                    border: "1px solid rgba(255,255,255,.12)",
-                    background: "rgba(255,255,255,.04)",
-                    color: "rgba(255,255,255,.45)",
-                    fontFamily: "'Fredoka',sans-serif", fontSize: 13,
-                    cursor: "pointer",
+                    padding: "5px 12px", borderRadius: 20,
+                    border: `1px solid ${s.c}25`,
+                    background: `${s.c}08`,
+                    color: `${s.c}aa`,
+                    fontFamily: "'Fredoka',sans-serif", fontSize: 12,
+                    cursor: "pointer", transition: "all .15s ease",
                   }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `${s.c}20`; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = `${s.c}08`; }}
                 >
-                  {s}
+                  {s.q}
                 </button>
               ))}
             </div>

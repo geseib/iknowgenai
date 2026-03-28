@@ -299,6 +299,38 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
               </div>
             )}
 
+            {/* Sample Questions by Tool */}
+            {notes?.sampleQuestions?.length > 0 && (
+              <div style={{ marginTop: 18, marginBottom: 18 }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontSize: 11, letterSpacing: 2, textTransform: "uppercase",
+                  color: "#00bbf999", marginBottom: 8,
+                }}>
+                  <Lightbulb size={14} weight="duotone" color="#00bbf9" />
+                  Try These Questions
+                </div>
+                {notes.sampleQuestions.map((group, i) => (
+                  <div key={i} style={{ marginBottom: 10 }}>
+                    <div style={{
+                      fontSize: 12, fontWeight: 700, color: "#00bbf9",
+                      fontFamily: "'Fredoka',sans-serif", marginBottom: 4,
+                    }}>
+                      {group.tool}
+                    </div>
+                    {group.questions.map((q, j) => (
+                      <div key={j} style={{
+                        fontSize: 12, color: "rgba(255,255,255,.5)",
+                        lineHeight: 1.5, paddingLeft: 10,
+                      }}>
+                        • {q}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Connections to School Subjects */}
             {connections?.length > 0 && (
               <div style={{ marginTop: 18, marginBottom: 18 }}>
