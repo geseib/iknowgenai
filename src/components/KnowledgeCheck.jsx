@@ -41,9 +41,9 @@ const QUESTIONS = [
   },
   {
     q: "What does the MLP (thinking layer) do?",
-    options: ["It memorizes every sentence it has ever seen", "It takes the context from Attention and thinks more deeply about what it means", "It translates words into other languages", "It checks for spelling mistakes"],
+    options: ["It memorizes every sentence it has ever seen", "It takes the context from Attention and thinks more deeply about what it means", "It translates words into other languages", "It connects to the internet to search for answers"],
     correct: 1,
-    explanation: "After Attention gathers context, the MLP processes that information more deeply — like thinking harder about what something means.",
+    explanation: "After Attention gathers context, the MLP processes that information more deeply — like flipping through everything it learned during training to figure out what something means.",
   },
   {
     q: "Why does the model run through many layers instead of just one?",
