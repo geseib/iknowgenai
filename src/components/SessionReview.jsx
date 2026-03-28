@@ -330,7 +330,7 @@ export default function SessionReview({
 
 /* ─── Session Teaser component (end of sessions 1 & 2) ─── */
 
-export function SessionTeaser({ teaser, nextSessionName, color }) {
+export function SessionTeaser({ teaser, nextSessionName, color, onStartNext }) {
   return (
     <PresSlide>
       <div style={{ animation: "fadeUp .5s ease", textAlign: "center" }}>
@@ -381,6 +381,22 @@ export function SessionTeaser({ teaser, nextSessionName, color }) {
             {nextSessionName}
           </span>
         </div>
+        {onStartNext && (
+          <button
+            onClick={onStartNext}
+            className="cta-btn"
+            style={{
+              background: color,
+              color: "#000",
+              fontSize: 20,
+              padding: "14px 32px",
+              marginTop: 28,
+              animation: "fadeUp .5s ease .5s both",
+            }}
+          >
+            Start {nextSessionName} →
+          </button>
+        )}
       </div>
     </PresSlide>
   );

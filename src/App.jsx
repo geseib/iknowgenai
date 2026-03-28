@@ -277,8 +277,19 @@ export default function App() {
       }
       setSec(nextSec);
       setSlide(0);
+    } else if (isV3 && session < 2) {
+      // At the end of a v3 session, advance to next session
+      goToNextSession();
     }
   }, [sec, slide, sectionTotal]);
+
+  const goToNextSession = useCallback(() => {
+    if (!isV3 || session >= 2) return;
+    setSession(session + 1);
+    setSec(0);
+    setSlide(0);
+    setDone(new Set());
+  }, [isV3, session]);
 
   const prev = useCallback(() => {
     if (slide > 0) {
@@ -790,6 +801,7 @@ export default function App() {
             teaser={v3SessionConfig?.teaser}
             nextSessionName={v3NextSession?.name}
             color={v3NextSession ? SESSION_COLORS[session + 1] : v3SessionColor}
+            onStartNext={session < 2 ? goToNextSession : undefined}
           />
         ) : SectionComponent ? (
           <SectionComponent color={color} mode="presentation" slide={slide} />
@@ -820,6 +832,10 @@ export default function App() {
           )}
           {sec < sectionTotal - 1 || slide < (PRESENTATION_SLIDES[sec] || 1) - 1
             ? <button onClick={next} className="ghost-btn" style={{ opacity: 0.5 }}>
+                <ArrowRight size={18} weight="bold" />
+              </button>
+            : isV3 && session < 2
+            ? <button onClick={goToNextSession} className="ghost-btn" style={{ opacity: 0.5 }}>
                 <ArrowRight size={18} weight="bold" />
               </button>
             : <button onClick={() => { setSec(0); setSlide(0); setDone(new Set()); }} className="ghost-btn" style={{ opacity: 0.5 }}>
