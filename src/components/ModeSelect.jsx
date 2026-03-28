@@ -4,9 +4,13 @@ import {
   Book,
   Exam,
   Flag,
+  MagnifyingGlass,
+  Compass,
+  PaintBrush,
 } from "@phosphor-icons/react";
 import { GRADE_CONFIG } from "../data/gradeConfig";
 import { GRADES } from "../data/GradeContext";
+import { SESSION_CONFIG, SESSION_COLORS } from "../data/sessionConfig";
 
 const modes = [
   {
@@ -27,7 +31,9 @@ const modes = [
   },
 ];
 
-export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags }) {
+const SESSION_ICONS = [MagnifyingGlass, Compass, PaintBrush];
+
+export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags, session, onSessionChange }) {
   const gc = GRADE_CONFIG[grade];
   const totalSlides = gc.presentationSlides.reduce((a, b) => a + b, 0);
   const activeSections = gc.presentationSlides.filter(n => n > 0).length;
@@ -109,6 +115,60 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
           })}
         </div>
 
+        {/* Session selector (v3 multi-session) */}
+        {flags?.multiSession && (
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 0,
+            marginBottom: 32,
+            background: "rgba(255,255,255,.06)",
+            borderRadius: 14,
+            padding: 4,
+            border: "1px solid rgba(255,255,255,.1)",
+          }}>
+            {(SESSION_CONFIG[grade]?.sessions || []).map((s, i) => {
+              const active = i === (session || 0);
+              const sColor = SESSION_COLORS[i];
+              const SIcon = SESSION_ICONS[i];
+              return (
+                <button
+                  key={i}
+                  onClick={() => onSessionChange?.(i)}
+                  style={{
+                    fontFamily: "'Fredoka',sans-serif",
+                    fontSize: 15,
+                    fontWeight: active ? 700 : 500,
+                    padding: "10px 20px",
+                    borderRadius: 10,
+                    border: "none",
+                    cursor: "pointer",
+                    background: active ? `${sColor}20` : "transparent",
+                    color: active ? sColor : "rgba(255,255,255,.35)",
+                    transition: "all .2s ease",
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <SIcon size={20} weight={active ? "duotone" : "regular"} />
+                  <div>{s.name}</div>
+                  <div style={{
+                    fontSize: 10,
+                    fontWeight: 400,
+                    color: active ? `${sColor}99` : "rgba(255,255,255,.2)",
+                    marginTop: 0,
+                  }}>
+                    {s.subtitle}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Mode cards */}
         <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
           {modes.map(m => (
@@ -136,11 +196,21 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
           </button>
           <button onClick={() => onSelect("flags")} className="ghost-btn" style={{
             display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px",
-            borderColor: flags?.flowVersion ? "#fb560740" : "rgba(255,255,255,.12)",
-            background: flags?.flowVersion ? "#fb560712" : undefined,
+            borderColor: (flags?.flowVersion || flags?.multiSession) ? "#fb560740" : "rgba(255,255,255,.12)",
+            background: (flags?.flowVersion || flags?.multiSession) ? "#fb560712" : undefined,
           }}>
-            <Flag size={18} weight="duotone" color={flags?.flowVersion ? "#fb5607" : undefined} /> Flags
-            {flags?.flowVersion && (
+            <Flag size={18} weight="duotone" color={(flags?.flowVersion || flags?.multiSession) ? "#fb5607" : undefined} /> Flags
+            {flags?.multiSession ? (
+              <span style={{
+                fontSize: 10,
+                background: "#fb5607",
+                color: "#000",
+                borderRadius: 8,
+                padding: "2px 6px",
+                fontWeight: 700,
+                fontFamily: "'Fredoka',sans-serif",
+              }}>v3</span>
+            ) : flags?.flowVersion ? (
               <span style={{
                 fontSize: 10,
                 background: "#fb5607",
@@ -150,7 +220,7 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
                 fontWeight: 700,
                 fontFamily: "'Fredoka',sans-serif",
               }}>v2</span>
-            )}
+            ) : null}
           </button>
         </div>
 

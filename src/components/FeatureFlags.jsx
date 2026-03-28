@@ -6,6 +6,7 @@ import {
   DeviceMobile,
   ChalkboardTeacher,
   Eye,
+  SplitVertical,
 } from "@phosphor-icons/react";
 
 const FLAGS = [
@@ -42,6 +43,15 @@ const FLAGS = [
     desc: "Show a mini preview of each section's first slide in the navigation drawer.",
     Icon: Eye,
     color: "#fee440",
+    type: "toggle",
+    defaultValue: false,
+  },
+  {
+    key: "multiSession",
+    label: "Multi-Session Mode (v3)",
+    desc: "Split the lesson into 3 bite-sized sessions: Discover, Explore, Create. Each starts with an animated review of what was learned before.",
+    Icon: SplitVertical,
+    color: "#fb5607",
     type: "toggle",
     defaultValue: false,
   },

@@ -32,6 +32,8 @@ import SectionTryIt from "./components/SectionTryIt";
 import SectionBeyondKnowledge from "./components/SectionBeyondKnowledge";
 import JoinRoom from "./components/JoinRoom";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
+import SessionReview, { SessionTeaser } from "./components/SessionReview";
+import { SESSION_CONFIG, SESSION_COLORS } from "./data/sessionConfig";
 
 // If ?join=CODE is in the URL, render the mobile join page instead
 const JOIN_CODE = new URLSearchParams(window.location.search).get("join");
@@ -163,6 +165,7 @@ export default function App() {
   const [flags, setFlags] = useState(loadFlags);
   const [mode, setMode] = useState(deepLink != null ? "student" : null);
   const [grade, setGrade] = useState("3-5");
+  const [session, setSession] = useState(0);
   const [sec, setSec] = useState(deepLink != null ? deepLink : 0);
   const [slide, setSlide] = useState(deepLink != null ? 1 : 0);
   const [done, setDone] = useState(new Set());
@@ -179,17 +182,72 @@ export default function App() {
   }, []);
 
   const isV2 = flags.flowVersion;
-  const SECTIONS = isV2 ? SECTIONS_V2 : SECTIONS_V1;
-  const activeGROUPS = isV2 ? GROUPS_V2 : GROUPS;
-  const activeTITLES = isV2 ? TITLES_V2 : TITLES;
-  const activeCOLORS = isV2 ? COLORS_V2 : COLORS;
-  const activeNOTES = isV2 ? getV2TeacherNotes() : TEACHER_NOTES;
+  const isV3 = flags.multiSession;
+
+  // ── V3 multi-session logic ──
+  // When v3 is active, we build a session-scoped view on top of the V2 section order.
+  const v3SessionConfig = isV3 ? SESSION_CONFIG[grade]?.sessions?.[session] : null;
+  const v3Reviews = v3SessionConfig?.review || [];
+  const v3HasReview = session > 0 && v3Reviews.length > 0;
+  const v3ReviewSlideCount = v3HasReview ? 1 + v3Reviews.length : 0; // 1 title + N questions
+  const v3HasTeaser = isV3 && session < 2 && v3SessionConfig?.teaser;
+  const v3TeaserSlideCount = v3HasTeaser ? 1 : 0;
+  const v3NextSession = isV3 && session < 2 ? SESSION_CONFIG[grade]?.sessions?.[session + 1] : null;
+
+  // Build the active section list
+  let SECTIONS, activeGROUPS, activeTITLES, activeCOLORS, activeNOTES;
+
+  if (isV3) {
+    // V3 always uses V2 ordering as its base
+    const sessionSections = v3SessionConfig?.sections || [];
+    SECTIONS = sessionSections.map(idx => SECTIONS_V2[idx]);
+    activeTITLES = sessionSections.map(idx => TITLES_V2[idx]);
+    activeCOLORS = sessionSections.map(idx => COLORS_V2[idx % COLORS_V2.length]);
+    activeNOTES = sessionSections.map(idx => getV2TeacherNotes()[idx] || {});
+    activeGROUPS = [
+      { name: v3SessionConfig?.name || "Session", start: 0, end: sessionSections.length - 1 },
+    ];
+  } else if (isV2) {
+    SECTIONS = SECTIONS_V2;
+    activeGROUPS = GROUPS_V2;
+    activeTITLES = TITLES_V2;
+    activeCOLORS = COLORS_V2;
+    activeNOTES = getV2TeacherNotes();
+  } else {
+    SECTIONS = SECTIONS_V1;
+    activeGROUPS = GROUPS;
+    activeTITLES = TITLES;
+    activeCOLORS = COLORS;
+    activeNOTES = TEACHER_NOTES;
+  }
+
+  // Total number of "slots" the user navigates through
+  const v3SectionCount = SECTIONS.length;
+  const v3TotalSlots = (isV3 ? v3ReviewSlideCount + v3SectionCount + v3TeaserSlideCount : SECTIONS.length);
 
   const isTeacherMode = mode === "teacher";
   const isPres = mode === "student" || mode === "teacher";
-  const PRESENTATION_SLIDES = isV2
-    ? getV2Slides(grade)
-    : (GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES);
+
+  // Build presentation slide counts
+  let PRESENTATION_SLIDES;
+  if (isV3) {
+    const sessionSections = v3SessionConfig?.sections || [];
+    const v2Slides = getV2Slides(grade);
+    const sectionSlides = sessionSections.map(idx => v2Slides[idx] || 1);
+    // Prepend review slides, append teaser
+    const reviewSlides = v3HasReview ? Array(v3ReviewSlideCount).fill(1) : [];
+    const teaserSlides = v3HasTeaser ? [1] : [];
+    PRESENTATION_SLIDES = [...reviewSlides, ...sectionSlides, ...teaserSlides];
+  } else if (isV2) {
+    PRESENTATION_SLIDES = getV2Slides(grade);
+  } else {
+    PRESENTATION_SLIDES = GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES;
+  }
+
+  // In v3, map logical sec index to what kind of slot it is
+  const v3IsReviewSlide = isV3 && v3HasReview && sec < v3ReviewSlideCount;
+  const v3IsTeaserSlide = isV3 && v3HasTeaser && sec === v3TotalSlots - 1;
+  const v3ContentSecIndex = isV3 ? sec - v3ReviewSlideCount : sec;
 
   // Open teacher drawer automatically when entering teacher mode
   useEffect(() => {
@@ -202,23 +260,25 @@ export default function App() {
     setNavOpen(false);
   }, []);
 
+  const sectionTotal = isV3 ? v3TotalSlots : TOTAL;
+
   const next = useCallback(() => {
     const maxSlides = PRESENTATION_SLIDES[sec] || 1;
     if (slide < maxSlides - 1) {
       setSlide(s => s + 1);
       return;
     }
-    if (sec < TOTAL - 1) {
+    if (sec < sectionTotal - 1) {
       setDone(p => new Set([...p, sec]));
       let nextSec = sec + 1;
-      while (nextSec < TOTAL - 1 && PRESENTATION_SLIDES[nextSec] === 0) {
+      while (nextSec < sectionTotal - 1 && PRESENTATION_SLIDES[nextSec] === 0) {
         setDone(p => new Set([...p, nextSec]));
         nextSec++;
       }
       setSec(nextSec);
       setSlide(0);
     }
-  }, [sec, slide]);
+  }, [sec, slide, sectionTotal]);
 
   const prev = useCallback(() => {
     if (slide > 0) {
@@ -267,13 +327,28 @@ export default function App() {
     return () => window.removeEventListener("jumpToSlide", handler);
   }, []);
 
-  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} />;
+  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} session={session} onSessionChange={setSession} />;
   if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
   if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
 
-  const color = activeCOLORS[sec % activeCOLORS.length];
-  const currentGroup = activeGROUPS.find(g => sec >= g.start && sec <= g.end);
+  // In v3 mode, review/teaser slides use the session color; content slides use section colors
+  const v3SessionColor = isV3 ? SESSION_COLORS[session] : null;
+  const color = (isV3 && (v3IsReviewSlide || v3IsTeaserSlide))
+    ? v3SessionColor
+    : (isV3 ? activeCOLORS[v3ContentSecIndex % activeCOLORS.length] : activeCOLORS[sec % activeCOLORS.length]);
+
+  // For the nav drawer, offset groups by the review slide count in v3
+  const v3NavGroups = isV3
+    ? [{
+        name: v3SessionConfig?.name || "Session",
+        start: v3ReviewSlideCount,
+        end: v3ReviewSlideCount + v3SectionCount - 1,
+      }]
+    : activeGROUPS;
+  const currentGroup = isV3
+    ? v3NavGroups[0]
+    : activeGROUPS.find(g => sec >= g.start && sec <= g.end);
 
   // Progress — always slide-based
   const totalSlideCount = PRESENTATION_SLIDES.reduce((a, b) => a + b, 0);
@@ -281,7 +356,9 @@ export default function App() {
   const progressPct = Math.round((currentSlideNum / totalSlideCount) * 100);
 
   // Teacher notes for current slide
-  const currentNotes = activeNOTES[sec]?.slides?.[slide] || {};
+  const currentNotes = (isV3 && !v3IsReviewSlide && !v3IsTeaserSlide)
+    ? (activeNOTES[v3ContentSecIndex]?.slides?.[slide] || {})
+    : (isV3 ? {} : (activeNOTES[sec]?.slides?.[slide] || {}));
 
   const stars = Array.from({ length: 80 }, (_, i) => ({
     x: ((i * 137.508) % 100).toFixed(2),
@@ -291,7 +368,10 @@ export default function App() {
     dl: ((i % 30) * .1).toFixed(1),
   }));
 
-  const SectionComponent = SECTIONS[sec];
+  // Determine what to render for this "sec" slot
+  const SectionComponent = (isV3 && (v3IsReviewSlide || v3IsTeaserSlide))
+    ? null
+    : (isV3 ? SECTIONS[v3ContentSecIndex] : SECTIONS[sec]);
 
   return (
     <GradeContext.Provider value={grade}>
@@ -432,8 +512,8 @@ export default function App() {
 
             {/* Groups and sections */}
             <div style={{ padding: "6px 0 16px" }}>
-              {activeGROUPS.map((group, gi) => {
-                const groupColor = activeCOLORS[group.start % activeCOLORS.length];
+              {(isV3 ? v3NavGroups : activeGROUPS).map((group, gi) => {
+                const groupColor = isV3 ? v3SessionColor : activeCOLORS[group.start % activeCOLORS.length];
                 return (
                   <div key={gi}>
                     {/* Group header */}
@@ -467,7 +547,8 @@ export default function App() {
                     ).map(si => {
                       const isActive = si === sec;
                       const isDone = done.has(si);
-                      const sColor = activeCOLORS[si % activeCOLORS.length];
+                      const titleIdx = isV3 ? si - v3ReviewSlideCount : si;
+                      const sColor = isV3 ? activeCOLORS[titleIdx % activeCOLORS.length] : activeCOLORS[si % activeCOLORS.length];
                       const totalSlidesInSec = PRESENTATION_SLIDES[si] || 1;
                       const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
                       const pct = (slidesDone / totalSlidesInSec) * 100;
@@ -509,7 +590,7 @@ export default function App() {
                                   fontWeight: 600,
                                   color: isActive ? sColor : "rgba(255,255,255,.25)",
                                 }}>
-                                  {si + 1}
+                                  {isV3 ? titleIdx + 1 : si + 1}
                                 </span>}
                           </div>
 
@@ -522,7 +603,7 @@ export default function App() {
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                             }}>
-                              {activeTITLES[si]}
+                              {isV3 ? activeTITLES[titleIdx] : activeTITLES[si]}
                             </div>
                             {(isActive || isDone) && (
                               <div style={{
@@ -628,8 +709,8 @@ export default function App() {
         open={teacherOpen}
         onToggle={() => setTeacherOpen(o => !o)}
         notes={currentNotes}
-        connections={activeNOTES[sec]?.connections}
-        sectionTitle={activeTITLES[sec]}
+        connections={isV3 && !v3IsReviewSlide && !v3IsTeaserSlide ? activeNOTES[v3ContentSecIndex]?.connections : (isV3 ? undefined : activeNOTES[sec]?.connections)}
+        sectionTitle={isV3 ? (v3IsReviewSlide ? "Review" : v3IsTeaserSlide ? "Coming Up" : activeTITLES[v3ContentSecIndex]) : activeTITLES[sec]}
         slideLabel={`Slide ${slide + 1} of ${PRESENTATION_SLIDES[sec]}`}
         color={color}
         isTeacherMode={isTeacherMode}
@@ -637,7 +718,7 @@ export default function App() {
 
       {/* Home button — top right */}
       <button
-        onClick={() => { setMode(null); setSec(0); setSlide(0); setDone(new Set()); setNavOpen(false); setTeacherOpen(false); }}
+        onClick={() => { setMode(null); setSec(0); setSlide(0); setDone(new Set()); setNavOpen(false); setTeacherOpen(false); setSession(0); }}
         style={{
           position: "fixed",
           top: 10,
@@ -695,7 +776,24 @@ export default function App() {
         }}
         key={sec}
       >
-        <SectionComponent color={color} mode="presentation" slide={slide} />
+        {isV3 && v3IsReviewSlide ? (
+          <SessionReview
+            reviews={v3Reviews}
+            slide={sec}
+            sessionName={v3SessionConfig?.name}
+            subtitle={v3SessionConfig?.subtitle}
+            sessionIndex={session}
+            color={v3SessionColor}
+          />
+        ) : isV3 && v3IsTeaserSlide ? (
+          <SessionTeaser
+            teaser={v3SessionConfig?.teaser}
+            nextSessionName={v3NextSession?.name}
+            color={v3NextSession ? SESSION_COLORS[session + 1] : v3SessionColor}
+          />
+        ) : SectionComponent ? (
+          <SectionComponent color={color} mode="presentation" slide={slide} />
+        ) : null}
       </div>
 
       {/* Footer nav */}
@@ -711,7 +809,7 @@ export default function App() {
           <div>{currentSlideNum} / {totalSlideCount}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {PRESENTATION_SKIP[sec] !== undefined && slide < PRESENTATION_SKIP[sec] && (
+          {!isV3 && PRESENTATION_SKIP[sec] !== undefined && slide < PRESENTATION_SKIP[sec] && (
             <button
               onClick={() => setSlide(PRESENTATION_SKIP[sec])}
               className="ghost-btn"
@@ -720,7 +818,7 @@ export default function App() {
               Skip <FastForward size={15} weight="bold" />
             </button>
           )}
-          {sec < TOTAL - 1 || slide < (PRESENTATION_SLIDES[sec] || 1) - 1
+          {sec < sectionTotal - 1 || slide < (PRESENTATION_SLIDES[sec] || 1) - 1
             ? <button onClick={next} className="ghost-btn" style={{ opacity: 0.5 }}>
                 <ArrowRight size={18} weight="bold" />
               </button>
