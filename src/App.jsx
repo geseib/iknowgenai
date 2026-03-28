@@ -29,6 +29,7 @@ import SectionMLP from "./components/SectionMLP";
 import SectionLayers from "./components/SectionLayers";
 import SectionPredict from "./components/SectionPredict";
 import SectionTryIt from "./components/SectionTryIt";
+import SectionBeyondKnowledge from "./components/SectionBeyondKnowledge";
 import JoinRoom from "./components/JoinRoom";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 
@@ -56,6 +57,7 @@ const SECTIONS_V1 = [
   SectionLayers,
   SectionPredict,
   SectionTryIt,
+  SectionBeyondKnowledge,
 ];
 
 // ── V2: Proposed reordering ──
@@ -79,11 +81,12 @@ const SECTIONS_V2 = [
   SectionMLP,           // 15 — Group 4: How AI Writes
   SectionLayers,        // 16
   SectionPredict,       // 17
-  SectionTryIt,         // 18 — Group 5: Try It!
+  SectionTryIt,             // 18 — Group 5: Try It!
+  SectionBeyondKnowledge,   // 19 — Group 6: Bonus
 ];
 
 // V2 index mapping: v2Position → v1Position (for slide count remapping)
-const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
 // V2 groups and titles
 const GROUPS_V2 = [
@@ -92,6 +95,7 @@ const GROUPS_V2 = [
   { name: "Inside the Machine", start: 9,  end: 14 },
   { name: "How AI Writes",      start: 15, end: 17 },
   { name: "Try It!",            start: 18, end: 18 },
+  { name: "Bonus",              start: 19, end: 19 },
 ];
 
 const TITLES_V2 = [
@@ -114,6 +118,7 @@ const TITLES_V2 = [
   "Rinse & Repeat",          // 16
   "Predict!",                // 17
   "Try It Yourself!",        // 18
+  "Beyond What AI Knows",    // 19
 ];
 
 // Remap colors for v2 ordering

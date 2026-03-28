@@ -24,6 +24,7 @@ export const GRADE_CONFIG = {
       0,  // 16: Rinse & Repeat — SKIP
       3,  // 17: Predict! — simplified voting
       1,  // 18: Try It! — preset prompts only
+      0,  // 19: Beyond What AI Knows — SKIP
     ],
   },
   "3-5": {
@@ -51,6 +52,7 @@ export const GRADE_CONFIG = {
       2,  // 16: Rinse & Repeat
       5,  // 17: Predict!
       2,  // 18: Try It!
+      0,  // 19: Beyond What AI Knows — SKIP
     ],
   },
   "7-8": {
@@ -78,6 +80,7 @@ export const GRADE_CONFIG = {
       2,  // 16: Rinse & Repeat
       5,  // 17: Predict!
       2,  // 18: Try It!
+      7,  // 19: Beyond What AI Knows — bonus: RAG, tools, agents
     ],
   },
 };
