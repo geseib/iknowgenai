@@ -63,7 +63,8 @@ async function moderationCheck(text) {
   try {
     const result = await openai.moderations.create({ input: text });
     return !result.results[0].flagged;
-  } catch {
+  } catch (err) {
+    console.error(`[moderate] Layer 2 ERROR (continuing): ${err.message}`);
     // If moderation API fails, continue to Layer 3
     return true;
   }
@@ -82,8 +83,10 @@ async function llmSafetyCheck(text) {
       temperature: 0,
     });
     const answer = response.choices[0]?.message?.content?.trim().toUpperCase();
+    console.log(`[moderate] Layer 3 LLM responded: "${answer}" for: "${text}"`);
     return answer === "SAFE";
-  } catch {
+  } catch (err) {
+    console.error(`[moderate] Layer 3 ERROR (blocking): ${err.message}`);
     // If LLM check fails, block to be safe
     return false;
   }
