@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, CheckCircle, XCircle, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { Card } from "./shared";
+import RoamingCat from "./catai/cat_runner_react_component";
 
 const QUESTIONS = [
   {
@@ -69,7 +70,20 @@ const ACCENT = "#9b5de5";
 const GREEN = "#06d6a0";
 const RED = "#f15bb5";
 
-export default function KnowledgeCheck({ onBack }) {
+const CAT_GREAT = [
+  "Purr-fect score energy!",
+  "You're smarter than my neural net!",
+  "A+ in AI and treat identification!",
+  "I knew you could do it!",
+];
+const CAT_ENCOURAGE = [
+  "Keep going, you've got this!",
+  "Even AI needs a few rounds to learn!",
+  "Every expert was once a beginner. And a kitten.",
+  "Try again — I believe in you!",
+];
+
+export default function KnowledgeCheck({ onBack, flags }) {
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(null));
   const [showResults, setShowResults] = useState(false);
 
@@ -323,6 +337,14 @@ export default function KnowledgeCheck({ onBack }) {
           </button>
         )}
       </div>
+
+      {/* AI Cat reacts to your score */}
+      {flags?.roamingCat && showResults && (
+        <RoamingCat
+          key={`quiz-${score}`}
+          quotes={score >= 8 ? CAT_GREAT : CAT_ENCOURAGE}
+        />
+      )}
     </div>
   );
 }

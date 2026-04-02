@@ -165,13 +165,10 @@ const CAT_SECTIONS = {
       "Cat detection: the OG AI flex.",
     ],
   },
-  7: {  // How AI Learns — knock-knock jokes and weight dials
+  7: {  // How AI Learns — knock-knock joke opening
     slide: 0,
     quotes: [
-      "I adjusted my treat-prediction weights.",
-      "Knock knock. Who's there? A neural net with 9 lives.",
-      "Wrong answer? Adjust the dials. Story of my life.",
-      "I learn from my mistakes. All nine of them.",
+      "Meow, who's there?",
     ],
   },
   10: { // Numbers & Words — "when you see 'cat', what do you think?"
@@ -200,6 +197,22 @@ const CAT_SECTIONS = {
       "Bat? I prefer to attend to the tuna nearby.",
     ],
   },
+  6: {  // Meet the Models — introducing AI models
+    slide: 0,
+    quotes: [
+      "Where's MY model card?",
+      "ChatGPT, Claude, Gemini... and ME!",
+      "I'm the AI they didn't tell you about.",
+    ],
+  },
+  16: { // Rinse & Repeat (Layers) — 96 layers and "cat sat on the mat"
+    slide: 1,
+    quotes: [
+      "96 layers? That's a lot of thinking about me.",
+      "The cat sat on the mat. Obviously.",
+      "After 96 layers, they finally got my name right.",
+    ],
+  },
   17: { // Predict! — interactive prediction
     slide: 0,
     quotes: [
@@ -207,6 +220,14 @@ const CAT_SECTIONS = {
       "Top-p? I prefer top-cat.",
       "Next word prediction: meow meow meow meow.",
       "Randomness set to maximum. Chaos cat activated.",
+    ],
+  },
+  19: { // Beyond What AI Knows — farewell
+    slide: 0,
+    quotes: [
+      "Beyond what AI knows? I know it's treat time.",
+      "Thanks for learning with me!",
+      "You now know more about AI than most cats.",
     ],
   },
 };
@@ -400,7 +421,7 @@ export default function App() {
   if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} session={session} onSessionChange={setSession} />;
   if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
-  if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} /></>;
+  if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} flags={flags} /></>;
 
   // In v3 mode, review/teaser slides use the session color; content slides use section colors
   const v3SessionColor = isV3 ? SESSION_COLORS[session] : null;
