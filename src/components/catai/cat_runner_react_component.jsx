@@ -61,11 +61,12 @@ export default function RoamingCat({ quotes = QUOTES }) {
   function startNewRun() {
     const pageW = window.innerWidth;
     const enterFromLeft = Math.random() < 0.5;
-    // stop in the left or right margin (random, independent of entry)
+    // stop in the left or right margin (away from centered content)
+    // bubble extends ~280px right of cat, so right-side stops need extra room
     const stopOnLeft = Math.random() < 0.5;
     stopTarget.current = stopOnLeft
-      ? MARGIN + Math.random() * 40
-      : pageW - MARGIN - DISPLAY_W - Math.random() * 40;
+      ? MARGIN + Math.random() * 30
+      : Math.max(MARGIN, pageW - MARGIN - DISPLAY_W - 280 - Math.random() * 30);
 
     setMovingRight(enterFromLeft);
     setX(enterFromLeft ? -DISPLAY_W : pageW + DISPLAY_W);

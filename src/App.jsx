@@ -153,38 +153,62 @@ const SECTION_DONE_EVENT = "sectionFullyRevealed";
 // Map URL hash fragments to section indices
 const HASH_SECTIONS = { "try-it": SECTIONS_V1.length - 1 };
 
-// AI Cat: V2 section indices where the cat appears, with relevant quotes
+// AI Cat: V2 section indices where the cat appears, with per-slide quotes
+// Each entry: { slide: number, quotes: string[] }
 const CAT_SECTIONS = {
-  3: [  // Rules vs Learning — cat recognition is an example on this page
-    "They used ME as an example? Typical.",
-    "I'm not a program... I'm a learning machine!",
-    "Rules say I'm a cat. AI had to figure it out.",
-    "Cat detection: the OG AI flex.",
-  ],
-  7: [  // How AI Learns — knock-knock jokes and weight dials
-    "I adjusted my treat-prediction weights.",
-    "Knock knock. Who's there? A neural net with 9 lives.",
-    "Wrong answer? Adjust the dials. Story of my life.",
-    "I learn from my mistakes. All nine of them.",
-  ],
-  11: [ // Tokens — words chopped into pieces
-    "They tokenized my name into 'c' + 'at'. Rude.",
-    "I'm not just a token! I'm a whole cat!",
-    "Break me into tokens? I break into treats.",
-    "Meow = token #28719. Just checked.",
-  ],
-  14: [ // Attention! — bat disambiguation
-    "Wait... bat like the animal, right? Asking for a friend.",
-    "Attention is all you need... and treats.",
-    "I pay attention to the important things. Like lunch.",
-    "Bat? I prefer to attend to the tuna nearby.",
-  ],
-  17: [ // Predict! — interactive prediction
-    "I predict... dinner. Always dinner.",
-    "Top-p? I prefer top-cat.",
-    "Next word prediction: meow meow meow meow.",
-    "Randomness set to maximum. Chaos cat activated.",
-  ],
+  3: {  // Rules vs Learning — appears after reveal that cat/dog app is AI
+    slide: 2,
+    quotes: [
+      "They used ME as an example? Typical.",
+      "I'm not a program... I'm a learning machine!",
+      "Rules say I'm a cat. AI had to figure it out.",
+      "Cat detection: the OG AI flex.",
+    ],
+  },
+  7: {  // How AI Learns — knock-knock jokes and weight dials
+    slide: 0,
+    quotes: [
+      "I adjusted my treat-prediction weights.",
+      "Knock knock. Who's there? A neural net with 9 lives.",
+      "Wrong answer? Adjust the dials. Story of my life.",
+      "I learn from my mistakes. All nine of them.",
+    ],
+  },
+  10: { // Numbers & Words — "when you see 'cat', what do you think?"
+    slide: 1,
+    quotes: [
+      "ME!",
+      "Did someone say cat?!",
+      "You called?",
+    ],
+  },
+  11: { // Tokens — words chopped into pieces
+    slide: 0,
+    quotes: [
+      "They tokenized my name into 'c' + 'at'. Rude.",
+      "I'm not just a token! I'm a whole cat!",
+      "Break me into tokens? I break into treats.",
+      "Meow = token #28719. Just checked.",
+    ],
+  },
+  14: { // Attention! — bat disambiguation
+    slide: 0,
+    quotes: [
+      "Wait... bat like the animal, right? Asking for a friend.",
+      "Attention is all you need... and treats.",
+      "I pay attention to the important things. Like lunch.",
+      "Bat? I prefer to attend to the tuna nearby.",
+    ],
+  },
+  17: { // Predict! — interactive prediction
+    slide: 0,
+    quotes: [
+      "I predict... dinner. Always dinner.",
+      "Top-p? I prefer top-cat.",
+      "Next word prediction: meow meow meow meow.",
+      "Randomness set to maximum. Chaos cat activated.",
+    ],
+  },
 };
 
 export default function App() {
@@ -842,14 +866,14 @@ export default function App() {
           <SectionComponent color={color} mode="presentation" slide={slide} />
         ) : null}
 
-        {/* AI Cat — appears on select sections when flag is on */}
-        {flags.roamingCat && slide === 0 && (() => {
-          // Get the real V2 section index for current section
+        {/* AI Cat — appears on select sections/slides when flag is on */}
+        {flags.roamingCat && (() => {
           const v2Idx = isV3
             ? (v3SessionConfig?.sections?.[v3ContentSecIndex] ?? -1)
             : (isV2 ? sec : -1);
-          const catQuotes = CAT_SECTIONS[v2Idx];
-          return catQuotes ? <RoamingCat key={v2Idx} quotes={catQuotes} /> : null;
+          const catConfig = CAT_SECTIONS[v2Idx];
+          if (!catConfig || slide !== catConfig.slide) return null;
+          return <RoamingCat key={`${v2Idx}-${slide}`} quotes={catConfig.quotes} />;
         })()}
       </div>
 
