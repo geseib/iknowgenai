@@ -33,6 +33,7 @@ import SectionBeyondKnowledge from "./components/SectionBeyondKnowledge";
 import JoinRoom from "./components/JoinRoom";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 import SessionReview, { SessionTeaser } from "./components/SessionReview";
+import RoamingCat from "./components/catai/cat_runner_react_component";
 import { SESSION_CONFIG, SESSION_COLORS } from "./data/sessionConfig";
 
 // If ?join=CODE is in the URL, render the mobile join page instead
@@ -151,6 +152,40 @@ const SECTION_DONE_EVENT = "sectionFullyRevealed";
 
 // Map URL hash fragments to section indices
 const HASH_SECTIONS = { "try-it": SECTIONS_V1.length - 1 };
+
+// AI Cat: V2 section indices where the cat appears, with relevant quotes
+const CAT_SECTIONS = {
+  3: [  // Rules vs Learning — cat recognition is an example on this page
+    "They used ME as an example? Typical.",
+    "I'm not a program... I'm a learning machine!",
+    "Rules say I'm a cat. AI had to figure it out.",
+    "Cat detection: the OG AI flex.",
+  ],
+  7: [  // How AI Learns — knock-knock jokes and weight dials
+    "I adjusted my treat-prediction weights.",
+    "Knock knock. Who's there? A neural net with 9 lives.",
+    "Wrong answer? Adjust the dials. Story of my life.",
+    "I learn from my mistakes. All nine of them.",
+  ],
+  11: [ // Tokens — words chopped into pieces
+    "They tokenized my name into 'c' + 'at'. Rude.",
+    "I'm not just a token! I'm a whole cat!",
+    "Break me into tokens? I break into treats.",
+    "Meow = token #28719. Just checked.",
+  ],
+  14: [ // Attention! — bat disambiguation
+    "Wait... bat like the animal, right? Asking for a friend.",
+    "Attention is all you need... and treats.",
+    "I pay attention to the important things. Like lunch.",
+    "Bat? I prefer to attend to the tuna nearby.",
+  ],
+  17: [ // Predict! — interactive prediction
+    "I predict... dinner. Always dinner.",
+    "Top-p? I prefer top-cat.",
+    "Next word prediction: meow meow meow meow.",
+    "Randomness set to maximum. Chaos cat activated.",
+  ],
+};
 
 export default function App() {
   // If ?join=CODE is in the URL, render the mobile join page
@@ -806,6 +841,16 @@ export default function App() {
         ) : SectionComponent ? (
           <SectionComponent color={color} mode="presentation" slide={slide} />
         ) : null}
+
+        {/* AI Cat — appears on select sections when flag is on */}
+        {flags.roamingCat && slide === 0 && (() => {
+          // Get the real V2 section index for current section
+          const v2Idx = isV3
+            ? (v3SessionConfig?.sections?.[v3ContentSecIndex] ?? -1)
+            : (isV2 ? sec : -1);
+          const catQuotes = CAT_SECTIONS[v2Idx];
+          return catQuotes ? <RoamingCat key={v2Idx} quotes={catQuotes} /> : null;
+        })()}
       </div>
 
       {/* Footer nav */}

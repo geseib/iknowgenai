@@ -7,6 +7,7 @@ import {
   ChalkboardTeacher,
   Eye,
   SplitVertical,
+  Cat,
 } from "@phosphor-icons/react";
 
 const FLAGS = [
@@ -54,6 +55,15 @@ const FLAGS = [
     color: "#fb5607",
     type: "toggle",
     defaultValue: false,
+  },
+  {
+    key: "roamingCat",
+    label: "AI Cat",
+    desc: "A friendly cat roams the page and shares fun AI-related quips. Appears on select slides throughout the lesson.",
+    Icon: Cat,
+    color: "#7ec8e3",
+    type: "toggle",
+    defaultValue: true,
   },
 ];
 

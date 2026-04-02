@@ -11,6 +11,7 @@ import {
 import { GRADE_CONFIG } from "../data/gradeConfig";
 import { GRADES } from "../data/GradeContext";
 import { SESSION_CONFIG, SESSION_COLORS } from "../data/sessionConfig";
+import RoamingCat from "./catai/cat_runner_react_component";
 
 const modes = [
   {
@@ -227,7 +228,9 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
         <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>
           {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}
         </p>
+
       </div>
+      {flags?.roamingCat && <RoamingCat />}
     </div>
   );
 }
