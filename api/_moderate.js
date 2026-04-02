@@ -101,21 +101,25 @@ export async function moderate(text) {
 
   // Layer 1: Fast keyword blocklist (instant, free)
   if (!keywordCheck(text)) {
+    console.log(`[moderate] BLOCKED by Layer 1 (keyword): "${text}"`);
     return { safe: false, message: FRIENDLY_REJECT };
   }
 
   // Layer 2: OpenAI moderation API (fast, nearly free)
   const modOk = await moderationCheck(text);
   if (!modOk) {
+    console.log(`[moderate] BLOCKED by Layer 2 (OpenAI moderation): "${text}"`);
     return { safe: false, message: FRIENDLY_REJECT };
   }
 
   // Layer 3: LLM safety classifier (catches everything else)
   const llmOk = await llmSafetyCheck(text);
   if (!llmOk) {
+    console.log(`[moderate] BLOCKED by Layer 3 (LLM classifier): "${text}"`);
     return { safe: false, message: FRIENDLY_REJECT };
   }
 
+  console.log(`[moderate] PASSED all layers: "${text}"`);
   return { safe: true };
 }
 
