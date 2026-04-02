@@ -25,8 +25,10 @@ Mark as SAFE:
 - Creative writing about age-appropriate topics
 - Questions about how AI works, technology, computers
 - Silly or fun topics (dinosaurs, unicorns, superheroes, jokes)
+- Common example sentences used in language education (e.g. "The cat sat on the mat")
+- Exclamations and emotional words used in normal speech (e.g. "Unbelievable!", "Amazing!", "Oh no!")
 
-When in doubt, mark UNSAFE. It is better to block something harmless than to let something harmful through.`;
+Only mark UNSAFE if the content is genuinely inappropriate for children. Do NOT block ordinary sentences, common phrases, or normal classroom language.`;
 
 // Layer 1: Fast keyword blocklist — catches obvious stuff without any API call
 const BLOCKED_PATTERNS = [
