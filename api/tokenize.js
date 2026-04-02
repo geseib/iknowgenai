@@ -16,8 +16,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Text too long (max 500 characters)" });
   }
 
-  // Content safety check
-  const check = await moderate(text);
+  // Content safety check — skip LLM layer since tokenizing is read-only
+  const check = await moderate(text, { skipLlm: true });
   if (!check.safe) {
     return res.status(200).json({ blocked: true });
   }

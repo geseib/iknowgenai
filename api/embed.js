@@ -71,7 +71,7 @@ export default async function handler(req, res) {
   const wordList = words.slice(0, 20);
 
   // Content safety check
-  const check = await moderateWords(wordList);
+  const check = await moderateWords(wordList, { skipLlm: true });
   if (!check.safe) {
     return res.status(200).json({ blocked: true });
   }

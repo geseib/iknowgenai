@@ -94,7 +94,7 @@ async function llmSafetyCheck(text) {
  * 3 layers: keyword blocklist → OpenAI moderation → LLM classifier
  * Returns { safe: true } or { safe: false, message: string }
  */
-export async function moderate(text) {
+export async function moderate(text, { skipLlm = false } = {}) {
   if (!text || text.trim().length === 0) {
     return { safe: true };
   }
@@ -113,13 +113,16 @@ export async function moderate(text) {
   }
 
   // Layer 3: LLM safety classifier (catches everything else)
-  const llmOk = await llmSafetyCheck(text);
-  if (!llmOk) {
-    console.log(`[moderate] BLOCKED by Layer 3 (LLM classifier): "${text}"`);
-    return { safe: false, message: FRIENDLY_REJECT };
+  // Skip for read-only endpoints (tokenize, embed) where no content is generated
+  if (!skipLlm) {
+    const llmOk = await llmSafetyCheck(text);
+    if (!llmOk) {
+      console.log(`[moderate] BLOCKED by Layer 3 (LLM classifier): "${text}"`);
+      return { safe: false, message: FRIENDLY_REJECT };
+    }
   }
 
-  console.log(`[moderate] PASSED all layers: "${text}"`);
+  console.log(`[moderate] PASSED${skipLlm ? ' (layers 1+2)' : ' all layers'}: "${text}"`);
   return { safe: true };
 }
 
@@ -127,9 +130,9 @@ export async function moderate(text) {
  * Check an array of words (for embeddings).
  * Returns { safe: true } or { safe: false, message: string }
  */
-export async function moderateWords(words) {
+export async function moderateWords(words, opts) {
   const joined = words.join(" ");
-  return moderate(joined);
+  return moderate(joined, opts);
 }
 
 /**
