@@ -58,15 +58,27 @@ function keywordCheck(text) {
   return true;
 }
 
+// Detect if an OpenAI error is a credit/billing/auth issue vs a real failure
+function isApiCredentialError(err) {
+  const status = err?.status || err?.response?.status;
+  // 401 = bad key, 403 = forbidden, 429 = rate limit/quota exceeded
+  if (status === 401 || status === 403 || status === 429) return true;
+  const msg = (err?.message || '').toLowerCase();
+  return msg.includes('quota') || msg.includes('billing') || msg.includes('rate limit')
+    || msg.includes('insufficient') || msg.includes('exceeded');
+}
+
 // Layer 2: OpenAI moderation API (catches subtle stuff)
 async function moderationCheck(text) {
   try {
     const result = await openai.moderations.create({ input: text });
-    return !result.results[0].flagged;
+    return { ok: !result.results[0].flagged };
   } catch (err) {
-    console.error(`[moderate] Layer 2 ERROR (continuing): ${err.message}`);
-    // If moderation API fails, continue to Layer 3
-    return true;
+    console.error(`[moderate] Layer 2 ERROR: ${err.message}`);
+    if (isApiCredentialError(err)) {
+      return { ok: true, apiError: 'credits' };
+    }
+    return { ok: true, apiError: 'network' };
   }
 }
 
@@ -84,54 +96,68 @@ async function llmSafetyCheck(text) {
     });
     const answer = response.choices[0]?.message?.content?.trim().toUpperCase();
     console.log(`[moderate] Layer 3 LLM responded: "${answer}" for: "${text}"`);
-    return answer === "SAFE";
+    return { ok: answer === "SAFE" };
   } catch (err) {
-    console.error(`[moderate] Layer 3 ERROR (blocking): ${err.message}`);
-    // If LLM check fails, block to be safe
-    return false;
+    console.error(`[moderate] Layer 3 ERROR: ${err.message}`);
+    if (isApiCredentialError(err)) {
+      return { ok: true, apiError: 'credits' };
+    }
+    return { ok: true, apiError: 'network' };
   }
 }
 
 /**
  * Check if input is appropriate for K-12 classroom use.
  * 3 layers: keyword blocklist → OpenAI moderation → LLM classifier
- * Returns { safe: true } or { safe: false, message: string }
+ *
+ * Returns:
+ *   { safe: true }                              — all clear
+ *   { safe: false, reason: 'content' }          — genuinely unsafe content
+ *   { safe: true,  warning: 'credits'|'network' } — API issue, let it through
  */
 export async function moderate(text, { skipLlm = false } = {}) {
   if (!text || text.trim().length === 0) {
     return { safe: true };
   }
 
+  let warning = null;
+
   // Layer 1: Fast keyword blocklist (instant, free)
   if (!keywordCheck(text)) {
     console.log(`[moderate] BLOCKED by Layer 1 (keyword): "${text}"`);
-    return { safe: false, message: FRIENDLY_REJECT };
+    return { safe: false, reason: 'content', message: FRIENDLY_REJECT };
   }
 
   // Layer 2: OpenAI moderation API (fast, nearly free)
-  const modOk = await moderationCheck(text);
-  if (!modOk) {
+  const mod = await moderationCheck(text);
+  if (!mod.ok) {
     console.log(`[moderate] BLOCKED by Layer 2 (OpenAI moderation): "${text}"`);
-    return { safe: false, message: FRIENDLY_REJECT };
+    return { safe: false, reason: 'content', message: FRIENDLY_REJECT };
   }
+  if (mod.apiError) warning = mod.apiError;
 
   // Layer 3: LLM safety classifier (catches everything else)
   // Skip for read-only endpoints (tokenize, embed) where no content is generated
   if (!skipLlm) {
-    const llmOk = await llmSafetyCheck(text);
-    if (!llmOk) {
+    const llm = await llmSafetyCheck(text);
+    if (!llm.ok) {
       console.log(`[moderate] BLOCKED by Layer 3 (LLM classifier): "${text}"`);
-      return { safe: false, message: FRIENDLY_REJECT };
+      return { safe: false, reason: 'content', message: FRIENDLY_REJECT };
     }
+    if (llm.apiError) warning = llm.apiError;
   }
 
-  console.log(`[moderate] PASSED${skipLlm ? ' (layers 1+2)' : ' all layers'}: "${text}"`);
-  return { safe: true };
+  if (warning) {
+    console.warn(`[moderate] PASSED with warning (${warning}): "${text}" — safety layers degraded`);
+  } else {
+    console.log(`[moderate] PASSED${skipLlm ? ' (layers 1+2)' : ' all layers'}: "${text}"`);
+  }
+  return { safe: true, ...(warning && { warning }) };
 }
 
 /**
  * Check an array of words (for embeddings).
- * Returns { safe: true } or { safe: false, message: string }
+ * Returns same shape as moderate()
  */
 export async function moderateWords(words, opts) {
   const joined = words.join(" ");
