@@ -302,6 +302,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
   const [entryMode, setEntryMode] = useState(null); // null | "remote" | "manual"
   const [roomCode, setRoomCode] = useState(null);
   const [roomStatus, setRoomStatus] = useState(null); // { character, place, event, *_claimed }
+  const [remoteError, setRemoteError] = useState(null);
   const [revealIdx, setRevealIdx] = useState(-1);
   const [story, setStory] = useState("");
   const [loading, setLoading] = useState(false);
@@ -321,22 +322,28 @@ export default function SectionStoryMash({ color, mode, slide }) {
 
   /* ── Create room for remote entry ── */
   const startRemote = async () => {
+    setRemoteError(null);
     try {
       const res = await fetch("/api/room-create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      const data = await res.json();
-      if (data.code) {
-        setRoomCode(data.code);
-        setEntryMode("remote");
-        setPhase("remote-waiting");
-        setRoomStatus({ character: "", place: "", event: "", character_claimed: false, place_claimed: false, event_claimed: false });
+      if (!res.ok) {
+        let detail = `Server error ${res.status}`;
+        try {
+          const body = await res.json();
+          if (body?.error) detail = body.error;
+        } catch (_) {}
+        throw new Error(detail);
       }
+      const data = await res.json();
+      if (!data.code) throw new Error("Server returned no room code");
+      setRoomCode(data.code);
+      setEntryMode("remote");
+      setPhase("remote-waiting");
+      setRoomStatus({ character: "", place: "", event: "", character_claimed: false, place_claimed: false, event_claimed: false });
     } catch (err) {
-      // If remote fails, fall back to manual
-      setEntryMode("manual");
-      setPhase("input");
+      setRemoteError(`Remote entry is unavailable (${err.message}). Use "Type Here" instead.`);
     }
   };
 
@@ -486,6 +493,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
     setEntryMode(null);
     setRoomCode(null);
     setRoomStatus(null);
+    setRemoteError(null);
     setRevealIdx(-1);
     setStory("");
     setLoading(false);
@@ -876,6 +884,22 @@ export default function SectionStoryMash({ color, mode, slide }) {
             }}>
               How should players enter their secret ingredients?
             </div>
+            {remoteError && (
+              <div style={{
+                fontFamily: "'Fredoka',sans-serif",
+                fontSize: 18,
+                color: "#fb5607",
+                background: "rgba(251,86,7,.08)",
+                border: "1.5px solid rgba(251,86,7,.35)",
+                borderRadius: 14,
+                padding: "14px 22px",
+                maxWidth: 560,
+                margin: "0 auto 24px",
+                lineHeight: 1.4,
+              }}>
+                {remoteError}
+              </div>
+            )}
             <div style={{
               display: "flex",
               justifyContent: "center",

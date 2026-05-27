@@ -54,7 +54,7 @@ const FLAGS = [
     Icon: SplitVertical,
     color: "#fb5607",
     type: "toggle",
-    defaultValue: false,
+    defaultValue: true,
   },
   {
     key: "roamingCat",

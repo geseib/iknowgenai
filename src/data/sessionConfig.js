@@ -43,7 +43,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: [12, 14, 17, 18],
+        sections: [12, 14, 17, 18, 19],
         review: [
           {
             question: "How does AI see words?",
@@ -98,7 +98,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: [14, 15, 16, 17, 18],
+        sections: [14, 15, 16, 17, 18, 19],
         review: [
           {
             question: "How does AI see the word 'cat'?",
@@ -159,7 +159,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "The full pipeline",
-        sections: [14, 15, 16, 17, 18, 19],
+        sections: [14, 15, 16, 17, 18, 19, 20],
         review: [
           {
             question: "How does AI see the word 'cat'?",

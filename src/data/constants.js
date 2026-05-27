@@ -3,6 +3,7 @@ export const COLORS = [
   "#fb5607","#06d6a0","#00f5d4","#fb5607","#fee440",
   "#f15bb5","#9b5de5","#06d6a0","#00bbf9","#fb5607",
   "#06d6a0","#fee440","#f15bb5","#9b5de5","#06d6a0",
+  "#00bbf9",
 ];
 
 export const TOTAL = 20;

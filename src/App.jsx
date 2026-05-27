@@ -28,6 +28,7 @@ import SectionAttention from "./components/SectionAttention";
 import SectionMLP from "./components/SectionMLP";
 import SectionLayers from "./components/SectionLayers";
 import SectionPredict from "./components/SectionPredict";
+import SectionReasoning from "./components/SectionReasoning";
 import SectionTryIt from "./components/SectionTryIt";
 import SectionBeyondKnowledge from "./components/SectionBeyondKnowledge";
 import JoinRoom from "./components/JoinRoom";
@@ -84,21 +85,22 @@ const SECTIONS_V2 = [
   SectionMLP,           // 15 — Group 4: How AI Writes
   SectionLayers,        // 16
   SectionPredict,       // 17
-  SectionTryIt,             // 18 — Group 5: Try It!
-  SectionBeyondKnowledge,   // 19 — Group 6: Bonus
+  SectionReasoning,     // 18 — NEW: Think First!
+  SectionTryIt,             // 19 — Group 5: Try It!
+  SectionBeyondKnowledge,   // 20 — Group 6: Bonus
 ];
 
 // V2 index mapping: v2Position → v1Position (for slide count remapping)
-const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 20, 18, 19];
 
 // V2 groups and titles
 const GROUPS_V2 = [
   { name: "What Is AI?",        start: 0,  end: 4  },
   { name: "Meet the LLMs",      start: 5,  end: 8  },
   { name: "Inside the Machine", start: 9,  end: 14 },
-  { name: "How AI Writes",      start: 15, end: 17 },
-  { name: "Try It!",            start: 18, end: 18 },
-  { name: "Bonus",              start: 19, end: 19 },
+  { name: "How AI Writes",      start: 15, end: 18 },
+  { name: "Try It!",            start: 19, end: 19 },
+  { name: "Bonus",              start: 20, end: 20 },
 ];
 
 const TITLES_V2 = [
@@ -120,8 +122,9 @@ const TITLES_V2 = [
   "The Thinking Layer",      // 15
   "Rinse & Repeat",          // 16
   "Predict!",                // 17
-  "Try It Yourself!",        // 18
-  "Beyond What AI Knows",    // 19
+  "Think First!",            // 18 — NEW: Reasoning
+  "Try It Yourself!",        // 19
+  "Beyond What AI Knows",    // 20
 ];
 
 // Remap colors for v2 ordering
@@ -222,7 +225,16 @@ const CAT_SECTIONS = {
       "Randomness set to maximum. Chaos cat activated.",
     ],
   },
-  19: { // Beyond What AI Knows — farewell
+  18: { // Think First! — reasoning models
+    slide: 0,
+    quotes: [
+      "Thinking before speaking? Revolutionary.",
+      "I always think before I pounce. Well, sometimes.",
+      "Step 1: Think. Step 2: Nap. Step 3: Think about napping.",
+      "My reasoning: if it fits, I sits.",
+    ],
+  },
+  20: { // Beyond What AI Knows — farewell
     slide: 0,
     quotes: [
       "Beyond what AI knows? I know it's treat time.",
@@ -340,7 +352,19 @@ export default function App() {
     setNavOpen(false);
   }, []);
 
-  const sectionTotal = isV3 ? v3TotalSlots : TOTAL;
+  // V3: jump to a section in any session (switches session if needed)
+  const jumpToV3Section = useCallback((targetSession, positionInSession) => {
+    const targetConfig = SESSION_CONFIG[grade]?.sessions?.[targetSession];
+    const hasReview = targetSession > 0 && (targetConfig?.review?.length > 0);
+    const reviewCount = hasReview ? 1 + targetConfig.review.length : 0;
+    setSession(targetSession);
+    setSec(reviewCount + positionInSession);
+    setSlide(0);
+    setDone(new Set());
+    setNavOpen(false);
+  }, [grade]);
+
+  const sectionTotal = isV3 ? v3TotalSlots : SECTIONS.length;
 
   const next = useCallback(() => {
     const maxSlides = PRESENTATION_SLIDES[sec] || 1;
@@ -603,8 +627,171 @@ export default function App() {
 
             {/* Groups and sections */}
             <div style={{ padding: "6px 0 16px" }}>
-              {(isV3 ? v3NavGroups : activeGROUPS).map((group, gi) => {
-                const groupColor = isV3 ? v3SessionColor : activeCOLORS[group.start % activeCOLORS.length];
+              {isV3 ? (
+                /* V3: Show all sessions with their sections */
+                (SESSION_CONFIG[grade]?.sessions || []).map((sess, si) => {
+                  const isCurrentSession = si === session;
+                  const sessColor = SESSION_COLORS[si];
+                  const hasReview = si > 0 && (sess.review?.length > 0);
+                  const reviewCount = hasReview ? 1 + sess.review.length : 0;
+                  const v2Slides = getV2Slides(grade);
+
+                  return (
+                    <div key={si}>
+                      {/* Session header */}
+                      <div style={{
+                        padding: "10px 18px 5px",
+                        marginTop: si > 0 ? 10 : 4,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}>
+                        <div style={{
+                          width: 3,
+                          height: 14,
+                          borderRadius: 2,
+                          background: sessColor,
+                          opacity: isCurrentSession ? 1 : 0.4,
+                        }} />
+                        <span style={{
+                          fontSize: 10,
+                          letterSpacing: 2.5,
+                          textTransform: "uppercase",
+                          color: isCurrentSession ? `${sessColor}cc` : `${sessColor}55`,
+                        }}>
+                          {sess.name}{sess.subtitle ? ` — ${sess.subtitle}` : ""}
+                        </span>
+                        {isCurrentSession && (
+                          <span style={{
+                            fontSize: 8,
+                            padding: "1px 6px",
+                            borderRadius: 6,
+                            background: `${sessColor}22`,
+                            color: sessColor,
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                          }}>NOW</span>
+                        )}
+                      </div>
+
+                      {/* Section items for this session */}
+                      {sess.sections.map((v2Idx, posInSession) => {
+                        const secSlot = reviewCount + posInSession;
+                        const isActive = isCurrentSession && secSlot === sec;
+                        const isDone = isCurrentSession && done.has(secSlot);
+                        const sColor = COLORS_V2[v2Idx % COLORS_V2.length];
+                        const title = TITLES_V2[v2Idx];
+                        const totalSlidesInSec = v2Slides[v2Idx] || 1;
+                        const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
+                        const pct = (slidesDone / totalSlidesInSec) * 100;
+                        const dimmed = !isCurrentSession;
+
+                        return (
+                          <div
+                            key={`${si}-${v2Idx}`}
+                            onClick={() => isCurrentSession ? jumpToSection(secSlot) : jumpToV3Section(si, posInSession)}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "9px 14px",
+                              margin: "2px 8px",
+                              borderRadius: 10,
+                              cursor: "pointer",
+                              borderLeft: `3px solid ${isActive ? sColor : "transparent"}`,
+                              background: isActive ? `${sColor}12` : "transparent",
+                              opacity: dimmed ? 0.45 : 1,
+                              transition: "all .15s ease",
+                            }}
+                            onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
+                            onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                          >
+                            {/* Number / check */}
+                            <div style={{
+                              width: 22,
+                              height: 22,
+                              borderRadius: "50%",
+                              background: isDone ? `${sColor}25` : (isActive ? `${sColor}25` : "rgba(255,255,255,.06)"),
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}>
+                              {isDone
+                                ? <CheckCircle size={14} weight="fill" color={sColor} />
+                                : <span style={{
+                                    fontSize: 10,
+                                    fontWeight: 600,
+                                    color: isActive ? sColor : "rgba(255,255,255,.25)",
+                                  }}>
+                                    {posInSession + 1}
+                                  </span>}
+                            </div>
+
+                            {/* Title + mini progress */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontSize: 13,
+                                color: isActive ? "white" : (isDone ? "rgba(255,255,255,.4)" : "rgba(255,255,255,.55)"),
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}>
+                                {title}
+                              </div>
+                              {(isActive || isDone) && (
+                                <div style={{
+                                  height: 2,
+                                  borderRadius: 1,
+                                  marginTop: 5,
+                                  background: "rgba(255,255,255,.06)",
+                                }}>
+                                  <div style={{
+                                    height: "100%",
+                                    borderRadius: 1,
+                                    width: `${pct}%`,
+                                    background: isDone ? `${sColor}55` : sColor,
+                                    transition: "width .3s ease",
+                                  }} />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Slide count + active dot */}
+                            <div style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              flexShrink: 0,
+                            }}>
+                              {(isActive || isDone) && (
+                                <span style={{
+                                  fontSize: 10,
+                                  color: "rgba(255,255,255,.2)",
+                                }}>
+                                  {slidesDone}/{totalSlidesInSec}
+                                </span>
+                              )}
+                              {isActive && (
+                                <div style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  background: sColor,
+                                  animation: "navDot 1.5s ease-in-out infinite",
+                                }} />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              ) : (
+                /* V1/V2: Standard group-based nav */
+                activeGROUPS.map((group, gi) => {
+                const groupColor = activeCOLORS[group.start % activeCOLORS.length];
                 return (
                   <div key={gi}>
                     {/* Group header */}
@@ -638,8 +825,7 @@ export default function App() {
                     ).map(si => {
                       const isActive = si === sec;
                       const isDone = done.has(si);
-                      const titleIdx = isV3 ? si - v3ReviewSlideCount : si;
-                      const sColor = isV3 ? activeCOLORS[titleIdx % activeCOLORS.length] : activeCOLORS[si % activeCOLORS.length];
+                      const sColor = activeCOLORS[si % activeCOLORS.length];
                       const totalSlidesInSec = PRESENTATION_SLIDES[si] || 1;
                       const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
                       const pct = (slidesDone / totalSlidesInSec) * 100;
@@ -681,7 +867,7 @@ export default function App() {
                                   fontWeight: 600,
                                   color: isActive ? sColor : "rgba(255,255,255,.25)",
                                 }}>
-                                  {isV3 ? titleIdx + 1 : si + 1}
+                                  {si + 1}
                                 </span>}
                           </div>
 
@@ -694,7 +880,7 @@ export default function App() {
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                             }}>
-                              {isV3 ? activeTITLES[titleIdx] : activeTITLES[si]}
+                              {activeTITLES[si]}
                             </div>
                             {(isActive || isDone) && (
                               <div style={{
@@ -744,7 +930,8 @@ export default function App() {
                     })}
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
 
             {/* Footer */}

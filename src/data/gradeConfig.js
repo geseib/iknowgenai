@@ -25,6 +25,7 @@ export const GRADE_CONFIG = {
       3,  // 17: Predict! — simplified voting
       1,  // 18: Try It! — preset prompts only
       0,  // 19: Beyond What AI Knows — SKIP
+      3,  // 20: Think First! (Reasoning) — simplified
     ],
   },
   "3-5": {
@@ -53,6 +54,7 @@ export const GRADE_CONFIG = {
       5,  // 17: Predict!
       2,  // 18: Try It!
       0,  // 19: Beyond What AI Knows — SKIP
+      5,  // 20: Think First! (Reasoning)
     ],
   },
   "7-8": {
@@ -81,6 +83,7 @@ export const GRADE_CONFIG = {
       5,  // 17: Predict!
       2,  // 18: Try It!
       7,  // 19: Beyond What AI Knows — bonus: RAG, tools, agents
+      6,  // 20: Think First! (Reasoning) — full + deeper dive
     ],
   },
 };

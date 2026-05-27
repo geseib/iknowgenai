@@ -16,30 +16,32 @@ const JOKE_DISPLAY = [
   "Lettuce in, it's cold out here!",
 ];
 
-// Each round: 3 robots guess, one is correct
+// Each round: 3 robots guess, one is correct.
+// Wrong guesses are deliberately the WRONG KIND of text (greetings, meta-descriptions,
+// definitions, random lists) so kids see why predicting the *next* text matters.
 const ROUNDS = [
   {
     prompt: "Knock knock.",
     robots: [
-      { guess: "Banana!", correct: false },
-      { guess: "Who's there?", correct: true },
       { guess: "Hello!", correct: false },
+      { guess: "Who's there?", correct: true },
+      { guess: "…is the start of a joke.", correct: false },
     ],
   },
   {
     prompt: "Who's there?",
     robots: [
-      { guess: "Pizza.", correct: false },
-      { guess: "Tacos!", correct: false },
+      { guess: "Ring ring.", correct: false },
+      { guess: "I'm a robot telling jokes.", correct: false },
       { guess: "Lettuce.", correct: true },
     ],
   },
   {
     prompt: "Lettuce who?",
     robots: [
-      { guess: "Lettuce play outside!", correct: false },
+      { guess: "…is a leafy vegetable.", correct: false },
       { guess: "Lettuce in, it's cold out here!", correct: true },
-      { guess: "Lettuce eat lunch!", correct: false },
+      { guess: "Tomato, pickle.", correct: false },
     ],
   },
 ];

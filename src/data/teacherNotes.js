@@ -851,4 +851,67 @@ export const TEACHER_NOTES = [
       },
     ],
   },
+
+  // ── 20: SectionReasoning (3–6 slides depending on grade) ──
+  {
+    title: "Think First!",
+    connections: [
+      { subject: "Science", note: "The scientific method — reasoning models follow a similar process: question, hypothesize, test ideas, then conclude" },
+      { subject: "ELA", note: "Persuasive writing and argumentation — weighing evidence before drawing a conclusion is the same skill used in essay writing" },
+      { subject: "Math", note: "Showing your work — just like math teachers ask students to show their steps, reasoning models show their thinking process" },
+    ],
+    slides: [
+      // Slide 0: Hook
+      {
+        keyPoints: ["Some newer AI models 'think' before answering", "This is a real, observable behavior — not marketing"],
+        narrative: "Start by asking the class: 'Have you ever noticed that some AI takes a few seconds before it starts answering?' If kids use ChatGPT or Claude, some may have noticed the 'thinking' indicator. This is NOT just loading — the model is actually generating a chain of reasoning before producing the final answer.",
+        definitions: [{ term: "Reasoning Model", def: "An AI model that thinks through problems step by step before giving a final answer" }],
+        discussion: ["When you have a hard question, do you answer immediately or think first?", "What does 'thinking' even look like for a computer?"],
+      },
+      // Slide 1: Scientific method
+      {
+        keyPoints: ["Humans have a structured way of figuring things out: the scientific method", "The steps are: Question, Hypothesis, Experiment, Observe, Conclude"],
+        narrative: "Walk through each step with the plant-talking example. Ask kids to contribute: 'What would YOUR hypothesis be? How would you set up the experiment?' The goal is to show that structured thinking leads to better answers.",
+        definitions: [
+          { term: "Hypothesis", def: "An educated guess about what you think will happen — based on what you already know" },
+          { term: "Scientific Method", def: "A step-by-step process for figuring out if something is true: ask, guess, test, look, decide" },
+        ],
+        discussion: ["What's the difference between guessing and hypothesizing?", "Why do scientists do experiments instead of just guessing?"],
+        simplification: "We draw a parallel between the scientific method and AI reasoning. In reality, reasoning models don't follow the scientific method — they use chain-of-thought prompting reinforced through training with reinforcement learning (RLHF/RLAIF). The model learns that producing intermediate reasoning steps leads to more accurate final answers. The scientific method analogy helps kids understand the CONCEPT of structured thinking, even though the mechanism is very different.",
+      },
+      // Slide 2: AI thinking block
+      {
+        keyPoints: ["The AI's 'thinking' is visible as a collapsible block", "The thinking looks like a conversation with itself"],
+        narrative: "Show the collapsible thinking block. Ask a volunteer to expand it. Read through the AI's thinking together. Point out how it considers multiple possibilities, weighs evidence, and changes its mind — just like the scientific method steps.",
+        definitions: [{ term: "Chain of Thought", def: "When AI writes out its reasoning step by step before giving a final answer — like showing your work in math" }],
+        discussion: ["Does the AI's thinking look like how YOU would think about this?", "Did the AI consider something you didn't think of?"],
+      },
+      // Slide 3: The essay analogy — it's still sentence completion
+      {
+        keyPoints: ["The AI is still doing next-word prediction — same as always", "It's been trained to write a 'rough draft chapter' before the 'answer chapter'", "Same engine, different instructions — like a student writing an outline before an essay"],
+        narrative: "THIS IS THE KEY SLIDE. The animated diagram shows Chapter 1 (rough draft / thinking) → Chapter 2 (final answer). Emphasize hard: the model is still predicting the next word, one at a time, the EXACT same way. It's just been trained to produce a planning section first. The analogy is writing an essay: a good student doesn't just start writing — they brainstorm, outline, and THEN write their answer. The AI has learned to do the same thing, word by word.",
+        definitions: [{ term: "Reasoning (in AI)", def: "When an AI writes out a 'rough draft' of its thinking before producing its final answer — still word-by-word prediction, just with a planning phase added" }],
+        discussion: ["Is the AI really 'thinking,' or is it just following instructions to write its thoughts down?", "When do YOU make an outline or rough draft before writing?", "What's the difference between thinking and writing about thinking?"],
+        simplification: "Saying the AI 'writes a rough draft' is a deliberate simplification. What actually happens: the model was trained via reinforcement learning to produce intermediate reasoning tokens that improve final answer quality. The model doesn't 'decide' to plan — it was trained so that producing planning tokens is the most likely next-token prediction given the system prompt and input. But the essay analogy captures the right intuition: same generative process, just with an extra phase.",
+      },
+      // Slide 4: Takeaway
+      {
+        keyPoints: ["Reasoning models plan before they answer", "Not a new kind of intelligence — same next-word prediction with new instructions", "The instruction: 'Write your thinking first, then your answer'"],
+        narrative: "Reinforce the core message: same engine, new instruction. Show the side-by-side: Regular AI goes Question → Answer. Reasoning AI goes Question → Think → Answer. The 'Think' part is just more text generation — not a fundamentally different process. This connects back to everything they learned about prediction.",
+        definitions: [],
+        discussion: ["When is it worth taking extra time to think/plan?", "Are there questions where planning actually makes the answer worse?", "If the AI is just following instructions, is it really 'smart'?"],
+      },
+      // Slide 5: Deeper dive (7-8 only)
+      {
+        keyPoints: ["Thinking uses extra compute (tokens)", "Reasoning models are trained with reinforcement learning", "Models like o1, o3, and Claude with extended thinking are examples"],
+        narrative: "For older students: explain that the 'thinking' tokens are real computation that costs time and money. The model generates hundreds or thousands of tokens of reasoning that the user often doesn't see. These models are trained differently — using reinforcement learning to reward good reasoning chains, not just good final answers.",
+        definitions: [
+          { term: "Thinking Tokens", def: "The hidden words the AI generates while reasoning — they use compute but are often hidden from the user" },
+          { term: "Reinforcement Learning", def: "Training where the AI gets a 'reward' for good reasoning and good answers, learning to think better over time" },
+        ],
+        discussion: ["If thinking takes extra time and money, when is it worth it?", "Should AI always show its thinking, or should it be hidden?"],
+        simplification: "We say reasoning models 'think' but this is anthropomorphic. What actually happens: the model is trained (via RL) to produce intermediate token sequences that improve the quality of the final output. It's not conscious deliberation — it's learned behavior that mimics structured reasoning. The o1 model uses process reward modeling where each step of the chain is evaluated, not just the final answer.",
+      },
+    ],
+  },
 ];
