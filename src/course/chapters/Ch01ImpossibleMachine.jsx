@@ -62,21 +62,29 @@ function GenerateSlide({ accent }) {
     setLoading(true);
     setOutput("");
     setBlocked(false);
+    // Keep the prompt compact and instruction-free: the safety classifier is
+    // tuned for short classroom inputs and false-positives on meta-heavy
+    // prompts. It's also slightly nondeterministic, so retry once on a block.
+    const prompt = `Write a fun, vivid short story (4-6 sentences) about ${c} in ${p}, where ${t}.`;
     try {
-      const result = await generateStream(
-        `Write a short story (about 90 words) featuring ${c}, set in ${p}, where ${t}. Be vivid and surprising. Don't mention that you were given ingredients — just tell the story.`,
-        {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const result = await generateStream(prompt, {
           temperature: 0.9,
+          maxTokens: 220,
           onToken: (_, text) => {
             setOutput(text);
             outRef.current?.scrollTo(0, outRef.current.scrollHeight);
           },
+        });
+        if (!result.blocked) {
+          if (result.text) lastStory = result.text;
+          setLoading(false);
+          return;
         }
-      );
-      if (result.blocked) setBlocked(true);
-      else if (result.text) lastStory = result.text;
+      }
+      setBlocked(true);
     } catch {
-      setOutput(lastStory || FALLBACK_STORY);
+      setOutput((lastStory || FALLBACK_STORY) + "\n\n(Couldn't reach the model — this one's a canned example.)");
       if (!lastStory) lastStory = FALLBACK_STORY;
     }
     setLoading(false);

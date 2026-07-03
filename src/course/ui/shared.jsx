@@ -203,7 +203,8 @@ export function Recap({ accent, lines, next, footnote }) {
 export function BlockedNote() {
   return (
     <Prose muted style={{ fontSize: TYPE.caption }}>
-      That input was blocked by the content filter — try something else.
+      The content filter blocked that one. It errs on the side of caution —
+      try again, or reword the input.
     </Prose>
   );
 }
