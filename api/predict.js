@@ -21,8 +21,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: `Prompt too long (max ${MAX_PROMPT_LENGTH} characters)` });
   }
 
-  // Layer 1+2: Content safety check on input
-  const check = await moderate(prompt);
+  // Content safety check on input. Completion mode is used only by the 14+
+  // course, so it gets relaxed moderation (OpenAI moderation API only — the
+  // K-12 keyword list and classifier would block ordinary story words).
+  const isCompletion = req.body.mode === "completion";
+  const check = await moderate(prompt, { relaxed: isCompletion });
   if (!check.safe) {
     return res.status(200).json({ blocked: true });
   }
@@ -71,7 +74,7 @@ export default async function handler(req, res) {
         }))
         .sort((a, b) => b.pct - a.pct);
 
-      const outputCheck = await moderate(prompt + " " + word);
+      const outputCheck = await moderate(prompt + " " + word, { relaxed: true });
       if (!outputCheck.safe) {
         return res.status(200).json({ blocked: true });
       }
