@@ -261,11 +261,161 @@ function HighDimDemo({ accent }) {
       </Card>
       <Prose>
         {d <= 3
-          ? "In 2 or 3 dimensions, random directions collide constantly — some pairs nearly parallel, some nearly opposite. Chaos."
+          ? "In 2 or 3 dimensions, random directions collide constantly — some pairs nearly parallel, some nearly opposite. This is the overcrowding from the last slide."
           : d < 1000
-            ? "The dots are pulling toward 90°. Random directions in higher dimensions are automatically more independent."
-            : <>At {d.toLocaleString()} dimensions, all 435 pairs are within a few degrees of perpendicular — <strong>by pure accident</strong>. In high dimensions, almost every direction is almost perpendicular to almost every other.</>}
+            ? "The dots are pulling toward 90°. Random directions in higher dimensions are automatically more independent — no planning required."
+            : <>At {d.toLocaleString()} dimensions, every pair is within a couple of degrees of perpendicular — <strong>by pure accident</strong>. Read that as capacity: you could add concept #31 <em>blindfolded</em>, as a random direction, and it would land almost perpendicular to all 30 existing ones. The map isn't crowded. It's practically empty.</>}
       </Prose>
+      {d >= 12288 && (
+        <Prose muted className="reveal" style={{ fontSize: 15 }}>
+          How un-crowded, exactly? The next slide counts.
+        </Prose>
+      )}
+    </Slide>
+  );
+}
+
+// ---- Exponential capacity: how many nearly-perpendicular directions fit? ----
+// Standard random-packing lower bound: at least e^(d·ε²/4) unit vectors can
+// pairwise stay within ε (radians) of perpendicular; demanding exactly 90°
+// gives exactly d. The honest footnote flags the bound's looseness.
+const CAP_DIMS = [100, 1000, 12288];
+const CAP_TOLERANCES = [
+  { deg: 0, label: "exactly 90°" },
+  { deg: 5, label: "within ±5°" },
+  { deg: 10, label: "within ±10°" },
+  { deg: 15, label: "within ±15°" },
+];
+
+function capacityLog10(d, deg) {
+  if (deg === 0) return Math.log10(d);
+  const eps = Math.sin((deg * Math.PI) / 180);
+  const ln = (d * eps * eps) / 4;
+  return Math.max(Math.log10(d), ln / Math.LN10);
+}
+
+function fmtCapacity(log10N) {
+  if (log10N < 6) return Math.round(Math.pow(10, log10N)).toLocaleString();
+  return null; // rendered as 10^x
+}
+
+const ANCHORS = [
+  { log: 6, label: "every English word", row: 0 },
+  { log: 10, label: "people on Earth", row: 1 },
+  { log: 19, label: "grains of sand on Earth", row: 0 },
+  { log: 50, label: "10⁵⁰", row: 1 },
+  { log: 80, label: "atoms in the universe", row: 0 },
+];
+const CAP_SCALE_MAX = 92;
+
+function CapacityDemo({ accent }) {
+  const [dim, setDim] = useState(12288);
+  const [tol, setTol] = useState(5);
+  const log10N = capacityLog10(dim, tol);
+  const exact = fmtCapacity(log10N);
+  const exp = Math.round(log10N);
+  const beyondAtoms = log10N > 80;
+
+  const caption =
+    tol === 0
+      ? "Demand perfect 90° separation and the ceiling is just the dimension count — geometry allows exactly d mutually perpendicular directions, no more."
+      : dim === 100
+        ? "At 100 dimensions, the tolerance buys you essentially nothing — the exponent is too small to matter. Low dimensions have no loophole."
+        : dim === 1000 && tol <= 10
+          ? "The exponential is waking up — but at 1,000 dimensions it takes a generous tolerance to beat the plain dimension count."
+          : beyondAtoms
+            ? "More directions than there are atoms in the observable universe — from twelve thousand dimensions and a tolerance smaller than your eye could see on a protractor."
+            : "Now the exponent is doing the work: capacity grows as e raised to (dimensions × tolerance²) — exponential in d. This is why the loophole belongs to high dimensions alone.";
+
+  return (
+    <Slide wide>
+      <Kicker accent={accent}>Count the room</Kicker>
+      <Heading size="h2">The exponential payoff.</Heading>
+      <Prose muted>
+        How many nearly-independent directions fit? Pick a space, pick your
+        standard for “independent enough,” and count.
+      </Prose>
+      <div style={{ display: "flex", gap: SPACE.md, flexWrap: "wrap" }}>
+        <div>
+          <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginBottom: 6 }}>DIMENSIONS</Mono>
+          <div style={{ display: "flex", gap: 8 }}>
+            {CAP_DIMS.map((d) => (
+              <button
+                key={d}
+                onClick={() => setDim(d)}
+                className="btn"
+                style={{
+                  padding: "8px 14px", fontSize: 14,
+                  background: dim === d ? accent : "transparent",
+                  color: dim === d ? "#0B0E14" : COLORS.muted,
+                  border: `1px solid ${dim === d ? accent : COLORS.hairline}`,
+                }}
+              >
+                {d.toLocaleString()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginBottom: 6 }}>“UNRELATED” MEANS…</Mono>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {CAP_TOLERANCES.map((t) => (
+              <button
+                key={t.deg}
+                onClick={() => setTol(t.deg)}
+                className="btn"
+                style={{
+                  padding: "8px 14px", fontSize: 14,
+                  background: tol === t.deg ? accent : "transparent",
+                  color: tol === t.deg ? "#0B0E14" : COLORS.muted,
+                  border: `1px solid ${tol === t.deg ? accent : COLORS.hairline}`,
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Card style={{ borderColor: accent + "44" }}>
+        <Mono style={{ fontSize: 12, color: COLORS.muted }}>room for at least…</Mono>
+        <div style={{ fontFamily: FONTS.mono, fontSize: exact ? 44 : 40, color: accent, lineHeight: 1.3, fontVariantNumeric: "tabular-nums" }}>
+          {exact ? exact : <>~10<sup style={{ fontSize: 24 }}>{exp}</sup></>}
+          <span style={{ fontSize: 15, color: COLORS.muted }}> nearly-independent directions</span>
+        </div>
+        {/* Log-scale bar with real-world anchors (staggered rows to avoid overlap) */}
+        <div style={{ position: "relative", height: 84, marginTop: SPACE.sm }}>
+          <div style={{ position: "absolute", left: 0, right: 0, top: 38, height: 4, background: "rgba(255,255,255,.08)", borderRadius: 2 }} />
+          <div style={{
+            position: "absolute", left: 0, top: 38, height: 4, borderRadius: 2,
+            width: `${Math.min(100, (log10N / CAP_SCALE_MAX) * 100)}%`,
+            background: accent, transition: "width 600ms cubic-bezier(.2,.7,.3,1)",
+          }} />
+          {ANCHORS.map((a) => (
+            <div key={a.log} style={{ position: "absolute", left: `${(a.log / CAP_SCALE_MAX) * 100}%`, top: 0, bottom: 0 }}>
+              <div style={{
+                position: "absolute", top: a.row === 0 ? 18 : 42, width: 1,
+                height: a.row === 0 ? 20 : 20, background: COLORS.faint,
+              }} />
+              <div style={{
+                position: "absolute", top: a.row === 0 ? 2 : 64,
+                fontFamily: FONTS.mono, fontSize: 10, color: log10N >= a.log ? COLORS.text : COLORS.faint,
+                transform: "translateX(-50%)", whiteSpace: "nowrap", transition: "color 400ms",
+              }}>
+                {a.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Prose muted style={{ fontSize: 15 }}>{caption}</Prose>
+      <HonestNote>
+        “At least” is doing real work: these come from a standard
+        random-packing bound (about e^(d·ε²⁄4) directions fit with pairwise
+        angles within ε of 90°) — the true maximum is even larger, and at
+        exactly 90° the answer is exactly d. The point survives any choice of
+        constants: capacity is <em>exponential in dimensions</em>.
+      </HonestNote>
     </Slide>
   );
 }
@@ -378,24 +528,26 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
     case 6:
       return <HighDimDemo accent={accent} />;
     case 7:
+      return <CapacityDemo accent={accent} />;
+    case 8:
       return (
         <Slide>
           <Kicker accent={accent}>So what</Kicker>
           <Heading size="h2">Almost perpendicular is good enough.</Heading>
           <Prose>
-            That's the loophole. If you accept <em>89.9°</em> instead of
-            demanding exactly 90°, the number of directions you can pack grows
-            <strong> exponentially</strong> with dimensions. In 12,288
-            dimensions there's room for not millions but effectively unlimited
-            almost-independent directions. The map was never overcrowded — high
-            dimensions are unimaginably roomier than our 3D intuition suggests.
+            That's the loophole, now with numbers attached: demand perfection
+            and you get thousands of concepts; accept <em>almost</em> and you
+            get more than there are atoms. The map was never overcrowded —
+            high dimensions are unimaginably roomier than 3D intuition
+            suggests, and the exponential only ignites at scale. A small model
+            couldn't do this.
           </Prose>
           <Prose>
-            And the tiny overlaps that remain? They're not even a bug. “Cat”
-            overlapping slightly with “dog,” a little with “pet,” barely with
-            “jazz” — that residue of interference <em>is</em> similarity. The
-            map stores relatedness in exactly the imperfection it couldn't
-            avoid.
+            And the tiny overlaps that “almost” leaves behind? They're not even
+            a bug. “Cat” overlapping slightly with “dog,” a little with “pet,”
+            barely with “jazz” — that residue of interference <em>is</em>
+            similarity. The map stores relatedness in exactly the imperfection
+            it couldn't avoid.
           </Prose>
           <HonestNote>
             Researchers call concepts-sharing-dimensions <strong>superposition</strong>,
@@ -405,7 +557,7 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
           </HonestNote>
         </Slide>
       );
-    case 8:
+    case 9:
     default:
       return (
         <Recap
