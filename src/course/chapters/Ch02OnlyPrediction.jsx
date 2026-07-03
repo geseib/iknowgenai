@@ -138,7 +138,9 @@ function GameSlide({ accent }) {
     try {
       // Completion mode returns the assembled first WORD plus the token
       // pieces it took to get there — real boundaries, no guesswork.
-      const data = await predictNext(GAME_SENTENCE, { mode: "completion" });
+      // Low temperature so the model's word is its confident pick, not a
+      // wild dice roll (that lesson belongs to Chapter 11).
+      const data = await predictNext(GAME_SENTENCE, { mode: "completion", temperature: 0.4 });
       setResult(data.blocked ? { blocked: true } : data);
     } catch (err) {
       setResult({ error: err.message });
