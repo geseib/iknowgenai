@@ -5,8 +5,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Max input prompt length in characters
 const MAX_PROMPT_LENGTH = 500;
-// Hard cap on output tokens (client can request less but never more)
-const MAX_OUTPUT_TOKENS = 100;
+// Hard cap on output tokens (client can request less but never more).
+// 250 matches what the story sections request for a 4-6 sentence story.
+const MAX_OUTPUT_TOKENS = 250;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -39,13 +40,17 @@ export default async function handler(req, res) {
   res.setHeader("Connection", "keep-alive");
 
   try {
+    const requestedTokens = Math.min(maxTokens, MAX_OUTPUT_TOKENS);
+    const lengthHint = requestedTokens <= 80
+      ? " Keep responses short (2-3 sentences max)."
+      : " Keep responses concise (4-6 sentences max).";
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: SAFE_SYSTEM_PROMPT + " Keep responses short (2-3 sentences max)." },
+        { role: "system", content: SAFE_SYSTEM_PROMPT + lengthHint },
         { role: "user", content: prompt },
       ],
-      max_tokens: Math.min(maxTokens, MAX_OUTPUT_TOKENS),
+      max_tokens: requestedTokens,
       temperature: Math.max(0, Math.min(temperature, 2)),
       stream: true,
     });

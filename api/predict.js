@@ -27,6 +27,61 @@ export default async function handler(req, res) {
     return res.status(200).json({ blocked: true });
   }
 
+  // Completion mode (v2 course): raw next-token prediction via the legacy
+  // completions API. Unlike chat, every token here carries its true leading
+  // space, so word boundaries are unambiguous — the model also naturally
+  // continues partial words. Returns the assembled first word + its pieces.
+  if (req.body.mode === "completion") {
+    try {
+      const t = Math.max(0.05, Math.min(temperature, 2));
+      const response = await openai.completions.create({
+        model: "gpt-3.5-turbo-instruct",
+        prompt,
+        max_tokens: 8,
+        temperature: Math.min(t, 2),
+        logprobs: 5, // completions API max
+        stop: ["\n"],
+      });
+      const lp = response.choices[0].logprobs || {};
+      const sampled = lp.tokens || [];
+
+      // Assemble the first whole word from the sampled tokens.
+      const pieces = [];
+      for (let i = 0; i < sampled.length; i++) {
+        if (i > 0 && /^[\s.,!?;:'"()]/.test(sampled[i])) break;
+        pieces.push(sampled[i]);
+        if (/[.,!?;:]$/.test(sampled[i])) break;
+      }
+      const word = pieces.join("").trim();
+
+      // Top candidates for the FIRST position, with temperature rescaling
+      // (same math as the chat path).
+      const top0 = lp.top_logprobs?.[0] || {};
+      const entries = Object.entries(top0).filter(([tok]) => tok.trim().length > 0);
+      const scaled = entries.map(([, l]) => l / t);
+      const maxL = Math.max(...scaled);
+      const exps = scaled.map((l) => Math.exp(l - maxL));
+      const sumExps = exps.reduce((a, b) => a + b, 0);
+      const candidates = entries
+        .map(([tok, l], i) => ({
+          token: tok.trim(),
+          raw: tok,
+          logprob: l,
+          pct: Math.round((exps[i] / sumExps) * 1000) / 10,
+        }))
+        .sort((a, b) => b.pct - a.pct);
+
+      const outputCheck = await moderate(prompt + " " + word);
+      if (!outputCheck.safe) {
+        return res.status(200).json({ blocked: true });
+      }
+      return res.status(200).json({ chosen: word, word, pieces, candidates });
+    } catch (err) {
+      console.error("predict (completion mode) error:", err);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -53,6 +108,7 @@ export default async function handler(req, res) {
 
     const candidates = filtered.map((lp, i) => ({
       token: lp.token.trim(),
+      raw: lp.token, // untrimmed — leading space marks a word boundary
       logprob: lp.logprob,
       pct: Math.round((exps[i] / sumExps) * 1000) / 10,
     }));
