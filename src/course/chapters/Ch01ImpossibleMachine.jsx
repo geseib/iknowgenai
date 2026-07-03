@@ -1,13 +1,16 @@
 // Chapter 1 — The Impossible Machine
 // Hook: a live story generation, then the rug-pull (one word at a time,
 // blind to its own ending), then the course's driving question.
-import { useEffect, useRef, useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, GhostButton, Mono, Recap, BlockedNote } from "../ui/shared.jsx";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, GhostButton, Mono, HonestNote, Recap, BlockedNote } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
-import { generateStream } from "../lib/api.js";
+import { generateStream, annotateStory } from "../lib/api.js";
 
 // The generated story survives slide changes (slides remount on navigation).
 let lastStory = null;
+let lastPrompt = null;
+// One annotation (influence map) per story, cached across slide changes.
+let annotationCache = { story: null, influences: null };
 
 const FALLBACK_STORY =
   "The lighthouse keeper had never trusted the octopus, but rent was due and the creature paid in pearls. Every evening it climbed the spiral stairs, polished the great lamp with four arms, and used the other four to write letters to the sea. One night the lamp went dark, and the keeper found the octopus gone — the final letter read simply: the light was never for the ships.";
@@ -17,6 +20,9 @@ const SUGGESTIONS = [
   ["the last coffee shop on Mars", "inside a grand piano", "a subway station in 1912", "the world's quietest library"],
   ["gravity stops working on Tuesdays", "everyone can suddenly hear thoughts", "the moon goes missing", "time runs backwards after midnight"],
 ];
+
+// Matches the FALLBACK_STORY's octopus/lighthouse theme.
+const DEFAULT_PROMPT = `Write a fun, vivid short story (4-6 sentences) about ${SUGGESTIONS[0][2]} in ${SUGGESTIONS[1][0]}, where ${SUGGESTIONS[2][2]}.`;
 
 function IngredientInput({ label, value, onChange, suggestions }) {
   return (
@@ -85,7 +91,10 @@ function GenerateSlide({ accent }) {
           },
         });
         if (!result.blocked) {
-          if (result.text) lastStory = result.text;
+          if (result.text) {
+            lastStory = result.text;
+            lastPrompt = prompt;
+          }
           setLoading(false);
           return;
         }
@@ -93,7 +102,7 @@ function GenerateSlide({ accent }) {
       setBlocked(true);
     } catch {
       setOutput((lastStory || FALLBACK_STORY) + "\n\n(Couldn't reach the model — this one's a canned example.)");
-      if (!lastStory) lastStory = FALLBACK_STORY;
+      if (!lastStory) { lastStory = FALLBACK_STORY; lastPrompt = DEFAULT_PROMPT; }
     }
     setLoading(false);
   };
@@ -160,38 +169,104 @@ function GenerateSlide({ accent }) {
   );
 }
 
-// Slow word-by-word replay of the story the learner just generated.
+// Slow word-by-word replay — with influence choreography: before each content
+// word appears, the earlier words that most influenced it glow (an LLM's
+// retrospective estimate; see the honest footnote).
 function ReplaySlide({ accent }) {
   const story = lastStory || FALLBACK_STORY;
-  const words = story.split(/\s+/);
-  const [shown, setShown] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const prompt = lastPrompt || DEFAULT_PROMPT;
+  const words = useMemo(() => story.trim().split(/\s+/), [story]);
+  const promptWords = useMemo(() => prompt.trim().split(/\s+/), [prompt]);
 
+  const [shown, setShown] = useState(0);
+  const [glow, setGlow] = useState([]); // refs like "P8", "S2"
+  const [playing, setPlaying] = useState(false);
+  const [influences, setInfluences] = useState(
+    annotationCache.story === story ? annotationCache.influences : null
+  );
+  const runToken = useRef(0);
+
+  // Fetch the influence map once per story (cached across slide changes).
   useEffect(() => {
-    if (!playing || shown >= words.length) return;
-    const t = setTimeout(() => setShown((s) => s + 1), 320);
-    return () => clearTimeout(t);
-  }, [playing, shown, words.length]);
+    if (influences !== null) return;
+    let alive = true;
+    annotateStory(prompt, story)
+      .then((d) => {
+        const inf = d.influences || {};
+        annotationCache = { story, influences: inf };
+        if (alive) setInfluences(inf);
+      })
+      .catch(() => {
+        annotationCache = { story, influences: {} };
+        if (alive) setInfluences({}); // replay still works, just without glow
+      });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => () => { runToken.current++; }, []); // cancel on unmount
+
+  const play = async () => {
+    const token = ++runToken.current;
+    setPlaying(true);
+    setShown(0);
+    const inf = influences || {};
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    await sleep(300);
+    for (let i = 0; i < words.length; i++) {
+      if (runToken.current !== token) return;
+      const refs = inf[i];
+      setGlow(refs || []);
+      if (refs) await sleep(540); // let the glances land before the word
+      if (runToken.current !== token) return;
+      setShown(i + 1);
+      await sleep(refs ? 420 : 260);
+    }
+    if (runToken.current === token) { setPlaying(false); setGlow([]); }
+  };
+
+  const skip = () => { runToken.current++; setPlaying(false); setGlow([]); setShown(words.length); };
+
+  const wordStyle = (ref, extra = {}) => ({
+    borderRadius: 4,
+    padding: "0 2px",
+    transition: "background 250ms, color 250ms",
+    background: glow.includes(ref) ? accent + "55" : "transparent",
+    ...extra,
+  });
 
   return (
     <Slide wide>
       <Kicker accent={accent}>Watch it again — slowly</Kicker>
-      <Heading size="h2">One piece at a time.</Heading>
+      <Heading size="h2">It keeps glancing back.</Heading>
       <Prose muted>
-        This is how the machine actually wrote it. At every step, it looked at
-        everything written so far — and guessed what should come next.
+        Before each word appears, watch which earlier words light up — the
+        machine keeps looking back at <em>your ingredients</em> and at its own
+        sentences to choose what comes next.
       </Prose>
-      <Card style={{ minHeight: 180 }}>
-        <div style={{ fontFamily: FONTS.display, fontSize: 21, lineHeight: 1.8, fontStyle: "italic" }}>
+      {/* The prompt — visible so glances can land on the learner's own words */}
+      <Card style={{ padding: SPACE.sm, borderColor: accent + "33" }}>
+        <Mono style={{ fontSize: 11, color: accent, display: "block", marginBottom: 6 }}>
+          THE PROMPT — what the machine was reading
+        </Mono>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 13.5, lineHeight: 1.9, color: COLORS.muted }}>
+          {promptWords.map((w, i) => (
+            <span key={i} style={wordStyle(`P${i}`, glow.includes(`P${i}`) ? { color: COLORS.text } : {})}>
+              {w}{" "}
+            </span>
+          ))}
+        </div>
+      </Card>
+      {/* The story, building word by word */}
+      <Card style={{ minHeight: 150 }}>
+        <div style={{ fontFamily: FONTS.display, fontSize: 20, lineHeight: 1.8, fontStyle: "italic" }}>
           {words.slice(0, shown).map((w, i) => (
             <span
               key={i}
-              style={{
-                opacity: i === shown - 1 ? 1 : 0.75,
-                background: i === shown - 1 ? accent + "33" : "transparent",
-                borderRadius: 4,
-                padding: "0 2px",
-              }}
+              style={wordStyle(`S${i}`, {
+                opacity: i === shown - 1 ? 1 : 0.78,
+                background: i === shown - 1 ? accent + "44" : glow.includes(`S${i}`) ? accent + "55" : "transparent",
+              })}
             >
               {w}{" "}
             </span>
@@ -199,15 +274,27 @@ function ReplaySlide({ accent }) {
           {shown < words.length && playing && <span style={{ animation: "v2Blink 1s infinite", color: accent }}>▌</span>}
         </div>
       </Card>
-      <div style={{ display: "flex", gap: SPACE.sm }}>
-        {!playing || shown >= words.length ? (
-          <Button accent={accent} onClick={() => { setShown(0); setPlaying(true); }}>
-            {shown >= words.length ? "Replay" : "Play"}
+      <div style={{ display: "flex", gap: SPACE.sm, alignItems: "center" }}>
+        {!playing ? (
+          <Button accent={accent} onClick={play} disabled={influences === null}>
+            {influences === null ? "Choreographing…" : shown >= words.length ? "Replay" : "Play"}
           </Button>
         ) : (
-          <GhostButton onClick={() => setShown(words.length)}>Skip ahead</GhostButton>
+          <GhostButton onClick={skip}>Skip ahead</GhostButton>
+        )}
+        {influences === null && (
+          <Prose muted style={{ fontSize: 13 }}>
+            asking a model to map the influences…
+          </Prose>
         )}
       </div>
+      <HonestNote>
+        The highlights are an AI's own estimate of what mattered, made after
+        the fact — the model's true “glances” (attention weights) live inside
+        it and aren't exposed. The real machinery reads <em>every</em> earlier
+        word at once, in dozens of parallel streams. You'll meet it properly in
+        Chapter 9.
+      </HonestNote>
     </Slide>
   );
 }
