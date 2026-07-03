@@ -14,9 +14,12 @@ async function postJSON(url, body) {
 }
 
 // Ranked next-token candidates with probabilities.
-// → { blocked? } | { tokens: [{token, prob, ...}], ... }
-export function predictNext(prompt, { temperature = 1.0 } = {}) {
-  return postJSON("/api/predict", { prompt, temperature });
+// mode "completion" uses raw completion semantics: candidates carry `raw`
+// tokens with true leading spaces, plus `word`/`pieces` — the first whole
+// word assembled from the sampled tokens.
+// → { blocked? } | { candidates: [{token, raw, pct, ...}], word?, pieces? }
+export function predictNext(prompt, { temperature = 1.0, mode } = {}) {
+  return postJSON("/api/predict", { prompt, temperature, ...(mode ? { mode } : {}) });
 }
 
 // Real tiktoken tokenization. → { blocked? } | { tokens: [...], count, ... }

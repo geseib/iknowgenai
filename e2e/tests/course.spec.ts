@@ -11,9 +11,9 @@ test.describe("How AI Actually Works (v2 course)", () => {
     await expect(page.getByRole("heading", { name: "How AI Actually Works" })).toBeVisible();
     await expect(page.getByText("The Mystery")).toBeVisible();
     await expect(page.getByText("Begin Chapter 1")).toBeVisible();
-    // Coming-soon chapters are disabled
-    await expect(page.getByRole("button", { name: /Confident Nonsense/ })).toBeDisabled();
-    // Built chapters are clickable
+    // The full course is built — every chapter card is clickable
+    await expect(page.getByRole("button", { name: /Confident Nonsense/ })).toBeEnabled();
+    await expect(page.getByRole("button", { name: /You Know GenAI/ })).toBeEnabled();
     await expect(page.getByRole("button", { name: /Attention/ })).toBeEnabled();
   });
 

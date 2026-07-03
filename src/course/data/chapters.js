@@ -12,6 +12,10 @@ import Ch07 from "../chapters/Ch07WordsBecomeNumbers.jsx";
 import Ch08 from "../chapters/Ch08MapOfMeaning.jsx";
 import Ch09 from "../chapters/Ch09Attention.jsx";
 import Ch10 from "../chapters/Ch10LayersOfThought.jsx";
+import Ch11 from "../chapters/Ch11Temperature.jsx";
+import Ch12 from "../chapters/Ch12ThinkingOutLoud.jsx";
+import Ch13 from "../chapters/Ch13ConfidentNonsense.jsx";
+import Ch14 from "../chapters/Ch14YouKnowGenAI.jsx";
 
 export const COURSE_TITLE = "How AI Actually Works";
 export const COURSE_TAGLINE =
@@ -90,25 +94,25 @@ export const CHAPTERS = [
     id: "temperature", slug: "temperature", num: 11, act: 4,
     title: "Temperature",
     blurb: "Creativity is controlled randomness. Turn the dial from Frozen to Wild and watch what happens.",
-    minutes: 6, slideCount: 7, accent: ACT_ACCENTS[4], Component: null,
+    minutes: 7, slideCount: 7, accent: ACT_ACCENTS[4], Component: Ch11,
   },
   {
     id: "thinking-out-loud", slug: "thinking-out-loud", num: 12, act: 4,
     title: "Thinking Out Loud",
     blurb: "Reasoning models write pages of private thinking you never see before answering. The twist: the thinking is also just prediction.",
-    minutes: 7, slideCount: 7, accent: ACT_ACCENTS[4], Component: null,
+    minutes: 7, slideCount: 7, accent: ACT_ACCENTS[4], Component: Ch12,
   },
   {
     id: "confident-nonsense", slug: "confident-nonsense", num: 13, act: 5,
     title: "Confident Nonsense",
     blurb: "Hallucinations, bias, and knowledge cutoffs — why they happen, and the tools that fix them.",
-    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[5], Component: null,
+    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[5], Component: Ch13,
   },
   {
     id: "you-know-genai", slug: "you-know-genai", num: 14, act: 5,
     title: "You Know GenAI",
-    blurb: "The story from Chapter 1 again — but this time, you can narrate every step of the machine.",
-    minutes: 6, slideCount: 6, accent: ACT_ACCENTS[5], Component: null,
+    blurb: "The story from Chapter 1 again — but this time, you can narrate every step of the machine. Then prove it.",
+    minutes: 10, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch14,
   },
 ];
 

@@ -67,7 +67,7 @@ function LiveDemo({ accent }) {
     setBlocked(false);
     setResult(null);
     try {
-      const data = await predictNext(text);
+      const data = await predictNext(text, { mode: "completion" });
       if (data.blocked) setBlocked(true);
       else setResult(data);
     } catch (err) {
@@ -125,29 +125,6 @@ function LiveDemo({ accent }) {
 
 const GAME_SENTENCE = "The waiter brought the soup, but he forgot the";
 
-// Roll prediction cycles until the model finishes a whole word: take the top
-// token each cycle, append its RAW form (leading space = word boundary), and
-// stop when the next top token would start a new word.
-async function predictWholeWord(sentence, maxCycles = 4) {
-  let ctx = sentence;
-  const steps = [];
-  let firstCandidates = null;
-  for (let i = 0; i < maxCycles; i++) {
-    const data = await predictNext(ctx);
-    if (data.blocked) return { blocked: true };
-    if (!firstCandidates) firstCandidates = data.candidates;
-    const top = data.candidates[0];
-    const raw = top.raw ?? ` ${top.token}`;
-    // A token that opens with a space or punctuation starts the NEXT word —
-    // the current word is complete.
-    if (i > 0 && /^[\s.,!?;:'"()—-]/.test(raw)) break;
-    steps.push(raw);
-    ctx += raw;
-    if (/[.,!?;:]$/.test(raw)) break;
-  }
-  return { word: steps.join("").trim(), steps, firstCandidates };
-}
-
 function GameSlide({ accent }) {
   const [guess, setGuess] = useState("");
   const [result, setResult] = useState(null);
@@ -159,8 +136,10 @@ function GameSlide({ accent }) {
     setLoading(true);
     setSubmitted(guess.trim());
     try {
-      const data = await predictWholeWord(GAME_SENTENCE);
-      setResult(data);
+      // Completion mode returns the assembled first WORD plus the token
+      // pieces it took to get there — real boundaries, no guesswork.
+      const data = await predictNext(GAME_SENTENCE, { mode: "completion" });
+      setResult(data.blocked ? { blocked: true } : data);
     } catch (err) {
       setResult({ error: err.message });
     }
@@ -168,7 +147,7 @@ function GameSlide({ accent }) {
   };
 
   const matched = result?.word && result.word.toLowerCase() === submitted.toLowerCase();
-  const inTop = !matched && result?.firstCandidates?.some(
+  const inTop = !matched && result?.candidates?.some(
     (c) => submitted.toLowerCase().startsWith(c.token.toLowerCase())
   );
 
@@ -199,6 +178,7 @@ function GameSlide({ accent }) {
         </div>
       )}
       {result?.error && <Prose muted>Couldn't reach the model: {result.error}</Prose>}
+      {result?.blocked && <BlockedNote />}
       {result?.word && (
         <>
           <Prose>
@@ -206,12 +186,12 @@ function GameSlide({ accent }) {
               ? <>You and the model both said <Mono accent={accent}>{result.word}</Mono>. You and a trillion-word reading habit agree.</>
               : <>Your guess: <Mono accent={accent}>{submitted}</Mono>. The model's word: <Mono accent={accent}>{result.word}</Mono>.{inTop ? " Close — your word was among its live candidates." : ""}</>}
           </Prose>
-          {result.steps.length > 1 && (
+          {result.pieces?.length > 1 && (
             <Card style={{ borderColor: accent + "44" }}>
               <Prose muted style={{ fontSize: 15 }}>
                 Worth noticing: that one word took the model{" "}
-                <strong style={{ color: accent }}>{result.steps.length} prediction cycles</strong> —
-                {" "}{result.steps.map((s, i) => (
+                <strong style={{ color: accent }}>{result.pieces.length} prediction cycles</strong> —
+                {" "}{result.pieces.map((s, i) => (
                   <span key={i}>
                     {i > 0 && " + "}
                     <Mono accent={accent}>“{s.replace(/ /g, "␣")}”</Mono>
@@ -226,7 +206,7 @@ function GameSlide({ accent }) {
             Its live candidates for the first piece:
           </Prose>
           <Card>
-            <ProbBars candidates={result.firstCandidates} accent={accent} highlight={submitted} />
+            <ProbBars candidates={result.candidates} accent={accent} highlight={submitted} />
           </Card>
           <Prose muted style={{ fontSize: 15 }}>
             You just did next-word prediction — the same task the model does. The
@@ -248,7 +228,9 @@ function LoopSlide({ accent }) {
   const run = async (t) => {
     setLoading(true);
     try {
-      const data = await predictNext(t);
+      // Completion mode: candidate `raw` tokens carry true leading spaces,
+      // so appending them verbatim always produces coherent text.
+      const data = await predictNext(t, { mode: "completion" });
       setResult(data);
     } catch (err) {
       setResult({ error: err.message });

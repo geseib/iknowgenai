@@ -136,7 +136,9 @@ export default function Landing({ progress, navigate }) {
           )}
         </div>
         <div style={{ fontSize: 14, color: COLORS.faint, marginTop: SPACE.sm }}>
-          Chapters 1–{BUILT_CHAPTERS.length} available now ({builtMinutes} min) · the rest are on their way
+          {BUILT_CHAPTERS.length === CHAPTERS.length
+            ? `All ${CHAPTERS.length} chapters · every demo runs a real model · finish with the quiz`
+            : `Chapters 1–${BUILT_CHAPTERS.length} available now (${builtMinutes} min) · the rest are on their way`}
         </div>
       </div>
 
