@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "POST only" });
   }
 
-  const { prompt, temperature = 0.8, maxTokens = 60 } = req.body;
+  const { prompt, temperature = 0.8, maxTokens = 60, style } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: "prompt required" });
   }
@@ -24,8 +24,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: `Prompt too long (max ${MAX_PROMPT_LENGTH} characters)` });
   }
 
+  // "plain" style (the 14+ course): neutral persona, relaxed moderation —
+  // OpenAI's moderation API still screens every input.
+  const plain = style === "plain";
+
   // Content safety check
-  const check = await moderate(prompt);
+  const check = await moderate(prompt, { relaxed: plain });
   if (!check.safe) {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
@@ -44,10 +48,17 @@ export default async function handler(req, res) {
     const lengthHint = requestedTokens <= 80
       ? " Keep responses short (2-3 sentences max)."
       : " Keep responses concise (4-6 sentences max).";
+    // The K-12 system prompt tells the model to deflect ("Let's try a
+    // different topic!") — which contaminates the course's demos with OUR
+    // guardrail behavior instead of the model's own. Plain style gets a
+    // neutral persona.
+    const systemContent = plain
+      ? "You are a concise, helpful assistant." + lengthHint
+      : SAFE_SYSTEM_PROMPT + lengthHint;
     const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: SAFE_SYSTEM_PROMPT + lengthHint },
+        { role: "system", content: systemContent },
         { role: "user", content: prompt },
       ],
       max_tokens: requestedTokens,

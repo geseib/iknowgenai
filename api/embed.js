@@ -70,8 +70,9 @@ export default async function handler(req, res) {
   // Limit to 20 words to control costs
   const wordList = words.slice(0, 20);
 
-  // Content safety check
-  const check = await moderateWords(wordList, { skipLlm: true });
+  // Content safety check — relaxed (14+ course) skips the K-12 keyword list;
+  // OpenAI moderation still applies.
+  const check = await moderateWords(wordList, { skipLlm: true, relaxed: req.body.relaxed === true });
   if (!check.safe) {
     return res.status(200).json({ blocked: true });
   }

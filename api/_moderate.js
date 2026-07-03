@@ -115,15 +115,21 @@ async function llmSafetyCheck(text) {
  *   { safe: false, reason: 'content' }          — genuinely unsafe content
  *   { safe: true,  warning: 'credits'|'network' } — API issue, let it through
  */
-export async function moderate(text, { skipLlm = false } = {}) {
+export async function moderate(text, { skipLlm = false, relaxed = false } = {}) {
   if (!text || text.trim().length === 0) {
     return { safe: true };
   }
 
   let warning = null;
 
+  // Relaxed mode (14+ course): skip the K-12 keyword blocklist and LLM
+  // classifier — ordinary words like "fight" or "war" are fine for teens and
+  // adults — but ALWAYS keep Layer 2, OpenAI's moderation API, which catches
+  // genuinely harmful content.
+  if (relaxed) skipLlm = true;
+
   // Layer 1: Fast keyword blocklist (instant, free)
-  if (!keywordCheck(text)) {
+  if (!relaxed && !keywordCheck(text)) {
     console.log(`[moderate] BLOCKED by Layer 1 (keyword): "${text}"`);
     return { safe: false, reason: 'content', message: FRIENDLY_REJECT };
   }

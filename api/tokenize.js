@@ -16,8 +16,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Text too long (max 500 characters)" });
   }
 
-  // Content safety check — skip LLM layer since tokenizing is read-only
-  const check = await moderate(text, { skipLlm: true });
+  // Content safety check — skip LLM layer since tokenizing is read-only.
+  // relaxed (14+ course) also skips the K-12 keyword list; OpenAI moderation
+  // still applies.
+  const check = await moderate(text, { skipLlm: true, relaxed: req.body.relaxed === true });
   if (!check.safe) {
     return res.status(200).json({ blocked: true });
   }

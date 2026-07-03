@@ -24,12 +24,12 @@ export function predictNext(prompt, { temperature = 1.0, mode } = {}) {
 
 // Real tiktoken tokenization. → { blocked? } | { tokens: [...], count, ... }
 export function tokenize(text) {
-  return postJSON("/api/tokenize", { text });
+  return postJSON("/api/tokenize", { text, relaxed: true });
 }
 
 // PCA-reduced 2D embedding coordinates. → { blocked? } | { points: [...], ... }
 export function embed2d(words) {
-  return postJSON("/api/embed", { words });
+  return postJSON("/api/embed", { words, relaxed: true });
 }
 
 // Streaming generation over SSE. Calls onToken(token) as tokens arrive.
@@ -38,7 +38,9 @@ export async function generateStream(prompt, { temperature = 0.8, maxTokens, onT
   const res = await fetch("/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, temperature, ...(maxTokens ? { maxTokens } : {}) }),
+    // style "plain": neutral persona + relaxed (OpenAI-moderation-only)
+    // screening — this course is for 14+, not the K-8 classroom app.
+    body: JSON.stringify({ prompt, temperature, style: "plain", ...(maxTokens ? { maxTokens } : {}) }),
   });
   if (!res.ok) throw new Error(`generate failed (${res.status})`);
 
