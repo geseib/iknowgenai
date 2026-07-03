@@ -6,16 +6,17 @@ import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, Recap, Blocked
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { predictNext } from "../lib/api.js";
 
-function ProbBars({ candidates, accent, highlight, onPick }) {
+function ProbBars({ candidates, accent, highlight, onPick, showRaw = false }) {
   const max = Math.max(...candidates.map((c) => c.pct), 1);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {candidates.map((c, i) => {
         const isHighlight = highlight && c.token.toLowerCase() === highlight.toLowerCase();
+        const label = showRaw && c.raw ? c.raw.replace(/ /g, "␣") : c.token;
         return (
           <button
             key={`${c.token}-${i}`}
-            onClick={onPick ? () => onPick(c.token) : undefined}
+            onClick={onPick ? () => onPick(c) : undefined}
             disabled={!onPick}
             style={{
               display: "flex", alignItems: "center", gap: 12, width: "100%",
@@ -23,7 +24,7 @@ function ProbBars({ candidates, accent, highlight, onPick }) {
             }}
           >
             <Mono style={{ minWidth: 110, fontSize: 15, color: isHighlight ? accent : COLORS.text, fontWeight: isHighlight ? 600 : 400 }}>
-              {c.token}
+              {label}
             </Mono>
             <div style={{ flex: 1, height: 22, background: "rgba(255,255,255,.05)", borderRadius: 5, overflow: "hidden" }}>
               <div
@@ -124,6 +125,29 @@ function LiveDemo({ accent }) {
 
 const GAME_SENTENCE = "The waiter brought the soup, but he forgot the";
 
+// Roll prediction cycles until the model finishes a whole word: take the top
+// token each cycle, append its RAW form (leading space = word boundary), and
+// stop when the next top token would start a new word.
+async function predictWholeWord(sentence, maxCycles = 4) {
+  let ctx = sentence;
+  const steps = [];
+  let firstCandidates = null;
+  for (let i = 0; i < maxCycles; i++) {
+    const data = await predictNext(ctx);
+    if (data.blocked) return { blocked: true };
+    if (!firstCandidates) firstCandidates = data.candidates;
+    const top = data.candidates[0];
+    const raw = top.raw ?? ` ${top.token}`;
+    // A token that opens with a space or punctuation starts the NEXT word —
+    // the current word is complete.
+    if (i > 0 && /^[\s.,!?;:'"()—-]/.test(raw)) break;
+    steps.push(raw);
+    ctx += raw;
+    if (/[.,!?;:]$/.test(raw)) break;
+  }
+  return { word: steps.join("").trim(), steps, firstCandidates };
+}
+
 function GameSlide({ accent }) {
   const [guess, setGuess] = useState("");
   const [result, setResult] = useState(null);
@@ -135,7 +159,7 @@ function GameSlide({ accent }) {
     setLoading(true);
     setSubmitted(guess.trim());
     try {
-      const data = await predictNext(GAME_SENTENCE);
+      const data = await predictWholeWord(GAME_SENTENCE);
       setResult(data);
     } catch (err) {
       setResult({ error: err.message });
@@ -143,8 +167,9 @@ function GameSlide({ accent }) {
     setLoading(false);
   };
 
-  const matched = result?.candidates?.some(
-    (c) => c.token.toLowerCase() === submitted.toLowerCase()
+  const matched = result?.word && result.word.toLowerCase() === submitted.toLowerCase();
+  const inTop = !matched && result?.firstCandidates?.some(
+    (c) => submitted.toLowerCase().startsWith(c.token.toLowerCase())
   );
 
   return (
@@ -153,7 +178,10 @@ function GameSlide({ accent }) {
       <Heading size="h2">Now you play.</Heading>
       <Card>
         <div style={{ fontFamily: FONTS.display, fontSize: 24, fontStyle: "italic", lineHeight: 1.6 }}>
-          “{GAME_SENTENCE} <span style={{ background: accent + "33", borderRadius: 4, padding: "0 8px" }}>___</span>”
+          “{GAME_SENTENCE}{" "}
+          <span style={{ background: accent + "33", borderRadius: 4, padding: "0 8px" }}>
+            {result?.word || "___"}
+          </span>”
         </div>
       </Card>
       {!result && (
@@ -166,19 +194,39 @@ function GameSlide({ accent }) {
             style={{ flex: 1, minWidth: 200 }}
           />
           <Button accent={accent} onClick={play} disabled={loading || !guess.trim()}>
-            {loading ? "Comparing…" : "Lock it in"}
+            {loading ? "Predicting…" : "Lock it in"}
           </Button>
         </div>
       )}
-      {result?.candidates && (
+      {result?.error && <Prose muted>Couldn't reach the model: {result.error}</Prose>}
+      {result?.word && (
         <>
           <Prose>
             {matched
-              ? <>Your guess <Mono accent={accent}>{submitted}</Mono> is in the model's top picks. You and a trillion-word reading habit agree.</>
-              : <>Your guess: <Mono accent={accent}>{submitted}</Mono>. Here's what the model expected —</>}
+              ? <>You and the model both said <Mono accent={accent}>{result.word}</Mono>. You and a trillion-word reading habit agree.</>
+              : <>Your guess: <Mono accent={accent}>{submitted}</Mono>. The model's word: <Mono accent={accent}>{result.word}</Mono>.{inTop ? " Close — your word was among its live candidates." : ""}</>}
+          </Prose>
+          {result.steps.length > 1 && (
+            <Card style={{ borderColor: accent + "44" }}>
+              <Prose muted style={{ fontSize: 15 }}>
+                Worth noticing: that one word took the model{" "}
+                <strong style={{ color: accent }}>{result.steps.length} prediction cycles</strong> —
+                {" "}{result.steps.map((s, i) => (
+                  <span key={i}>
+                    {i > 0 && " + "}
+                    <Mono accent={accent}>“{s.replace(/ /g, "␣")}”</Mono>
+                  </span>
+                ))}.
+                It doesn't actually predict words — it predicts word-<em>pieces</em>,
+                and long words get assembled. That detail gets a whole chapter (7).
+              </Prose>
+            </Card>
+          )}
+          <Prose muted style={{ fontSize: 14 }}>
+            Its live candidates for the first piece:
           </Prose>
           <Card>
-            <ProbBars candidates={result.candidates} accent={accent} highlight={submitted} />
+            <ProbBars candidates={result.firstCandidates} accent={accent} highlight={submitted} />
           </Card>
           <Prose muted style={{ fontSize: 15 }}>
             You just did next-word prediction — the same task the model does. The
@@ -208,8 +256,11 @@ function LoopSlide({ accent }) {
     setLoading(false);
   };
 
-  const pick = (token) => {
-    const nextText = text + " " + token;
+  const pick = (c) => {
+    // Append the RAW token: its leading space (or lack of one) is real data.
+    // A token without a leading space continues the previous word — picking
+    // "house" after "light" correctly builds "lighthouse".
+    const nextText = text + (c.raw ?? ` ${c.token}`);
     setText(nextText);
     setSteps((s) => s + 1);
     run(nextText);
@@ -237,9 +288,11 @@ function LoopSlide({ accent }) {
       )}
       {result?.candidates && (
         <Card>
-          <ProbBars candidates={result.candidates} accent={accent} onPick={loading ? undefined : pick} />
+          <ProbBars candidates={result.candidates} accent={accent} onPick={loading ? undefined : pick} showRaw />
           <Prose muted style={{ fontSize: 13, marginTop: 12 }}>
-            {loading ? "Predicting…" : `Click a word to extend the sentence · ${steps} words added so far`}
+            {loading
+              ? "Predicting…"
+              : `Click a piece to extend the sentence · ${steps} pieces added. A ␣ means "start a new word" — pieces without one glue onto the previous word.`}
           </Prose>
         </Card>
       )}

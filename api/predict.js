@@ -53,6 +53,7 @@ export default async function handler(req, res) {
 
     const candidates = filtered.map((lp, i) => ({
       token: lp.token.trim(),
+      raw: lp.token, // untrimmed — leading space marks a word boundary
       logprob: lp.logprob,
       pct: Math.round((exps[i] / sumExps) * 1000) / 10,
     }));
