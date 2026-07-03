@@ -229,6 +229,35 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
           {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}
         </p>
 
+        {/* The 14+ course — styled deliberately unlike the kids' app */}
+        <a
+          href="/course"
+          style={{
+            display: "inline-block",
+            marginTop: 28,
+            padding: "14px 22px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,.14)",
+            background: "#0B0E14",
+            textDecoration: "none",
+            textAlign: "left",
+            maxWidth: 520,
+          }}
+        >
+          <span style={{
+            display: "block", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase",
+            color: "#6C9EF8", fontWeight: 600, marginBottom: 4,
+          }}>
+            Ages 14+ &middot; teens &amp; adults
+          </span>
+          <span style={{ display: "block", fontFamily: "Georgia, serif", fontSize: 19, color: "#E7EAF2" }}>
+            How AI Actually Works →
+          </span>
+          <span style={{ display: "block", fontSize: 13, color: "rgba(231,234,242,.55)", marginTop: 4, lineHeight: 1.5 }}>
+            A deeper 14-chapter course on what's under the hood — live demos, real models, no simulations.
+          </span>
+        </a>
+
       </div>
       {flags?.roamingCat && <RoamingCat />}
     </div>
