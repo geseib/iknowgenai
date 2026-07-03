@@ -68,11 +68,39 @@ function isApiCredentialError(err) {
     || msg.includes('insufficient') || msg.includes('exceeded');
 }
 
+// In relaxed mode we ignore the blanket `flagged` boolean (it false-positives
+// heavily on fiction — "a knight lost a sword fight" trips it) and threshold
+// the category scores ourselves: near-zero tolerance for the truly dangerous
+// categories, tolerance for fictional adventure/spookiness.
+const RELAXED_THRESHOLDS = {
+  "sexual/minors": 0.1,
+  "self-harm": 0.3,
+  "self-harm/intent": 0.2,
+  "self-harm/instructions": 0.1,
+  "hate/threatening": 0.4,
+  "harassment/threatening": 0.4,
+  "violence/graphic": 0.6,
+  "illicit/violent": 0.5,
+};
+const RELAXED_DEFAULT_THRESHOLD = 0.75;
+
 // Layer 2: OpenAI moderation API (catches subtle stuff)
-async function moderationCheck(text) {
+async function moderationCheck(text, relaxed = false) {
   try {
     const result = await openai.moderations.create({ input: text });
-    return { ok: !result.results[0].flagged };
+    const r = result.results[0];
+    if (!relaxed) {
+      return { ok: !r.flagged };
+    }
+    const scores = r.category_scores || {};
+    for (const [category, score] of Object.entries(scores)) {
+      const threshold = RELAXED_THRESHOLDS[category] ?? RELAXED_DEFAULT_THRESHOLD;
+      if (score > threshold) {
+        console.log(`[moderate] relaxed L2 block: ${category}=${score.toFixed(3)} > ${threshold}`);
+        return { ok: false };
+      }
+    }
+    return { ok: true };
   } catch (err) {
     console.error(`[moderate] Layer 2 ERROR: ${err.message}`);
     if (isApiCredentialError(err)) {
@@ -135,7 +163,7 @@ export async function moderate(text, { skipLlm = false, relaxed = false } = {}) 
   }
 
   // Layer 2: OpenAI moderation API (fast, nearly free)
-  const mod = await moderationCheck(text);
+  const mod = await moderationCheck(text, relaxed);
   if (!mod.ok) {
     console.log(`[moderate] BLOCKED by Layer 2 (OpenAI moderation): "${text}"`);
     return { safe: false, reason: 'content', message: FRIENDLY_REJECT };
