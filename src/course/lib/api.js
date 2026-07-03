@@ -32,6 +32,12 @@ export function embed2d(words) {
   return postJSON("/api/embed", { words, relaxed: true });
 }
 
+// LLM-estimated influence map for the Ch1 replay: which earlier words most
+// influenced each story word. → { blocked? } | { influences: { "3": ["P8","S1"] } }
+export function annotateStory(prompt, story) {
+  return postJSON("/api/annotate", { prompt, story });
+}
+
 // Streaming generation over SSE. Calls onToken(token) as tokens arrive.
 // Resolves with { blocked } or { text } when the stream ends.
 export async function generateStream(prompt, { temperature = 0.8, maxTokens, onToken } = {}) {
