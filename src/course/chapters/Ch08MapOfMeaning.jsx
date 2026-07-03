@@ -279,7 +279,7 @@ function HighDimDemo({ accent }) {
 // Standard random-packing lower bound: at least e^(d·ε²/4) unit vectors can
 // pairwise stay within ε (radians) of perpendicular; demanding exactly 90°
 // gives exactly d. The honest footnote flags the bound's looseness.
-const CAP_DIMS = [100, 1000, 12288];
+const CAP_DIMS = [100, 1000, 4096, 12288];
 const CAP_TOLERANCES = [
   { deg: 0, label: "exactly 90°" },
   { deg: 5, label: "within ±5°" },
@@ -323,9 +323,11 @@ function CapacityDemo({ accent }) {
         ? "At 100 dimensions, the tolerance buys you essentially nothing — the exponent is too small to matter. Low dimensions have no loophole."
         : dim === 1000 && tol <= 10
           ? "The exponential is waking up — but at 1,000 dimensions it takes a generous tolerance to beat the plain dimension count."
-          : beyondAtoms
-            ? "More directions than there are atoms in the observable universe — from twelve thousand dimensions and a tolerance smaller than your eye could see on a protractor."
-            : "Now the exponent is doing the work: capacity grows as e raised to (dimensions × tolerance²) — exponential in d. This is why the loophole belongs to high dimensions alone.";
+          : dim === 4096 && !beyondAtoms
+            ? "4,096 is a real embedding width (mid-size open models use it) — and here the exponent ignites. Capacity grows like e^(k·d), so doubling the dimensions SQUARES the capacity. Step up to 12,288 and watch."
+            : beyondAtoms
+              ? "More directions than there are atoms in the observable universe — from twelve thousand dimensions and a tolerance smaller than your eye could see on a protractor."
+              : "Now the exponent is doing the work: capacity grows exponentially in dimensions — doubling d squares the count. This is why the loophole belongs to high dimensions alone.";
 
   return (
     <Slide wide>
