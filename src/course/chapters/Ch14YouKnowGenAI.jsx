@@ -194,6 +194,15 @@ const QUIZ = [
     ],
   },
   {
+    q: "You told a chatbot your city in message one, and twenty messages later it still knows. How?",
+    options: [
+      { text: "The conversation updated the model's weights", why: "Weights are frozen after training — nothing you say changes the model, ever. Millions of people use the same frozen model simultaneously." },
+      { text: "The app resends the entire conversation with every message (and may inject saved notes into new chats)", correct: true, why: "That's the illusion: each turn, the full transcript goes back in and gets re-read — providers cache the repeated attention work to keep it fast — and apps keep their own notes ('lives in Portland') to paste into future prompts." },
+      { text: "The model keeps a private RAM slot for each user", why: "There's no per-user state inside the model — between calls it holds nothing at all. Any continuity you experience was assembled by the app, in the prompt." },
+      { text: "It only seems to remember; it's guessing your city", why: "It genuinely has your city — but from the context the app sent, not from memory. Delete the transcript and the saved notes, and the recall vanishes completely." },
+    ],
+  },
+  {
     q: "Why does a model sometimes state false things in a perfectly confident tone?",
     options: [
       { text: "It's deliberately lying", why: "Lying requires knowing the truth and choosing otherwise — the model has no such ledger. It's doing exactly what it always does: continuing text plausibly." },

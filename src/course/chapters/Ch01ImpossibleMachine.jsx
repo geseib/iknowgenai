@@ -46,11 +46,18 @@ function IngredientInput({ label, value, onChange, suggestions }) {
   );
 }
 
+// The system message our server (api/generate.js) actually prepends, abridged
+// for display. Keep in sync with SAFE_SYSTEM_PROMPT + the length hint there.
+const REAL_SYSTEM_ABRIDGED =
+  "You are a helpful, encouraging, and highly appropriate AI assistant designed for K-12 school use. Your primary goal is safety. Do not generate [… safety rules …]. Keep all responses polite, simple, and encouraging. Keep responses concise (4-6 sentences max).";
+
 function GenerateSlide({ accent }) {
   const [character, setCharacter] = useState("");
   const [place, setPlace] = useState("");
   const [twist, setTwist] = useState("");
   const [output, setOutput] = useState(lastStory || "");
+  const [sentPrompt, setSentPrompt] = useState(null);
+  const [showBehind, setShowBehind] = useState(false);
   const [loading, setLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const outRef = useRef(null);
@@ -66,6 +73,7 @@ function GenerateSlide({ accent }) {
     // tuned for short classroom inputs and false-positives on meta-heavy
     // prompts. It's also slightly nondeterministic, so retry once on a block.
     const prompt = `Write a fun, vivid short story (4-6 sentences) about ${c} in ${p}, where ${t}.`;
+    setSentPrompt(prompt);
     try {
       for (let attempt = 0; attempt < 2; attempt++) {
         const result = await generateStream(prompt, {
@@ -113,6 +121,40 @@ function GenerateSlide({ accent }) {
             {loading && <span style={{ animation: "v2Blink 1s infinite" }}>▌</span>}
           </div>
         </Card>
+      )}
+      {output && !loading && sentPrompt && (
+        <button
+          onClick={() => setShowBehind((s) => !s)}
+          style={{
+            textAlign: "left", borderRadius: 12, padding: SPACE.sm, width: "100%",
+            background: "transparent", border: `1px dashed ${accent}55`,
+          }}
+        >
+          <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: accent }}>
+            {showBehind ? "▾" : "▸"} BEHIND THE CURTAIN — what this page actually sent {showBehind ? "" : "(click)"}
+          </span>
+          {showBehind && (
+            <div className="reveal" style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ borderLeft: `2px solid ${accent}88`, paddingLeft: 12 }}>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: accent, display: "block" }}>SYSTEM — standing instructions the site gives the model (abridged, real)</span>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 12.5, color: "rgba(231,234,242,.75)", lineHeight: 1.8, display: "block", marginTop: 4 }}>
+                  {REAL_SYSTEM_ABRIDGED}
+                </span>
+              </div>
+              <div style={{ borderLeft: "2px solid rgba(255,255,255,.25)", paddingLeft: 12 }}>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 11, color: "rgba(255,255,255,.5)", display: "block" }}>USER — your ingredients, wrapped by this page</span>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 12.5, color: "rgba(231,234,242,.75)", lineHeight: 1.8, display: "block", marginTop: 4 }}>
+                  {sentPrompt}
+                </span>
+              </div>
+              <span style={{ fontSize: 13.5, color: "rgba(152,162,184,1)", lineHeight: 1.7 }}>
+                The story above is the model's continuation of exactly this text —
+                the system rules, then your request. Every AI product works this
+                way: instructions you never see, prepended to the words you type.
+              </span>
+            </div>
+          )}
+        </button>
       )}
     </Slide>
   );

@@ -105,8 +105,8 @@ export const CHAPTERS = [
   {
     id: "confident-nonsense", slug: "confident-nonsense", num: 13, act: 5,
     title: "Confident Nonsense",
-    blurb: "Hallucinations, bias, and knowledge cutoffs — why they happen, and the tools that fix them.",
-    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[5], Component: Ch13,
+    blurb: "Hallucinations, bias, no memory, knowledge cutoffs — why they happen, and the tools that fix them.",
+    minutes: 9, slideCount: 9, accent: ACT_ACCENTS[5], Component: Ch13,
   },
   {
     id: "you-know-genai", slug: "you-know-genai", num: 14, act: 5,
