@@ -65,6 +65,123 @@ function TrapDemo({ accent }) {
   );
 }
 
+// ---- The memory illusion ----------------------------------------------------
+// A scripted 3-step chat that reveals what the model ACTUALLY receives each
+// turn: the full transcript resent every time, then (in a new chat) an
+// app-injected memory note. Token counts are illustrative but proportional.
+const MEMORY_STEPS = [
+  {
+    label: "Turn 1",
+    you: "Hi! I live in Portland and I'm starting a garden.",
+    reply: "Lovely! What are you hoping to grow?",
+    payload: [
+      { kind: "new", text: "You: Hi! I live in Portland and I'm starting a garden." },
+    ],
+    tokens: 14,
+    note: "Turn one is simple: your message goes in, a reply comes out. Then the model forgets everything. Not 'moves on' — forgets. Nothing persists inside it between calls.",
+  },
+  {
+    label: "Turn 2",
+    you: "Mostly tomatoes, I think.",
+    reply: "Great choice — tomatoes love a long warm season.",
+    payload: [
+      { kind: "resent", text: "You: Hi! I live in Portland and I'm starting a garden." },
+      { kind: "resent", text: "AI: Lovely! What are you hoping to grow?" },
+      { kind: "new", text: "You: Mostly tomatoes, I think." },
+    ],
+    tokens: 38,
+    note: "To 'remember' turn one, the app resends the ENTIRE conversation — every turn, every time. The model re-reads it all from scratch and each round gets longer and more expensive. (Advanced providers cache the attention-and-layers work already done on the earlier tokens — a KV cache — so only the new part costs full effort. Without it, everything reruns token by token.)",
+  },
+  {
+    label: "A week later — brand new chat",
+    you: "What should I plant this month?",
+    reply: "In Portland's climate, this month is good for starting tomatoes indoors…",
+    payload: [
+      { kind: "memory", text: "MEMORY (injected by the app): User lives in Portland. User is growing tomatoes." },
+      { kind: "new", text: "You: What should I plant this month?" },
+    ],
+    tokens: 27,
+    note: "A new chat has no transcript — so how does it know Portland? The app kept its own notes in a database and quietly pasted them into the prompt. You never asked it to send that. The 'relationship' lives in a text file the app maintains, not in the model.",
+  },
+];
+
+function MemoryDemo({ accent }) {
+  const [step, setStep] = useState(-1);
+  const s = step >= 0 ? MEMORY_STEPS[step] : null;
+
+  return (
+    <Slide wide>
+      <Kicker accent={accent}>The memory illusion</Kicker>
+      <Heading size="h2">It doesn't remember you. At all.</Heading>
+      <Prose muted>
+        The weights froze when training ended — nothing you say changes the
+        model, and nothing persists inside it between messages. So how does a
+        chatbot remember your name? Step through a chat and watch what's
+        <em> actually sent</em>.
+      </Prose>
+      <div style={{ display: "flex", gap: SPACE.xs, flexWrap: "wrap" }}>
+        {MEMORY_STEPS.map((m, i) => (
+          <Button
+            key={m.label}
+            accent={i === step ? accent : "transparent"}
+            style={i === step ? {} : { border: `1px solid ${COLORS.hairline}`, color: COLORS.muted }}
+            onClick={() => setStep(i)}
+          >
+            {m.label}
+          </Button>
+        ))}
+      </div>
+      {s && (
+        <div key={step} className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: SPACE.sm }}>
+          <Card>
+            <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginBottom: 10 }}>WHAT YOU SEE</Mono>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 15, lineHeight: 1.6 }}>
+              <div style={{ alignSelf: "flex-end", background: accent + "22", borderRadius: "12px 12px 2px 12px", padding: "8px 12px", maxWidth: "90%" }}>
+                {s.you}
+              </div>
+              <div style={{ alignSelf: "flex-start", background: "rgba(255,255,255,.06)", borderRadius: "12px 12px 12px 2px", padding: "8px 12px", maxWidth: "90%" }}>
+                {s.reply}
+              </div>
+            </div>
+          </Card>
+          <Card style={{ borderColor: accent + "44" }}>
+            <Mono style={{ fontSize: 11, color: accent, display: "block", marginBottom: 10 }}>
+              WHAT THE MODEL RECEIVES · ~{s.tokens} tokens
+            </Mono>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {s.payload.map((p, i) => (
+                <div
+                  key={i}
+                  style={{
+                    fontFamily: FONTS.mono, fontSize: 12.5, lineHeight: 1.7,
+                    padding: "6px 10px", borderRadius: 8,
+                    background: p.kind === "memory" ? accent + "18" : "rgba(255,255,255,.03)",
+                    border: `1px solid ${p.kind === "new" ? "rgba(255,255,255,.2)" : p.kind === "memory" ? accent + "55" : "transparent"}`,
+                    color: p.kind === "resent" ? COLORS.faint : p.kind === "memory" ? accent : COLORS.text,
+                  }}
+                >
+                  {p.kind === "resent" && "↻ "}{p.text}
+                </div>
+              ))}
+            </div>
+            {step === 1 && (
+              <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginTop: 8 }}>
+                ↻ = resent from earlier turns
+              </Mono>
+            )}
+          </Card>
+        </div>
+      )}
+      {s && <Prose muted style={{ fontSize: 15 }}>{s.note}</Prose>}
+      {!s && (
+        <Prose muted style={{ fontSize: 15 }}>
+          Click “Turn 1” to start the chat.
+        </Prose>
+      )}
+    </Slide>
+  );
+}
+
 const CONTEXT_FACTS = `Here are the facts: "The Cartographer's Breakfast" is a fictional book invented for an AI course. It has no author, no publication year, and has won no awards.`;
 
 function ContextFixDemo({ accent }) {
@@ -195,7 +312,7 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
           <Prose muted>
             Neither of these is a bug to be patched out of the model. Both are
             consequences of what a language model <em>is</em>. The fixes, it
-            turns out, live outside the model — two slides from now.
+            turns out, all live outside the model — coming up shortly.
           </Prose>
         </Slide>
       );
@@ -228,8 +345,10 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
         </Slide>
       );
     case 5:
-      return <ContextFixDemo accent={accent} />;
+      return <MemoryDemo accent={accent} />;
     case 6:
+      return <ContextFixDemo accent={accent} />;
+    case 7:
       return (
         <Slide>
           <Kicker accent={accent}>Fixes two and three</Kicker>
@@ -272,7 +391,7 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 7:
+    case 8:
     default:
       return (
         <Recap
@@ -280,7 +399,8 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
           lines={[
             "Hallucination isn't a glitch — a plausibility machine sides with plausible when truth and plausibility disagree, and its confident tone is style, not evidence.",
             "The cutoff, the arithmetic weakness, and inherited bias all follow directly from how the machine is built and trained.",
-            "The fixes — context, RAG, tools, agents — all work the same way: don't change the model, change what's in its context.",
+            "The model remembers nothing between messages: chat apps resend the whole transcript every turn (caching the repeated work) and inject saved notes to fake long-term memory.",
+            "The fixes — context, memory notes, RAG, tools, agents — all work the same way: don't change the model, change what's in its context.",
           ]}
           next="You Know GenAI — the story from Chapter 1 returns, and this time you can narrate every step. Then: prove it."
         />

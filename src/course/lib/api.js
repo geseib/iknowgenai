@@ -40,6 +40,7 @@ export async function generateStream(prompt, { temperature = 0.8, maxTokens, onT
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt, temperature, ...(maxTokens ? { maxTokens } : {}) }),
   });
+  if (!res.ok) throw new Error(`generate failed (${res.status})`);
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
