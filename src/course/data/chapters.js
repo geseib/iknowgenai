@@ -76,7 +76,7 @@ export const CHAPTERS = [
     id: "map-of-meaning", slug: "map-of-meaning", num: 8, act: 3,
     title: "A Map of Meaning",
     blurb: "Every word is a point in a space with thousands of dimensions — and the space is roomier than it has any right to be.",
-    minutes: 9, slideCount: 9, accent: ACT_ACCENTS[3], Component: Ch08,
+    minutes: 10, slideCount: 10, accent: ACT_ACCENTS[3], Component: Ch08,
   },
   {
     id: "attention", slug: "attention", num: 9, act: 3,
