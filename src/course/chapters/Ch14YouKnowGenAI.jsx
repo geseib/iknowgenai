@@ -170,7 +170,7 @@ const QUIZ = [
     q: "What happens between layer 1 and layer 96 of a transformer?",
     options: [
       { text: "The same computation repeats to double-check the answer", why: "Each layer has its own learned weights doing different work — it's refinement, not repetition. Layer 40 genuinely does different things than layer 4." },
-      { text: "Understanding compounds: surface patterns in early layers, facts in the middle, meaning and reasoning near the top", correct: true, why: "Right — researchers probing real models find roughly this progression. Each layer's output feeds the next, so sophistication accumulates pass by pass." },
+      { text: "Understanding compounds: surface patterns in the first layers, facts in the middle, meaning and reasoning in the final layers", correct: true, why: "Right — researchers probing real models find roughly this progression. Each layer's output feeds the next, so sophistication accumulates pass by pass." },
       { text: "The model gets 96 chances to guess and picks its best", why: "There's only one prediction at the end — the layers aren't separate guesses but one deepening computation that produces it." },
       { text: "Each layer handles a different language", why: "Languages aren't separated by layer — all layers process everything, and the division of labor that does emerge (syntax→facts→meaning) was discovered, not designed." },
     ],

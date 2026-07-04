@@ -139,8 +139,8 @@ export default function Ch10LayersOfThought({ accent, slide }) {
     case 3:
       return (
         <Slide>
-          <Kicker accent={accent}>What the depths learn</Kicker>
-          <Heading size="h2">Spelling at the bottom, meaning at the top.</Heading>
+          <Kicker accent={accent}>What each stage learns</Kicker>
+          <Heading size="h2">Spelling in the first layers, meaning in the final ones.</Heading>
           <div style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
             {[
               ["layers ~1–10", "surface patterns — spelling, word endings, basic grammar", 0.25],
@@ -192,7 +192,7 @@ export default function Ch10LayersOfThought({ accent, slide }) {
           accent={accent}
           lines={[
             "Each layer is attention (gather context) plus an MLP (expand, apply learned knowledge, compress).",
-            "Stack ~100 layers and refinement compounds: spelling at the bottom, facts in the middle, meaning at the top.",
+            "Stack ~100 layers and refinement compounds: spelling in the first layers, facts in the middle, meaning in the final ones.",
             "One full pass of the pipeline produces one token. Everything an LLM does is this pipeline, on repeat.",
           ]}
           next="Act IV: Temperature — the probabilities are computed. Now someone has to roll the dice."
