@@ -4,6 +4,25 @@ An interactive, presentation-style web app that teaches 3rd–5th graders how la
 
 ![Mode Select](docs/screenshots/01-mode-select.png)
 
+## Two courses, one site
+
+| | K-8 classroom course | 14+ course |
+|---|---|---|
+| **URL** | `/` (this page describes it) | [`/course`](https://iknowgenai.seibtribe.us/course) |
+| **Title** | How AI Thinks | How AI Actually Works |
+| **Audience** | Grades K-2 / 3-5 / 7-8, teacher-led or solo | Teens & adults, self-paced single track |
+| **Style** | Big, colorful, playful (cat included) | 3Blue1Brown-style: serif, dark, restrained |
+| **Shape** | Sections + grade bands + teacher notes | 14 chapters in 5 acts, ~105 min, final quiz |
+| **Demos** | Real AI + guided visuals | Real AI + live in-browser math — "no simulations" is a stated promise |
+| **Docs** | This README | [`docs/COURSE-14PLUS.md`](docs/COURSE-14PLUS.md) |
+
+The 14+ course teaches what's *under the hood* — tokens, embeddings,
+near-orthogonal superposition, attention, layers, temperature, reasoning
+models, hallucination, RAG/tools/agents/MCP/skills — with every
+simplification flagged in an "honest footnote," and ends with a
+13-question quiz that explains every answer choice. Both courses share the
+same API backend (`api/`); the code lives separately in `src/course/`.
+
 ## What It Teaches
 
 The lesson walks students through 14 sections across three groups:
@@ -93,12 +112,18 @@ The built files will be in the `dist/` directory, ready to deploy to any static 
 - **Vite 7** — Build tool and dev server
 - **Phosphor Icons** — Duotone icons throughout (no emoji)
 - **No external CSS framework** — All styling is inline for simplicity
-- **No backend** — Entirely client-side, zero dependencies beyond React
+- **Vercel serverless functions** (`api/`) — real OpenAI-backed demos
+  (generation, next-token prediction, tokenization, embeddings, agent loop)
+  with layered content moderation; shared by both courses
 
 ## Project Structure
 
 ```
+api/                       # Vercel functions: generate, predict, tokenize,
+                           #   embed, annotate, agent, moderation (_moderate.js)
 src/
+  course/                  # The 14+ course ("How AI Actually Works") —
+                           #   isolated app at /course; see docs/COURSE-14PLUS.md
   App.jsx                  # Root component, section navigation, keyboard handling
   components/
     shared.jsx             # Card, Label, H1, TriviaBox, TeacherNote, DiscussionGate
