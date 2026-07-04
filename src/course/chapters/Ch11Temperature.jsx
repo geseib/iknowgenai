@@ -267,6 +267,14 @@ export default function Ch11Temperature({ accent, slide }) {
             allowed in the casino. Together they're why “creative but not
             insane” is a settable behavior.
           </Prose>
+          <Prose>
+            One more thing worth knowing: <strong>you've been playing with dials
+            most people never see.</strong> Chat apps like ChatGPT and Claude
+            don't expose temperature or top-p — the product picks sensible
+            values behind the scenes, and every “regenerate” click is simply
+            another roll of the same dice. The dials are there for developers,
+            through the APIs — which is exactly how this course reached them.
+          </Prose>
         </Slide>
       );
     case 6:
@@ -278,6 +286,7 @@ export default function Ch11Temperature({ accent, slide }) {
             "Generation needs a choice, and always picking the favorite produces dead, looping text — so models roll weighted dice.",
             "Temperature reshapes the dice: low exaggerates the leader, high flattens the race. You watched the real odds move.",
             "Top-p trims the absurd tail. Creativity in AI is literally controlled randomness — which is why the same prompt gives different answers.",
+            "Chat apps like ChatGPT and Claude preset these dials and hide them — “regenerate” is another roll of the same dice; developers reach the dials through APIs.",
           ]}
           footnote="At temperature 0 the same prompt gives essentially the same answer every time — “essentially” because parallel hardware introduces tiny arithmetic variations even then."
           next="Thinking Out Loud — some questions can't be answered in one roll. What if the model showed its work?"
