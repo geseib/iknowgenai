@@ -87,7 +87,7 @@ export const CHAPTERS = [
   {
     id: "layers-of-thought", slug: "layers-of-thought", num: 10, act: 3,
     title: "Layers of Thought",
-    blurb: "Stack the trick ~100 layers deep: spelling at the bottom, reasoning at the top.",
+    blurb: "Stack the trick ~100 layers deep: spelling in the first layers, reasoning in the final ones.",
     minutes: 7, slideCount: 7, accent: ACT_ACCENTS[3], Component: Ch10,
   },
   {
