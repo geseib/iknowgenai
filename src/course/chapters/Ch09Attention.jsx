@@ -195,7 +195,7 @@ function ClueGame({ accent }) {
 
 // ---- The loaded final word ---------------------------------------------------
 const MYSTERY_STORY =
-  "The butler had polished the silver knife all evening. At midnight the candles went out and a scream echoed through the manor. When the lights returned, the detective pointed across the room: the murderer was";
+  "The butler had polished the silver knife all evening. At midnight the candles went out and a scream echoed through the manor. When the lights returned, the detective pointed across the room: the murderer was the";
 // Content words whose "cargo" visibly gets packed into the final vector.
 const CARGO = [
   { word: "butler", color: "#6C9EF8" },
@@ -237,6 +237,7 @@ function LoadedWordSlide({ accent }) {
   };
 
   const storyParts = MYSTERY_STORY.split(/(\s+)/);
+  const lastWordIdx = storyParts.length - 1; // the final "the" — the loaded word
   const activeCargo = new Set(CARGO.slice(0, packed).map((c) => c.word));
 
   return (
@@ -253,8 +254,8 @@ function LoadedWordSlide({ accent }) {
           {storyParts.map((part, i) => {
             const w = part.replace(/[^a-zA-Z]/g, "").toLowerCase();
             const cargo = CARGO.find((c) => c.word === w);
-            const lit = cargo && activeCargo.has(cargo.word);
-            const isFinal = part === "was";
+            const lit = cargo && activeCargo.has(cargo.word) && i !== lastWordIdx;
+            const isFinal = i === lastWordIdx;
             return (
               <span
                 key={i}
@@ -274,11 +275,11 @@ function LoadedWordSlide({ accent }) {
         {/* The cargo bar: what's packed into "was" */}
         <div style={{ marginTop: SPACE.sm }}>
           <Mono style={{ fontSize: 11, color: COLORS.faint }}>
-            THE VECTOR AT “was” — {packed === 0 ? "just a small verb, so far" : "absorbing the story"}
+            THE VECTOR AT THE FINAL “the” — {packed === 0 ? "the most forgettable word in English, so far" : "absorbing the story"}
           </Mono>
           <div style={{ display: "flex", height: 18, borderRadius: 5, overflow: "hidden", background: "rgba(255,255,255,.05)", marginTop: 6 }}>
             <div style={{ width: "10%", background: "rgba(255,255,255,.14)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 9, fontFamily: FONTS.mono, color: COLORS.muted }}>“was”</span>
+              <span style={{ fontSize: 9, fontFamily: FONTS.mono, color: COLORS.muted }}>“the”</span>
             </div>
             {CARGO.map((c, i) => (
               <div
@@ -304,16 +305,19 @@ function LoadedWordSlide({ accent }) {
       </div>
       {result?.blocked && <BlockedNote />}
       {result?.error && <Prose muted>Couldn't reach the model: {result.error}</Prose>}
-      {result?.candidates && (
+      {result?.word && (
         <Card style={{ borderColor: accent + "44" }} className="reveal">
-          <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginBottom: 10 }}>
-            REAL PREDICTIONS — computed from that one loaded vector
+          <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block" }}>
+            THE REAL MODEL'S PREDICTION — computed from that one loaded vector
           </Mono>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {result.candidates.slice(0, 5).map((c, i) => (
+          <div style={{ fontFamily: FONTS.display, fontSize: 30, marginTop: 6 }}>
+            …the murderer was the <span style={{ color: accent }}>{result.word}</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: SPACE.sm }}>
+            {result.candidates.slice(0, 4).map((c, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <Mono style={{ minWidth: 90, fontSize: 15 }}>{c.token}</Mono>
-                <div style={{ flex: 1, height: 16, background: "rgba(255,255,255,.05)", borderRadius: 4, overflow: "hidden" }}>
+                <Mono style={{ minWidth: 90, fontSize: 14 }}>{c.token}</Mono>
+                <div style={{ flex: 1, height: 14, background: "rgba(255,255,255,.05)", borderRadius: 4, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${c.pct}%`, background: accent + "88", borderRadius: 4 }} />
                 </div>
                 <Mono style={{ minWidth: 48, fontSize: 13, color: COLORS.muted, textAlign: "right" }}>{c.pct}%</Mono>
@@ -321,10 +325,11 @@ function LoadedWordSlide({ accent }) {
             ))}
           </div>
           <Prose muted style={{ fontSize: 14, marginTop: 12 }}>
-            Look at those candidates: they only make sense if the vector behind
-            them knows about the butler, the knife, the scream. A humble “was”
-            went in; the whole story came out. <em>That</em> is why prediction
-            done well requires understanding.
+            It solved the mystery. And look at what the prediction was computed
+            from: the vector at “the” — the most forgettable word in English —
+            which attention had loaded with the butler, the knife, and the
+            scream. <em>That</em> is why prediction done well requires
+            understanding.
           </Prose>
         </Card>
       )}
