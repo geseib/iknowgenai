@@ -88,11 +88,15 @@ function executeTool(name, args) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
-  const { prompt, tools = [] } = req.body;
+  const { prompt, tools = [], style } = req.body;
   if (!prompt) return res.status(400).json({ error: "prompt required" });
   if (prompt.length > 500) return res.status(400).json({ error: "prompt too long" });
 
-  const check = await moderate(prompt);
+  // "plain" style (the 14+ course): neutral persona + relaxed moderation
+  // (OpenAI moderation API still screens every input).
+  const plain = style === "plain";
+
+  const check = await moderate(prompt, { relaxed: plain });
   if (!check.safe) return res.status(422).json({ error: "blocked", message: check.message });
 
   // Build tool list from enabled tools
@@ -100,10 +104,14 @@ export default async function handler(req, res) {
     .filter(t => TOOL_DEFS[t])
     .map(t => TOOL_DEFS[t]);
 
-  const systemPrompt = SAFE_SYSTEM_PROMPT + `
-You are helping students learn about AI tools and agents. Keep responses short (2-3 sentences).
+  const toolGuidance = `
+Keep responses short (2-3 sentences).
 If you have tools available, use them when appropriate — especially for math, dates, or facts you're unsure about.
 If you don't have a needed tool, say so honestly.`;
+  const systemPrompt = plain
+    ? "You are a concise, helpful assistant." + toolGuidance
+    : SAFE_SYSTEM_PROMPT + `
+You are helping students learn about AI tools and agents.` + toolGuidance;
 
   const messages = [
     { role: "system", content: systemPrompt },

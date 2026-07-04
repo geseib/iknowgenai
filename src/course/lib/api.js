@@ -38,6 +38,12 @@ export function annotateStory(prompt, story) {
   return postJSON("/api/annotate", { prompt, story });
 }
 
+// Run the real agent loop with a set of enabled tools.
+// → { steps: [{type:"tool_call"|"tool_result"|"response", ...}] }
+export function runAgent(prompt, tools) {
+  return postJSON("/api/agent", { prompt, tools, style: "plain" });
+}
+
 // Streaming generation over SSE. Calls onToken(token) as tokens arrive.
 // Resolves with { blocked } or { text } when the stream ends.
 export async function generateStream(prompt, { temperature = 0.8, maxTokens, onToken } = {}) {
