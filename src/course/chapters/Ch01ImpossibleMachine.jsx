@@ -170,8 +170,46 @@ function GenerateSlide({ accent }) {
 }
 
 // Slow word-by-word replay — with influence choreography: before each content
-// word appears, the earlier words that most influenced it glow (an LLM's
-// retrospective estimate; see the honest footnote).
+// word appears, the earlier words that most influenced it glow. Two sources,
+// merged: an LLM's retrospective estimate (see the honest footnote) plus
+// literal recurrences computed right here in the browser — when the story
+// reuses a content word ("keeper" → the earlier "keeper", "letter" → the
+// "letters" that set it up), that genuinely is the machine looking back.
+const GLANCE_STOP = new Set(
+  ("a an the and or but so as at by for from in into of off on onto out over to up with without " +
+    "is are was were be been being am has have had do does did will would can could may might shall should " +
+    "he she it they them his her its their this that these those there here i you we me my your our us " +
+    "not no yes if then than when while where who whom whose which what every each all any some just simply " +
+    "one night went gone found used read other never").split(" ")
+);
+const GLANCE_BOILERPLATE = new Set(["write", "fun", "vivid", "short", "story", "sentences", "sentence", "about", "where"]);
+
+// A content word's match key: lowercase, punctuation stripped, plural/'s
+// folded — or null for function words and the prompt's instruction words.
+function glanceKey(word) {
+  const c = word.toLowerCase().replace(/[^a-z'-]/g, "");
+  if (c.length < 4 || GLANCE_STOP.has(c) || GLANCE_BOILERPLATE.has(c)) return null;
+  return c.replace(/'s$/, "").replace(/s$/, "");
+}
+
+// { storyIndex: ["P8" | "S2", …] } — each content word points at the first
+// earlier appearance of the same word (in the prompt or the story so far).
+function buildRecurrenceMap(promptWords, storyWords) {
+  const firstSeen = new Map();
+  promptWords.forEach((w, i) => {
+    const k = glanceKey(w);
+    if (k && !firstSeen.has(k)) firstSeen.set(k, `P${i}`);
+  });
+  const map = {};
+  storyWords.forEach((w, i) => {
+    const k = glanceKey(w);
+    if (!k) return;
+    if (firstSeen.has(k)) map[i] = [firstSeen.get(k)];
+    else firstSeen.set(k, `S${i}`);
+  });
+  return map;
+}
+
 function ReplaySlide({ accent }) {
   const story = lastStory || FALLBACK_STORY;
   const prompt = lastPrompt || DEFAULT_PROMPT;
@@ -185,6 +223,13 @@ function ReplaySlide({ accent }) {
     annotationCache.story === story ? annotationCache.influences : null
   );
   const runToken = useRef(0);
+
+  // Deterministic word-recurrence glances — always available, even when the
+  // annotate call fails (e.g. running locally without the API).
+  const recurrences = useMemo(
+    () => buildRecurrenceMap(promptWords, words),
+    [promptWords, words]
+  );
 
   // Fetch the influence map once per story (cached across slide changes).
   useEffect(() => {
@@ -215,12 +260,13 @@ function ReplaySlide({ accent }) {
     await sleep(300);
     for (let i = 0; i < words.length; i++) {
       if (runToken.current !== token) return;
-      const refs = inf[i];
-      setGlow(refs || []);
-      if (refs) await sleep(540); // let the glances land before the word
+      // Merge the LLM's estimate with the literal recurrences, max 3 glances.
+      const refs = [...new Set([...(recurrences[i] || []), ...(inf[i] || [])])].slice(0, 3);
+      setGlow(refs);
+      if (refs.length) await sleep(540); // let the glances land before the word
       if (runToken.current !== token) return;
       setShown(i + 1);
-      await sleep(refs ? 420 : 260);
+      await sleep(refs.length ? 420 : 260);
     }
     if (runToken.current === token) { setPlaying(false); setGlow([]); }
   };
@@ -289,11 +335,12 @@ function ReplaySlide({ accent }) {
         )}
       </div>
       <HonestNote>
-        The highlights are an AI's own estimate of what mattered, made after
-        the fact — the model's true “glances” (attention weights) live inside
-        it and aren't exposed. The real machinery reads <em>every</em> earlier
-        word at once, in dozens of parallel streams. You'll meet it properly in
-        Chapter 9.
+        The highlights are a reconstruction, not a readout: an AI's
+        after-the-fact estimate of what mattered, plus places where the story
+        literally reuses an earlier word. The model's true “glances” (attention
+        weights) live inside it and aren't exposed — and the real machinery
+        reads <em>every</em> earlier word at once, in dozens of parallel
+        streams. You'll meet it properly in Chapter 9.
       </HonestNote>
     </Slide>
   );
@@ -365,7 +412,7 @@ export default function Ch01ImpossibleMachine({ accent, slide }) {
       return (
         <Slide>
           <Kicker accent={accent}>The driving question</Kicker>
-          <Heading size="h2">That should bother you.</Heading>
+          <Heading size="h2">That sounds too simple to be the whole story.</Heading>
           <Prose>
             A story has a plot. A joke has a setup that pays off. An argument
             holds together across paragraphs. How can a machine that only ever

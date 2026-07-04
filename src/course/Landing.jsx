@@ -109,7 +109,7 @@ export default function Landing({ progress, navigate }) {
           {COURSE_TAGLINE}
         </p>
         <p style={{ fontSize: TYPE.body, color: COLORS.text, lineHeight: 1.7, marginTop: SPACE.md, maxWidth: "56ch" }}>
-          Here is a claim that should bother you: the AI that writes essays, passes exams,
+          Here's an idea that sounds too simple to explain everything AI does: the AI that writes essays, passes exams,
           and cracks jokes is doing exactly one thing — guessing the next word. This course
           is about how that can possibly be true. You'll run the real machinery yourself,
           one idea at a time.
