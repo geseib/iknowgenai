@@ -3,18 +3,30 @@
 import { useCallback, useEffect, useState } from "react";
 import { COURSE_CSS } from "./styles/global.js";
 import { COURSE_TITLE, BY_SLUG } from "./data/chapters.js";
+import { SIDEQUEST_BY_SLUG } from "./data/sidequests.js";
 import { loadProgress, recordPosition } from "./data/progress.js";
 import Landing from "./Landing.jsx";
 import ChapterView from "./ChapterView.jsx";
+import SidequestView from "./SidequestView.jsx";
 
 function parseHash() {
   const hash = window.location.hash.replace(/^#/, "");
-  if (!hash) return { chapter: null, slide: 0 };
-  const [slug, slideStr] = hash.split("/");
+  if (!hash) return { chapter: null, sidequest: null, slide: 0 };
+  const [slug, second, third] = hash.split("/");
+  // Sidequest namespace: #sidequest/<slug>/<slide>. Separate from chapter
+  // slugs so deep dives never collide with (or renumber) course chapters.
+  if (slug === "sidequest") {
+    const sq = SIDEQUEST_BY_SLUG[second];
+    if (sq) {
+      const slide = Math.min(Math.max(parseInt(third, 10) || 0, 0), sq.slideCount - 1);
+      return { chapter: null, sidequest: sq, slide };
+    }
+    return { chapter: null, sidequest: null, slide: 0 };
+  }
   const ch = BY_SLUG[slug];
-  if (!ch || !ch.Component) return { chapter: null, slide: 0 };
-  const slide = Math.min(Math.max(parseInt(slideStr, 10) || 0, 0), ch.slideCount - 1);
-  return { chapter: ch, slide };
+  if (!ch || !ch.Component) return { chapter: null, sidequest: null, slide: 0 };
+  const slide = Math.min(Math.max(parseInt(second, 10) || 0, 0), ch.slideCount - 1);
+  return { chapter: ch, sidequest: null, slide };
 }
 
 export default function CourseApp() {
@@ -36,17 +48,33 @@ export default function CourseApp() {
     if (push) window.history.pushState(null, "", url);
     else window.history.replaceState(null, "", url);
     const ch = slug ? BY_SLUG[slug] : null;
-    setRoute({ chapter: ch && ch.Component ? ch : null, slide: ch ? slide : 0 });
+    setRoute({ chapter: ch && ch.Component ? ch : null, sidequest: null, slide: ch ? slide : 0 });
     if (ch && ch.Component) {
       setProgress((p) => recordPosition(p, slug, slide, ch.slideCount));
     }
     window.scrollTo(0, 0);
   }, []);
 
+  // Sidequest navigation replaces the hash and deliberately does NOT touch
+  // course progress — a sidequest tab leaves the learner's place untouched.
+  const navigateSidequest = useCallback((slug, slide = 0) => {
+    const hash = `#sidequest/${slug}${slide > 0 ? `/${slide}` : ""}`;
+    window.history.replaceState(null, "", window.location.pathname + window.location.search + hash);
+    const sq = SIDEQUEST_BY_SLUG[slug] || null;
+    setRoute({ chapter: null, sidequest: sq, slide: sq ? slide : 0 });
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="v2">
       <style>{COURSE_CSS}</style>
-      {route.chapter ? (
+      {route.sidequest ? (
+        <SidequestView
+          sidequest={route.sidequest}
+          slide={route.slide}
+          navigateSidequest={navigateSidequest}
+        />
+      ) : route.chapter ? (
         <ChapterView
           chapter={route.chapter}
           slide={route.slide}

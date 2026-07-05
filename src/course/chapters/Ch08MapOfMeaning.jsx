@@ -3,7 +3,7 @@
 // staircase, and the near-orthogonality playground: how 12,288 dimensions
 // hold millions of concepts (superposition).
 import { useMemo, useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, CountUp } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, CountUp, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { embed2d } from "../lib/api.js";
 
@@ -468,8 +468,10 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
             — it's <em>which way</em> things point.
           </Prose>
           <HonestNote>
-            This result is from word2vec (2013), an earlier, simpler kind of
-            embedding, and it holds approximately, not perfectly. Modern LLM
+            This result is from{" "}
+            <Term t="word2vec" accent={accent}>word2vec</Term> (2013), an
+            earlier, simpler kind of embedding, and it holds approximately,
+            not perfectly. Modern LLM
             embeddings are contextual — a word's vector shifts with its
             sentence — but the meaning-as-direction picture carries over, and
             it's about to matter enormously.
@@ -509,7 +511,8 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
           <Kicker accent={accent}>The counting problem</Kicker>
           <Heading size="h2">12,288 axes. Millions of ideas.</Heading>
           <Prose>
-            A frontier model knows about cats, jazz, tax law, sarcasm, Python,
+            A <Term t="frontier" accent={accent}>frontier model</Term> knows
+            about cats, jazz, tax law, sarcasm, Python,
             the French Revolution, and roughly everything else humans have
             written down — <strong>millions of distinct concepts</strong>.
           </Prose>
@@ -554,7 +557,8 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
           <HonestNote>
             Researchers call concepts-sharing-dimensions <strong>superposition</strong>,
             and reading these tangled directions back out of real models is an
-            active field (mechanistic interpretability). The exponential-packing
+            active field
+            (<Term t="interpretability" accent={accent}>mechanistic interpretability</Term>). The exponential-packing
             fact is solid math; how models exploit it is still being mapped.
           </HonestNote>
         </Slide>

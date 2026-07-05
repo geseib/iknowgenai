@@ -3,7 +3,7 @@
 // arithmetic limits, bias, the memory illusion, and the fixes: context, RAG,
 // tools/agents (live agent-loop demo), plus the buzzword decoder (MCP, skills).
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { generateStream, runAgent } from "../lib/api.js";
 
@@ -115,7 +115,8 @@ function MemoryDemo({ accent }) {
       <Kicker accent={accent}>The memory illusion</Kicker>
       <Heading size="h2">It doesn't remember you. At all.</Heading>
       <Prose muted>
-        The weights froze when training ended — nothing you say changes the
+        The <Term t="weights" accent={accent}>weights</Term> froze when
+        training ended — nothing you say changes the
         model, and nothing persists inside it between messages. So how does a
         chatbot remember your name? Step through a chat and watch what's
         <em> actually sent</em>.
@@ -574,7 +575,8 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
           </div>
           <Prose muted style={{ fontSize: 15 }}>
             Notice the shape of all three fixes: none of them change the model.
-            They change <strong>what's in the context</strong> — because the one
+            They change <strong>what's in the{" "}
+            <Term t="context" accent={accent}>context</Term></strong> — because the one
             thing you can always trust the machine to do is continue the text
             it was given. Next slide: run the agent loop for real.
           </Prose>

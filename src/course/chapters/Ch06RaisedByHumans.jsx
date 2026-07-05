@@ -2,7 +2,7 @@
 // Base models are wild autocomplete; instruction tuning and RLHF civilize
 // them. Ends Act II with the critical lens: who decides what "good" means?
 import { useEffect, useRef, useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 
 // Curated comparison pairs for the rating game. Deliberately, NEITHER answer
@@ -289,8 +289,9 @@ export default function Ch06RaisedByHumans({ accent, slide }) {
           <Heading>Raised by Humans</Heading>
           <Lead>
             Everything so far produces a machine that's brilliant at continuing
-            text — and nothing else. Pretraining gives you a savant that won't
-            answer questions. Someone has to raise it.
+            text — and nothing else.{" "}
+            <Term t="pretraining" accent={accent}>Pretraining</Term> gives you a
+            savant that won't answer questions. Someone has to raise it.
           </Lead>
         </Slide>
       );

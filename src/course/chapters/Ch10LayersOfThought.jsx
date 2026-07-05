@@ -2,7 +2,7 @@
 // The MLP (expand → compress), stacking ~96 layers, what different depths
 // learn, and the full-pipeline payoff slide that assembles the whole machine.
 import { useEffect, useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, CountUp } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, CountUp, Term, SidequestLink } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 
 // The assembled machine: stages reveal one by one, then the loop arrow.
@@ -104,10 +104,19 @@ export default function Ch10LayersOfThought({ accent, slide }) {
             where much of the model's factual knowledge appears to live.
           </Prose>
           <HonestNote>
-            The “questions” are really two big matrix multiplications with a
-            nonlinearity between them, and the numbers above are GPT-3's. The
+            The “questions” are really two big matrix multiplications with a{" "}
+            <Term t="nonlinearity" accent={accent}>nonlinearity</Term> between
+            them, and the numbers above are GPT-3's. The
             expand-then-compress shape, though, is exactly real.
           </HonestNote>
+          <Prose muted style={{ fontSize: 15 }}>
+            An MLP is a small neural network — and if that phrase has always
+            been a black box, the{" "}
+            <SidequestLink slug="neural-network" accent={accent}>What Is a Neural Network?</SidequestLink>{" "}
+            deep dive builds one from a single neuron up, every number
+            computed live. It’s optional, opens in a new tab, and your place
+            here stays put.
+          </Prose>
         </Slide>
       );
     case 2:
@@ -159,7 +168,8 @@ export default function Ch10LayersOfThought({ accent, slide }) {
             Nobody assigned these jobs — the division of labor emerges from
             training, and researchers discovered it afterward by probing models
             layer by layer. The progression is gradual, not neatly staged, and
-            mapping it precisely is ongoing interpretability research.
+            mapping it precisely is ongoing{" "}
+            <Term t="interpretability" accent={accent}>interpretability research</Term>.
           </HonestNote>
         </Slide>
       );
@@ -196,6 +206,16 @@ export default function Ch10LayersOfThought({ accent, slide }) {
             "One full pass of the pipeline produces one token. Everything an LLM does is this pipeline, on repeat.",
           ]}
           next="Act IV: Temperature — the probabilities are computed. Now someone has to roll the dice."
+          aside={
+            <>
+              Still fuzzy on what a “neural network” actually is, under all the
+              course’s dials-and-layers talk? The optional{" "}
+              <SidequestLink slug="neural-network" accent={accent}>What Is a Neural Network?</SidequestLink>{" "}
+              sidequest builds one by hand — one neuron, the ReLU bend, a live
+              17-parameter classifier — in a separate tab, without losing your
+              spot.
+            </>
+          }
         />
       );
   }

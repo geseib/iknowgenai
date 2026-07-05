@@ -67,6 +67,74 @@ src/course/
 Routing: `src/main.jsx` branches on pathname (`/course` → CourseApp, else K-8
 App). `vercel.json` has the SPA rewrite. Deep links: `/course#chapter-slug/3`.
 
+## Sidequests — optional deep dives
+
+Sidequests are self-contained deep dives (e.g. **Inside Attention**) launched
+from inline term-links in chapter prose. They open **in a new tab**, run in
+their own shell, and never touch main-course progress, numbering, or the quiz
+— skipping them costs nothing. Route namespace: `/course#sidequest/<slug>/<n>`.
+
+```
+src/course/
+  data/sidequests.js        # sidequest registry (slug, accent, slideCount, Component)
+  SidequestView.jsx         # shell: Sidequest badge, own slide dots, no progress writes
+  sidequests/Sq<Name>.jsx   # one file per sidequest, same {accent, slide} signature
+  ui/shared.jsx             # SidequestLink — the inline launcher (target=_blank)
+```
+
+To add a sidequest:
+
+1. **Create** `src/course/sidequests/Sq<Name>.jsx`. Same conventions as a
+   chapter (switch on `slide`, HonestNotes, in-browser real math or real
+   APIs). Slide 0 should say "this opened in its own tab; your place is
+   safe"; the last slide is a recap that ends with "close this tab and pick
+   the course back up."
+2. **Register** it in `src/course/data/sidequests.js` — `slideCount` must
+   exactly match the slide cases (the dots derive from it). Use the accent of
+   the act whose material it deepens.
+3. **Link** it from chapter prose with
+   `<SidequestLink slug="…" accent={accent}>term</SidequestLink>`.
+   Sparingly: one or two spots per concept (where the term is named, and/or
+   the chapter recap's `aside`), never inside a demo, and only from chapters
+   whose concepts the sidequest builds on (don't link math-heavy dives from
+   Act I).
+
+Shipped sidequests: **Inside Attention** (`attention`, linked from Ch9);
+**What Is a Neural Network?** (`neural-network`, linked from Ch10 — one
+neuron → ReLU → layers-as-matrices → a live 2-layer classifier → the
+transformer's MLP blocks);
+**How Networks Learn** (`gradient-descent`, linked from Ch4 — loss on a
+one-knob softmax model → the loss landscape → slope by nudging → the
+update rule with a breakable learning rate → a two-knob contour map →
+the honest bridge to backpropagation).
+
+Planned future sidequests: the MLP, backpropagation.
+
+## Glossary tooltips — inline definitions for jargon
+
+The lighter-weight sibling of sidequests. A term wrapped in `<Term>` gets a
+quiet **dashed** underline (dotted + chip = sidequest, dashed = glossary) and
+shows a small definition card on hover, keyboard focus, or tap (tap elsewhere
+or Escape closes; the card flips/clamps to stay on screen). Cards can carry an
+optional "Read more ↗" link that opens a canonical reference in a new tab.
+
+- **Definitions live in ONE file**: `src/course/data/glossary.js` —
+  `{ slug: { term, definition, link? } }`. Define once, use anywhere.
+- **Mark a term** in chapter prose:
+  `<Term t="softmax" accent={accent}>softmax</Term>`.
+  The primitive is in `src/course/ui/shared.jsx`.
+- **Sparing use, same spirit as sidequest links**: at most the first
+  meaningful occurrence per chapter; never inside headings, buttons, or
+  interactive demo regions; never nested in a `SidequestLink`; and never on
+  the slide that's *teaching* the term (the prose there already defines it) —
+  tooltip it where it's used in passing, before or after its teaching moment.
+- **Where a sidequest exists** (attention), link the sidequest — tooltips are
+  for lighter-weight terms.
+- **Definitions follow the course's honesty contract**: 1–3 sentences, plain
+  and confident, fact-checked, honest about simplification. Links are rare
+  and only for genuinely canonical, lay-readable references (3Blue1Brown,
+  the original paper, a first-rate explainer).
+
 ## API endpoints (shared with K-8; course behavior is opt-in)
 
 | Endpoint | Course flag | What the course uses it for |

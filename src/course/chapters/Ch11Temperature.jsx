@@ -3,7 +3,7 @@
 // decoding's failure, the temperature dial (live), the math, same-prompt-twice,
 // and top-p.
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { predictNext, generateStream } from "../lib/api.js";
 
@@ -232,8 +232,9 @@ export default function Ch11Temperature({ accent, slide }) {
             ))}
           </div>
           <HonestNote>
-            Precisely: the raw scores (logits) are divided by T before the
-            softmax step that turns them into probabilities. The name comes from
+            Precisely: the raw scores
+            (<Term t="logits" accent={accent}>logits</Term>) are divided by T
+            before the softmax step that turns them into probabilities. The name comes from
             physics — in thermodynamics, higher temperature means particles
             explore less-likely states, and the equation is literally the same
             (a Boltzmann distribution).
@@ -273,7 +274,8 @@ export default function Ch11Temperature({ accent, slide }) {
             don't expose temperature or top-p — the product picks sensible
             values behind the scenes, and every “regenerate” click is simply
             another roll of the same dice. The dials are there for developers,
-            through the APIs — which is exactly how this course reached them.
+            through the <Term t="api" accent={accent}>APIs</Term> — which is
+            exactly how this course reached them.
           </Prose>
         </Slide>
       );

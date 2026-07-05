@@ -3,7 +3,7 @@
 // and a live-updating vector, context moving a word across the meaning map,
 // the loaded final word, heads, and the Transformer.
 import { useRef, useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, SidequestLink, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { predictNext } from "../lib/api.js";
 
@@ -334,8 +334,9 @@ function LoadedWordSlide({ accent }) {
         </Card>
       )}
       <HonestNote>
-        The cargo bar is a cartoon, but the architecture is real: in a
-        transformer, the next-word probabilities are read off the final
+        The cargo bar is a cartoon, but the architecture is real: in a{" "}
+        <Term t="transformer" accent={accent}>transformer</Term>, the
+        next-word probabilities are read off the final
         position's vector after its last layer. Every earlier word contributes
         only by having been attended to — layer after layer — by that final
         position.
@@ -428,7 +429,8 @@ export default function Ch09Attention({ accent, slide }) {
           </Card>
           <Prose>
             Same token, same lookup, <strong>identical numbers</strong>. Step
-            two of Chapter 7 hands the model a vector that means “bat, some
+            two of Chapter 7 hands the model a{" "}
+            <Term t="vector" accent={accent}>vector</Term> that means “bat, some
             kind of.” If the meaning is going to sharpen, information has to
             flow in from the <em>other words in the sentence</em>.
           </Prose>
@@ -485,7 +487,7 @@ export default function Ch09Attention({ accent, slide }) {
             built around it is the <strong>Transformer</strong> — the T in GPT
             (Generative Pre-trained Transformer). It arrived in a 2017 paper
             with a title that turned out to be a prophecy:
-            <em> “Attention Is All You Need.”</em>
+            <em> “<Term t="attention-paper" accent={accent}>Attention Is All You Need</Term>.”</em>
           </Prose>
           <Prose>
             One detail worth getting right: in GPT-style models, attention is
@@ -512,6 +514,12 @@ export default function Ch09Attention({ accent, slide }) {
             scores every query against every key simultaneously. Weighted sums
             of values do the mixing. Same idea, industrial form.
           </HonestNote>
+          <Prose muted style={{ fontSize: 15 }}>
+            Want to see that industrial form with real numbers? The{" "}
+            <SidequestLink slug="attention" accent={accent}>Inside Attention</SidequestLink>{" "}
+            deep dive walks the full arithmetic on a four-word sentence. It's
+            optional, opens in a new tab, and your place here stays put.
+          </Prose>
         </Slide>
       );
     case 7:
@@ -526,6 +534,15 @@ export default function Ch09Attention({ accent, slide }) {
             "Many heads run in parallel, each tracking its own relationship. This is the Transformer — the T in GPT.",
           ]}
           next="Layers of Thought — attention runs once per layer, and there are ~100 layers. Time to stack."
+          aside={
+            <>
+              Curious how the “weighted mix” is actually computed? The optional{" "}
+              <SidequestLink slug="attention" accent={accent}>Inside Attention</SidequestLink>{" "}
+              sidequest does the math by hand — queries, keys,{" "}
+              <Term t="softmax" accent={accent}>softmax</Term>, the
+              mask — in a separate tab, without losing your spot.
+            </>
+          }
         />
       );
   }
