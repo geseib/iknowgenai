@@ -2,7 +2,7 @@
 // The central claim made rigorous: live ranked predictions, a human-vs-model
 // game, generation as prediction-in-a-loop, and the depth argument.
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, Recap, BlockedNote } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, Recap, BlockedNote, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { predictNext } from "../lib/api.js";
 
@@ -256,7 +256,8 @@ function LoopSlide({ accent }) {
       <Heading size="h2">Generation is prediction on repeat.</Heading>
       <Prose muted>
         Pick any candidate. It gets appended, and the model predicts again.
-        Congratulations — you are now the sampling algorithm.
+        Congratulations — you are now the{" "}
+        <Term t="sampling" accent={accent}>sampling algorithm</Term>.
       </Prose>
       <Card>
         <div style={{ fontFamily: FONTS.display, fontSize: 22, fontStyle: "italic", lineHeight: 1.7 }}>

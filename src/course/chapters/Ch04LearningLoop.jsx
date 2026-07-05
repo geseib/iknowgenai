@@ -2,7 +2,7 @@
 // Guess → check → adjust. The learner runs training steps by hand and watches
 // a model's guess distribution sharpen while its "loss" falls.
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, CountUp } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, CountUp, Term, SidequestLink } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 
 const TARGET = "two-tired";
@@ -199,11 +199,19 @@ export default function Ch04LearningLoop({ accent, slide }) {
           </Prose>
           <HonestNote>
             The dials in our demo wiggled decoratively; real training computes
-            exact nudges via an algorithm called backpropagation — it's
+            exact nudges via an algorithm called{" "}
+            <Term t="backprop" accent={accent}>backpropagation</Term> — it's
             calculus, not trial and error. And real training predicts every
             position across huge batches of text simultaneously, not one joke at
             a time.
           </HonestNote>
+          <Prose muted style={{ fontSize: 15 }}>
+            Want to walk downhill yourself? The{" "}
+            <SidequestLink slug="gradient-descent" accent={accent}>How Networks Learn</SidequestLink>{" "}
+            deep dive does the whole thing with real numbers — loss, slopes,
+            the update rule. It's optional, opens in a new tab, and your place
+            here stays put.
+          </Prose>
         </Slide>
       );
     case 5:
@@ -260,6 +268,15 @@ export default function Ch04LearningLoop({ accent, slide }) {
             "Run trillions of times, the loop grows a system that learned the patterns of language — not a list of memorized answers.",
           ]}
           next="What “Large” Means — just how big the data, the dials, and the compute really are."
+          aside={
+            <>
+              Curious what “nudge toward the right answer” looks like as actual
+              arithmetic? The optional{" "}
+              <SidequestLink slug="gradient-descent" accent={accent}>How Networks Learn</SidequestLink>{" "}
+              sidequest walks a tiny model downhill by hand — in a separate
+              tab, without losing your spot.
+            </>
+          }
         />
       );
   }

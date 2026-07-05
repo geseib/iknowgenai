@@ -2,7 +2,7 @@
 // The learner tries to write rules for English and watches edge cases destroy
 // them; then the pivot to learning from examples (and the bias seed).
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Mono, Recap } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Mono, Recap, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 
 // A rule and the words that break it. Learner tests each word, watches the
@@ -125,7 +125,8 @@ export default function Ch03WhyRulesFail({ accent, slide }) {
           </Prose>
           <Prose muted>
             This isn't hypothetical history. From the 1950s to the 1990s,
-            researchers built translation systems and “expert systems” from
+            researchers built translation systems and{" "}
+            “<Term t="expert-systems" accent={accent}>expert systems</Term>” from
             hand-written rules. They worked in narrow demos and broke everywhere
             else. Decades of effort never produced a machine that could hold a
             fluent conversation.

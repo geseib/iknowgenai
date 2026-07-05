@@ -2,7 +2,7 @@
 // Fixed compute per token → chain of thought → reasoning models with hidden
 // thinking (trained via RLVR) → the twist: thinking is also just prediction.
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { generateStream } from "../lib/api.js";
 
@@ -157,7 +157,8 @@ export default function Ch12ThinkingOutLoud({ accent, slide }) {
           <Kicker accent={accent}>Act IV · The Roll of the Dice — Chapter 12</Kicker>
           <Heading>Thinking Out Loud</Heading>
           <Lead>
-            Every token the model produces costs exactly one pass through the
+            Every <Term t="token" accent={accent}>token</Term> the model
+            produces costs exactly one pass through the
             machine — the same amount of computation whether the question is
             “what's 2+2” or “what caused World War I.” That's a problem, and
             the fix looks almost too simple.

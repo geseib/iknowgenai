@@ -1,7 +1,7 @@
 // Chapter 5 — What "Large" Means
 // The scale chapter: data, parameters, compute — then the name (LLM) and the
 // model families, placed here so "model" already means something.
-import { Slide, Kicker, Heading, Lead, Prose, Card, Mono, HonestNote, Recap, CountUp } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Mono, HonestNote, Recap, CountUp, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 
 function ScaleRow({ label, value, sub, accent, big }) {
@@ -108,7 +108,8 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
           <Heading size="h2">Months of warehouse-scale arithmetic.</Heading>
           <Prose>
             Training a frontier model means running the guess-check-adjust loop
-            on <strong>tens of thousands of specialized chips (GPUs) running in
+            on <strong>tens of thousands of specialized chips
+            (<Term t="gpu" accent={accent}>GPUs</Term>) running in
             parallel for months</strong>, in data centers drawing as much power
             as a small town. Training runs are estimated to cost from tens to
             hundreds of millions of dollars.
