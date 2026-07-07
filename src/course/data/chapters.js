@@ -82,7 +82,7 @@ export const CHAPTERS = [
     id: "attention", slug: "attention", num: 9, act: 3,
     title: "Attention",
     blurb: "How “bat” knows whether it's baseball or a cave — the trick that made modern AI possible.",
-    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[3], Component: Ch09,
+    minutes: 10, slideCount: 10, accent: ACT_ACCENTS[3], Component: Ch09,
   },
   {
     id: "layers-of-thought", slug: "layers-of-thought", num: 10, act: 3,
