@@ -13,6 +13,7 @@ import { ACT_ACCENTS } from "../styles/theme.js";
 import SqAttention from "../sidequests/SqAttention.jsx";
 import SqNeuralNetwork from "../sidequests/SqNeuralNetwork.jsx";
 import SqGradientDescent from "../sidequests/SqGradientDescent.jsx";
+import SqPositionBias from "../sidequests/SqPositionBias.jsx";
 
 export const SIDEQUESTS = [
   {
@@ -44,6 +45,16 @@ export const SIDEQUESTS = [
     accent: ACT_ACCENTS[2], // teal — it deepens Act II material (Ch4's learning loop)
     slideCount: 10,
     Component: SqGradientDescent,
+  },
+  {
+    slug: "position-bias",
+    title: "Where You Put It Matters",
+    blurb:
+      "Same words, different order, different answer. Lost in the Middle, the causal cause, prompt-order sensitivity, and why a 1M-token window isn't a fix.",
+    minutes: 12,
+    accent: ACT_ACCENTS[3], // violet — it deepens Act III material (Ch9's causal attention)
+    slideCount: 10,
+    Component: SqPositionBias,
   },
   // Future: "mlp", "backpropagation"
 ];

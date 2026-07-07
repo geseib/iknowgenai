@@ -106,7 +106,12 @@ transformer's MLP blocks);
 **How Networks Learn** (`gradient-descent`, linked from Ch4 — loss on a
 one-knob softmax model → the loss landscape → slope by nudging → the
 update rule with a breakable learning rate → a two-knob contour map →
-the honest bridge to backpropagation).
+the honest bridge to backpropagation);
+**Where You Put It Matters** (`position-bias`, linked from Ch9 and Ch13 —
+Lost in the Middle's U-curve → the causal/primacy/recency cause →
+prompt-order sensitivity (CQO vs QOC, few-shot order) → the 1M-token
+reality → needle-vs-associative retrieval; grounds every number in cited
+sources with honest footnotes on the still-emerging theory).
 
 Planned future sidequests: the MLP, backpropagation.
 
