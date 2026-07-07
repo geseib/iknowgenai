@@ -69,17 +69,23 @@ export function Lead({ children, style }) {
 }
 
 export function Prose({ children, muted = false, style, className }) {
+  // "prose-secondary" lets presentation mode hide the muted explanatory text
+  // (the speaker narrates it instead). See global.js `.presenting` rules.
+  const cls = [muted ? "prose-secondary" : "", className].filter(Boolean).join(" ");
   return (
-    <p className={className} style={{ fontSize: TYPE.body, color: muted ? COLORS.muted : COLORS.text, ...style }}>
+    <p className={cls || undefined} style={{ fontSize: TYPE.body, color: muted ? COLORS.muted : COLORS.text, ...style }}>
       {children}
     </p>
   );
 }
 
 // The course's credibility contract: every simplification gets flagged.
+// "honest-note" lets presentation mode hide it on the projected slide — the
+// caveat moves into the speaker's notes so it's still delivered out loud.
 export function HonestNote({ children }) {
   return (
     <div
+      className="honest-note"
       style={{
         borderLeft: `2px solid ${COLORS.faint}`,
         paddingLeft: SPACE.sm,
