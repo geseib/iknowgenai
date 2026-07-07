@@ -507,7 +507,10 @@ function CausalSlide({ accent }) {
         The quiet consequence: because each word absorbs only what came before
         it, the <em>later</em> a word sits, the more it has seen — which is
         exactly why the model reads its next-word guess off the very last
-        position.
+        position. It also means <em>where</em> you place a fact in the prompt
+        changes what can see it — a real, measurable effect the{" "}
+        <SidequestLink slug="position-bias" accent={accent}>Where You Put It Matters</SidequestLink>{" "}
+        sidequest explores.
       </Prose>
     </Slide>
   );

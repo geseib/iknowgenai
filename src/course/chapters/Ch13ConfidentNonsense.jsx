@@ -3,7 +3,7 @@
 // arithmetic limits, bias, the memory illusion, and the fixes: context, RAG,
 // tools/agents (live agent-loop demo), plus the buzzword decoder (MCP, skills).
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term, SidequestLink } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { generateStream, runAgent } from "../lib/api.js";
 
@@ -551,7 +551,10 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
                 system finds relevant documents (often using embeddings — your
                 Chapter 8 map, used as a search index!) and pastes them into the
                 prompt. This is how AI answers questions about today's news or
-                your company's files.
+                your company's files. Where those documents land in the prompt
+                turns out to matter as much as which ones you pick — the{" "}
+                <SidequestLink slug="position-bias" accent={accent}>Where You Put It Matters</SidequestLink>{" "}
+                sidequest shows why.
               </Prose>
             </Card>
             <Card>
