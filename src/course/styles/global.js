@@ -149,19 +149,19 @@ export const COURSE_CSS = `
   }
 }
 
-/* Presentation mode — a speaker drives; slides carry fewer words.
-   Secondary prose + honest footnotes drop off the projected slide (the
-   speaker delivers them from the notes panel), and everything scales up a
-   touch for a room. */
-.v2 .presenting .prose-secondary,
+/* Presentation mode — a speaker drives; the slide is headline + visual.
+   All body prose, leads, and honest footnotes drop off the projected slide
+   (the speaker delivers them from the notes panel), leaving the kicker,
+   heading, and the interactive/visual. Everything scales up for a room. */
+.v2 .presenting .present-hide,
 .v2 .presenting .honest-note {
   display: none !important;
 }
 .v2 .presenting .present-stage {
-  zoom: 1.12;
+  zoom: 1.18;
 }
 /* Fallback for engines without zoom: nudge base text up instead. */
 @supports not (zoom: 1) {
-  .v2 .presenting .present-stage { font-size: 1.08em; }
+  .v2 .presenting .present-stage { font-size: 1.12em; }
 }
 `;

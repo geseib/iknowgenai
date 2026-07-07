@@ -16,7 +16,11 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
   const [present, setPresent] = useState(() => {
     try { return localStorage.getItem("ikg.course.present") === "1"; } catch { return false; }
   });
-  const [notesOpen, setNotesOpen] = useState(true);
+  // Start with notes open on laptops (side-by-side), collapsed on phones where
+  // the panel would otherwise cover the slide — tap the edge tab to reveal.
+  const [notesOpen, setNotesOpen] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth > MOBILE_BREAK : true
+  );
   const togglePresent = useCallback(() => {
     setPresent((p) => {
       const nv = !p;
@@ -24,6 +28,16 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
       return nv;
     });
   }, []);
+
+  // Track viewport width so the header stays uncluttered (and the Present
+  // button stays visible) on phones. Recomputes on resize/rotation.
+  const [vw, setVw] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 1200));
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const mobile = vw <= MOBILE_BREAK;
 
   const builtIndex = BUILT_CHAPTERS.findIndex((c) => c.slug === chapter.slug);
   const nextChapter = BUILT_CHAPTERS[builtIndex + 1] || null;
@@ -125,9 +139,12 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
             </span>
             <button
               onClick={togglePresent}
-              style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint, padding: "6px 0" }}
+              style={{
+                fontFamily: FONTS.mono, fontSize: 12, color: chapter.accent,
+                padding: "7px 14px", border: `1px solid ${chapter.accent}66`, borderRadius: 999,
+              }}
             >
-              Exit present (P)
+              ✕ Exit
             </button>
           </>
         ) : (
@@ -138,11 +155,15 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
             >
               ← Syllabus
             </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: mobile ? 10 : 18 }}>
               <button
                 onClick={togglePresent}
                 title="Presentation mode (P)"
-                style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint, display: "flex", alignItems: "center", gap: 6, padding: "6px 0" }}
+                style={{
+                  fontFamily: FONTS.mono, fontSize: 12, fontWeight: 600, color: chapter.accent,
+                  display: "flex", alignItems: "center", gap: 6,
+                  padding: "7px 14px", border: `1px solid ${chapter.accent}`, borderRadius: 999,
+                }}
               >
                 ▶ Present
               </button>
@@ -153,7 +174,7 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
                 <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: chapter.accent }}>
                   {String(chapter.num).padStart(2, "0")}
                 </span>
-                <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span style={{ maxWidth: mobile ? 0 : 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {chapter.title}
                 </span>
                 <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint }}>
@@ -170,7 +191,9 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
         className="present-stage"
         style={{
           flex: 1, paddingTop: 56,
-          paddingRight: present && notesOpen ? 372 : 0,
+          // On phones the panel overlays the slide (toggle it); only reserve
+          // space for it on wider screens.
+          paddingRight: present && notesOpen && !mobile ? 372 : 0,
           transition: "padding-right .3s cubic-bezier(.4,0,.2,1)",
         }}
       >
