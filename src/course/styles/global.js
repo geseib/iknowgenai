@@ -148,4 +148,20 @@ export const COURSE_CSS = `
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Presentation mode — a speaker drives; slides carry fewer words.
+   Secondary prose + honest footnotes drop off the projected slide (the
+   speaker delivers them from the notes panel), and everything scales up a
+   touch for a room. */
+.v2 .presenting .prose-secondary,
+.v2 .presenting .honest-note {
+  display: none !important;
+}
+.v2 .presenting .present-stage {
+  zoom: 1.12;
+}
+/* Fallback for engines without zoom: nudge base text up instead. */
+@supports not (zoom: 1) {
+  .v2 .presenting .present-stage { font-size: 1.08em; }
+}
 `;

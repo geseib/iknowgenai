@@ -3,11 +3,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FONTS, COLORS, TYPE, SPACE, MOBILE_BREAK } from "./styles/theme.js";
 import { CHAPTERS, BUILT_CHAPTERS } from "./data/chapters.js";
+import SpeakerNotes from "./ui/SpeakerNotes.jsx";
+import { getSpeakerNotes } from "./data/speakerNotes.js";
 
 export default function ChapterView({ chapter, slide, progress, navigate }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [interstitial, setInterstitial] = useState(false);
   const touchStart = useRef(null);
+
+  // Presentation mode: a speaker drives, slides shed their secondary prose, and
+  // a notes panel rides along. The choice persists across slides and reloads.
+  const [present, setPresent] = useState(() => {
+    try { return localStorage.getItem("ikg.course.present") === "1"; } catch { return false; }
+  });
+  const [notesOpen, setNotesOpen] = useState(true);
+  const togglePresent = useCallback(() => {
+    setPresent((p) => {
+      const nv = !p;
+      try { localStorage.setItem("ikg.course.present", nv ? "1" : "0"); } catch { /* ignore */ }
+      return nv;
+    });
+  }, []);
 
   const builtIndex = BUILT_CHAPTERS.findIndex((c) => c.slug === chapter.slug);
   const nextChapter = BUILT_CHAPTERS[builtIndex + 1] || null;
@@ -47,6 +63,8 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
       if (e.key === "Escape") { setDrawerOpen(false); return; }
       if (drawerOpen) return;
+      if (e.key === "p" || e.key === "P") { togglePresent(); return; }
+      if (e.key === "n" || e.key === "N") { setNotesOpen((o) => !o); return; }
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
         next();
@@ -55,7 +73,7 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev, drawerOpen]);
+  }, [next, prev, drawerOpen, togglePresent]);
 
   // Horizontal swipe on touch devices.
   const onTouchStart = (e) => { touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
@@ -73,19 +91,22 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
 
   return (
     <div
+      className={present ? "presenting" : undefined}
       style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Progress bar */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 3, background: "rgba(255,255,255,.06)", zIndex: 60 }}>
-        <div
-          style={{
-            height: "100%", width: `${progressPct}%`, background: chapter.accent,
-            transition: "width 280ms cubic-bezier(.2,.7,.3,1)",
-          }}
-        />
-      </div>
+      {/* Progress bar — hidden while presenting for a cleaner screen */}
+      {!present && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 3, background: "rgba(255,255,255,.06)", zIndex: 60 }}>
+          <div
+            style={{
+              height: "100%", width: `${progressPct}%`, background: chapter.accent,
+              transition: "width 280ms cubic-bezier(.2,.7,.3,1)",
+            }}
+          />
+        </div>
+      )}
 
       {/* Header */}
       <div
@@ -93,39 +114,84 @@ export default function ChapterView({ chapter, slide, progress, navigate }) {
           position: "fixed", top: 3, left: 0, right: 0, zIndex: 50,
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: `${SPACE.sm}px ${SPACE.md}px`,
-          background: "linear-gradient(#0B0E14 55%, transparent)",
+          background: present ? "transparent" : "linear-gradient(#0B0E14 55%, transparent)",
         }}
       >
-        <button
-          onClick={() => navigate(null, 0, { push: true })}
-          style={{ fontSize: 14, fontWeight: 600, color: COLORS.muted, padding: "6px 0" }}
-        >
-          ← Syllabus
-        </button>
-        <button
-          onClick={() => setDrawerOpen(true)}
-          style={{ fontSize: 14, color: COLORS.muted, display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}
-        >
-          <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: chapter.accent }}>
-            {String(chapter.num).padStart(2, "0")}
-          </span>
-          <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {chapter.title}
-          </span>
-          <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint }}>
-            {slide + 1}/{chapter.slideCount}
-          </span>
-        </button>
+        {present ? (
+          <>
+            <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: chapter.accent, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: chapter.accent, display: "inline-block" }} />
+              PRESENTING
+            </span>
+            <button
+              onClick={togglePresent}
+              style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint, padding: "6px 0" }}
+            >
+              Exit present (P)
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate(null, 0, { push: true })}
+              style={{ fontSize: 14, fontWeight: 600, color: COLORS.muted, padding: "6px 0" }}
+            >
+              ← Syllabus
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <button
+                onClick={togglePresent}
+                title="Presentation mode (P)"
+                style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint, display: "flex", alignItems: "center", gap: 6, padding: "6px 0" }}
+              >
+                ▶ Present
+              </button>
+              <button
+                onClick={() => setDrawerOpen(true)}
+                style={{ fontSize: 14, color: COLORS.muted, display: "flex", alignItems: "center", gap: 10, padding: "6px 0" }}
+              >
+                <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: chapter.accent }}>
+                  {String(chapter.num).padStart(2, "0")}
+                </span>
+                <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {chapter.title}
+                </span>
+                <span style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.faint }}>
+                  {slide + 1}/{chapter.slideCount}
+                </span>
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Slide content */}
-      <div style={{ flex: 1, paddingTop: 56 }}>
+      {/* Slide content — pad right so the open notes panel never covers a demo */}
+      <div
+        className="present-stage"
+        style={{
+          flex: 1, paddingTop: 56,
+          paddingRight: present && notesOpen ? 372 : 0,
+          transition: "padding-right .3s cubic-bezier(.4,0,.2,1)",
+        }}
+      >
         {interstitial && nextChapter ? (
           <Interstitial chapter={chapter} nextChapter={nextChapter} onContinue={next} navigate={navigate} />
         ) : (
           <Component key={`${chapter.slug}-${slide}`} accent={chapter.accent} slide={slide} />
         )}
       </div>
+
+      {/* Speaker notes — only in presentation mode */}
+      {present && (
+        <SpeakerNotes
+          open={notesOpen}
+          onToggle={() => setNotesOpen((o) => !o)}
+          notes={getSpeakerNotes(chapter.slug, slide)}
+          accent={chapter.accent}
+          chapterTitle={`${String(chapter.num).padStart(2, "0")} · ${chapter.title}`}
+          slideLabel={interstitial ? "Chapter complete" : `Slide ${slide + 1} / ${chapter.slideCount}`}
+        />
+      )}
 
       {/* Footer nav */}
       <div
