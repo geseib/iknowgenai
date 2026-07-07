@@ -199,9 +199,9 @@ function MatrixGrid({ accent, filled, current, masked, showWeights }) {
                     background: dead
                       ? "rgba(224,108,117,.08)"
                       : isFilled ? `rgba(167,139,250,${0.06 + heat * 0.3})` : "transparent",
-                    fontFamily: FONTS.mono, fontSize: 13,
+                    fontFamily: FONTS.mono, fontSize: dead && !showWeights ? 15 : 13,
+                    fontWeight: dead && !showWeights ? 600 : 400,
                     color: dead ? COLORS.wrong : isFilled ? COLORS.text : COLORS.faint,
-                    textDecoration: dead && !showWeights ? "line-through" : "none",
                     transition: "background 280ms, color 280ms, border-color 280ms",
                   }}
                 >
@@ -391,6 +391,23 @@ function MaskSlide({ accent }) {
           {maskOn ? "Show the −∞ scores" : "Run softmax over the masked rows"}
         </Button>
       </div>
+      <Card style={{ borderColor: accent + "55", background: accent + "0d" }}>
+        <Mono style={{ fontSize: 11, color: accent, display: "block", marginBottom: 8 }}>
+          FUN FACT — WHY −∞ AND NOT JUST 0?
+        </Mono>
+        <Prose style={{ margin: 0 }}>
+          Because the score isn't the attention yet — it's the <em>input</em> to
+          softmax, which raises <Mono>e</Mono> to each value. Set a blocked
+          score to <Mono>0</Mono> and you get <Mono>e⁰ = 1</Mono>: a big,
+          positive number that, after normalizing, becomes a <em>real slice</em>
+          {" "}of the attention budget. You'd be telling the model to attend
+          {" "}<em>more</em> to the future, not less — the exact opposite of the
+          goal. Only <Mono>−∞</Mono> does the job, because{" "}
+          <Mono>e^(−∞) = 0</Mono> is the one value softmax collapses to exactly
+          zero. To erase a token you don't nudge its score down — you send it to
+          negative infinity.
+        </Prose>
+      </Card>
       <Prose muted style={{ fontSize: 15 }}>
         {maskOn ? (
           <>
