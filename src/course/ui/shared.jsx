@@ -61,17 +61,19 @@ export function Heading({ children, size = "h1", style }) {
 }
 
 export function Lead({ children, style }) {
+  // Narrative hook — hidden in presentation mode (the speaker delivers it).
   return (
-    <p style={{ fontSize: TYPE.lead, lineHeight: 1.55, color: COLORS.text, fontWeight: 400, ...style }}>
+    <p className="present-hide" style={{ fontSize: TYPE.lead, lineHeight: 1.55, color: COLORS.text, fontWeight: 400, ...style }}>
       {children}
     </p>
   );
 }
 
-export function Prose({ children, muted = false, style, className }) {
-  // "prose-secondary" lets presentation mode hide the muted explanatory text
-  // (the speaker narrates it instead). See global.js `.presenting` rules.
-  const cls = [muted ? "prose-secondary" : "", className].filter(Boolean).join(" ");
+export function Prose({ children, muted = false, style, className, keepInPresent = false }) {
+  // Presentation mode strips body prose off the slide so only the headline +
+  // the visual/interactive remain — the speaker narrates the rest. Pass
+  // keepInPresent on the rare line that must stay (e.g. Recap takeaways).
+  const cls = [keepInPresent ? "" : "present-hide", className].filter(Boolean).join(" ");
   return (
     <p className={cls || undefined} style={{ fontSize: TYPE.body, color: muted ? COLORS.muted : COLORS.text, ...style }}>
       {children}
@@ -193,7 +195,7 @@ export function Recap({ accent, lines, next, footnote, aside }) {
             <span style={{ color: accent, fontFamily: FONTS.mono, fontSize: 14 }}>
               {String(i + 1).padStart(2, "0")}
             </span>
-            <Prose>{line}</Prose>
+            <Prose keepInPresent>{line}</Prose>
           </div>
         ))}
       </div>
