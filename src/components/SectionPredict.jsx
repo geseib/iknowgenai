@@ -323,8 +323,18 @@ function MeaningLoadSlide({ color, gc }) {
   );
 }
 
-export default function SectionPredict({ color, mode, slide }) {
+export default function SectionPredict({ color, mode, slide: slideProp }) {
   const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 the question, 1 the
+  // meaning-load animation, 2 the ranked "voting" probability list, 3 the
+  // temperature slider, 4 the "Now you know how AI thinks!" grand recap takeaway.
+  // K-2 only shows 3 slides — without a remap it would render 0-2 and end on the
+  // ranked list's temperature cliffhanger (slide 2), never reaching the recap
+  // that closes the whole course. Route its 3 slides to question + the concrete
+  // "voting" list + the recap takeaway (dropping the more abstract meaning-load
+  // animation and the temperature demo). 3-5 / 7-8 (5 slides) are unchanged.
+  const K2_PRES_SLIDES = [0, 2, 4];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const gc = GRADE_EXAMPLES[grade].predict;
   const P_POSITIONS = gc.positions;
 

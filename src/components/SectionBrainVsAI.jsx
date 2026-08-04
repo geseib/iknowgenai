@@ -8,6 +8,7 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { useGrade } from "../data/GradeContext";
 
 const rows = [
   { topic: "How it learns",       brain: "From experience and practice",          ai: "From millions of training examples",     match: true },
@@ -140,7 +141,15 @@ function ComparisonCard({ row, color, pres }) {
   );
 }
 
-export default function SectionBrainVsAI({ color, mode, slide }) {
+export default function SectionBrainVsAI({ color, mode, slide: slideProp }) {
+  const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 intro, 1-6 three
+  // question/reveal pairs (rows 0/2/6), 7 the "AI is genuinely NEW" takeaway.
+  // K-2 only shows 4 slides — without a remap it would render 0-3 and end on the
+  // emotions *question* (slide 3), never reaching the takeaway. Route its 4 slides
+  // to intro + the emotions pair + takeaway. 3-5 / 7-8 (8 slides) are unchanged.
+  const K2_PRES_SLIDES = [0, 3, 4, 7];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);

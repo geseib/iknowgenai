@@ -5,6 +5,7 @@ import {
 } from "@phosphor-icons/react";
 import { Label, H1, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 import CatIllustration from "./CatIllustration";
+import { useGrade } from "../data/GradeContext";
 
 const notes = [
   "This is one of the most powerful moments in the lesson. Start by showing 'cat' and asking: 'When you see this word, what happens in your brain?' Give kids 30–60 seconds.",
@@ -134,7 +135,17 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionHook({ color, mode, slide }) {
+export default function SectionHook({ color, mode, slide: slideProp }) {
+  const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 bridge question,
+  // 1 "cat" prompt, 2 your brain floods (human side), 3 "but AI can't — all it
+  // sees is NUMBERS" pivot, 4 the "cat" -> 12,288 numbers ticker payoff.
+  // K-2 only shows 3 slides — without a remap it would render 0-2 and end on the
+  // *human* brain side (slide 2), never reaching the numbers reveal that is this
+  // section's whole point. Route its 3 slides to the human/AI/numbers contrast so
+  // it ends on the ticker payoff. 3-5 / 7-8 (5 slides) are unchanged.
+  const K2_PRES_SLIDES = [2, 3, 4];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);

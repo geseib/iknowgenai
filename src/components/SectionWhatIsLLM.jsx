@@ -10,6 +10,7 @@ import {
   VideoCamera,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { useGrade } from "../data/GradeContext";
 
 const ICON_MAP = {
   L0: Books,
@@ -52,7 +53,17 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
-export default function SectionWhatIsLLM({ color, mode, slide }) {
+export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
+  const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 intro (shows all
+  // three L-L-M boxes), 1 L=Large, 2 L=Language, 3 M=Model + the "massive
+  // mathematical system" synthesis takeaway, 4 bonus (not just text).
+  // K-2 only shows 3 slides — without a remap it would render 0-2 and end on
+  // "Language" (slide 2), never reaching the Model synthesis. Route its 3 slides
+  // to intro + Large + the Model takeaway (the intro already names all three
+  // words). 3-5 / 7-8 (5 slides) are unchanged.
+  const K2_PRES_SLIDES = [0, 1, 3];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);

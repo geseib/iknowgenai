@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
+import { useGrade } from "../data/GradeContext";
 
 const BAT_IMG_BASE = `${import.meta.env.BASE_URL}bat-baseball.png`;
 const BAT_IMG_ANIMAL = `${import.meta.env.BASE_URL}bat-animal.png`;
@@ -270,7 +271,18 @@ function ContinueButton({ onClick, color, label }) {
 }
 
 /* ── Main Section ───────────────────────────────────────────────────────────── */
-export default function SectionAttention({ color, mode, slide }) {
+export default function SectionAttention({ color, mode, slide: slideProp }) {
+  const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 big "bat", 1 reveal
+  // (two meanings, both right), 2 AI sees both... unless, 3 "it looks at the
+  // other words" tease title, 4 sentence-1 attention demo (baseball wins),
+  // 5 sentence-2 demo (animal wins), 6 the "That's ATTENTION!" takeaway.
+  // K-2 only shows 4 slides — without a remap it would render 0-3 and end on the
+  // tease title (slide 3), with no demonstration and no payoff. Route its 4
+  // slides to the setup (bat + two meanings) + one live demo + the takeaway.
+  // 3-5 / 7-8 (7 slides) are unchanged.
+  const K2_PRES_SLIDES = [0, 1, 4, 6];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const [step, setStep] = useState(0);
   const [guess, setGuess] = useState(null);
   const [s1words, setS1words] = useState(0);
