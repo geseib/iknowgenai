@@ -22,7 +22,7 @@ visually restrained, driven by "wait, how is that possible?"
   **Honest footnote** — the credibility contract with the audience.
 - **Playful but grown-up.** Wit stays; kid-styling goes.
 
-## The syllabus — 5 acts, 14 chapters (~105 min)
+## The syllabus — 5 acts, 14 chapters (~110 min)
 
 | # | Chapter | The beat | Signature demo |
 |---|---------|----------|----------------|

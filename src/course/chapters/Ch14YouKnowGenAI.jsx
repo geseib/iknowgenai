@@ -1,6 +1,6 @@
 // Chapter 14 — You Know GenAI
 // The payoff: Chapter 1's story returns with the pipeline annotated live,
-// the whole course in one map, a 12-question explained quiz, and the send-off.
+// the whole course in one map, a 13-question explained quiz, and the send-off.
 import { useRef, useState } from "react";
 import { Slide, Kicker, Heading, Lead, Prose, Card, Button, GhostButton, Mono, Recap } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";

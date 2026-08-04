@@ -1,8 +1,157 @@
 // Chapter 5 — What "Large" Means
 // The scale chapter: data, parameters, compute — then the name (LLM) and the
 // model families, placed here so "model" already means something.
-import { Slide, Kicker, Heading, Lead, Prose, Card, Mono, HonestNote, Recap, CountUp, Term } from "../ui/shared.jsx";
+import { useRef, useState } from "react";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, CountUp, BlockedNote, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
+import { tokenize } from "../lib/api.js";
+
+// Llama 3's publicly documented pretraining corpus: 15 trillion tokens.
+const TRAIN_TOKENS = 15e12;
+
+// Compact English for very large counts (used mid-animation, so keep it cheap).
+function bigWord(n) {
+  if (n >= 1e12) return `${(n / 1e12).toFixed(2)} trillion`;
+  if (n >= 1e9) return `${(n / 1e9).toFixed(0)} billion`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(0)} million`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(0)} thousand`;
+  return `${n}`;
+}
+
+const SCALE_PRESETS = [
+  "Hello.",
+  "The quick brown fox jumps over the lazy dog.",
+  "It was the best of times, it was the worst of times.",
+];
+
+// A canned, clearly-labelled stand-in for when the live tokenizer is
+// unreachable (e.g. running the site without the API, where /api/tokenize 404s).
+const CANNED = { text: "The quick brown fox jumps over the lazy dog.", count: 10 };
+
+function FeelTheScale({ accent }) {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState(null); // { count } | { error } | { canned, count }
+  const [loading, setLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const reqId = useRef(0); // ignore stale async responses so replays are clean
+
+  const run = async (text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const id = ++reqId.current;
+    setLoading(true);
+    setBlocked(false);
+    setResult(null);
+    try {
+      const data = await tokenize(trimmed);
+      if (id !== reqId.current) return;
+      if (data.blocked) setBlocked(true);
+      else setResult({ count: data.count });
+    } catch (err) {
+      if (id !== reqId.current) return;
+      setResult({ error: err.message });
+    }
+    if (id === reqId.current) setLoading(false);
+  };
+
+  const count = result?.count ?? (result?.error ? CANNED.count : 0);
+  const copies = count > 0 ? Math.round(TRAIN_TOKENS / count) : 0;
+
+  return (
+    <Slide wide>
+      <Kicker accent={accent}>Live — feel the scale</Kicker>
+      <Heading size="h2">How many of you fit inside a training set?</Heading>
+      <Prose muted>
+        Type or paste a sentence. We send it to the real tokenizer — the same
+        word-piece counter the labs use — then measure your text against Llama
+        3's 15-trillion-token training corpus.
+      </Prose>
+      <div style={{ display: "flex", gap: SPACE.xs, flexWrap: "wrap" }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && run(input)}
+          placeholder={SCALE_PRESETS[1]}
+          style={{ flex: 1, minWidth: 240 }}
+        />
+        <Button accent={accent} onClick={() => run(input)} disabled={loading}>
+          {loading ? "Measuring…" : "Measure"}
+        </Button>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {SCALE_PRESETS.map((p) => (
+          <button
+            key={p}
+            onClick={() => { setInput(p); run(p); }}
+            style={{ fontSize: 13, color: COLORS.muted, padding: "4px 10px", border: `1px solid ${COLORS.hairline}`, borderRadius: 999 }}
+          >
+            {p.length > 34 ? p.slice(0, 32) + "…" : p}
+          </button>
+        ))}
+      </div>
+
+      {blocked && <BlockedNote />}
+
+      {(result?.count || result?.error) && (
+        <Card>
+          {result?.error && (
+            <Mono style={{ fontSize: 12, color: COLORS.faint, display: "block", marginBottom: SPACE.sm }}>
+              EXAMPLE — couldn't reach the live tokenizer ({result.error}). Showing a
+              canned count for “{CANNED.text}”, not measured from your text.
+            </Mono>
+          )}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: SPACE.md, alignItems: "baseline" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ fontSize: 13, color: COLORS.muted }}>Your text</span>
+              <span style={{ fontFamily: FONTS.mono, fontSize: 28, color: COLORS.text, fontVariantNumeric: "tabular-nums" }}>
+                {count} tokens
+              </span>
+            </div>
+            <div style={{ fontSize: 22, color: COLORS.faint }}>→</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ fontSize: 13, color: COLORS.muted }}>Copies to fill the training set</span>
+              <CountUp
+                key={copies}
+                to={copies}
+                duration={1600}
+                format={(n) => `${bigWord(n)}×`}
+                style={{ fontSize: 34, color: accent }}
+              />
+            </div>
+          </div>
+
+          {/* Deterministic sliver visual: the whole bar is the corpus; your text
+              is a fixed 3px pixel pinned at the left. */}
+          <div style={{ marginTop: SPACE.md }}>
+            <div style={{ position: "relative", height: 16, borderRadius: 8, background: COLORS.surfaceRaised, overflow: "hidden" }}>
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: accent, boxShadow: `0 0 8px ${accent}` }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+              <Mono style={{ fontSize: 11, color: accent }}>your text</Mono>
+              <Mono style={{ fontSize: 11, color: COLORS.faint }}>15,000,000,000,000 tokens</Mono>
+            </div>
+          </div>
+
+          <Prose muted style={{ fontSize: 15, marginTop: SPACE.sm }}>
+            To reach the size of the training run, you'd have to copy your
+            sentence <strong style={{ color: accent }}>{bigWord(copies)}</strong> times
+            over. That glowing pixel on the left is you. The rest of the bar is
+            what the loop from last chapter actually read.
+          </Prose>
+        </Card>
+      )}
+
+      <HonestNote>
+        The token count is real — computed live by the same byte-pair tokenizer
+        the labs use (what a “token” even is gets its own chapter, 7). The
+        15-trillion figure is Meta's <em>documented</em> Llama 3 pretraining
+        corpus; other models differ (GPT-3 used a few hundred billion). The “×”
+        is just 15 trillion ÷ your token count — a scale cartoon, not a claim
+        your exact words appear in any model.
+      </HonestNote>
+    </Slide>
+  );
+}
 
 function ScaleRow({ label, value, sub, accent, big }) {
   return (
@@ -77,6 +226,8 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
         </Slide>
       );
     case 2:
+      return <FeelTheScale accent={accent} />;
+    case 3:
       return (
         <Slide>
           <Kicker accent={accent}>Number two — the dials</Kicker>
@@ -101,7 +252,7 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
           </HonestNote>
         </Slide>
       );
-    case 3:
+    case 4:
       return (
         <Slide>
           <Kicker accent={accent}>Number three — the compute</Kicker>
@@ -123,7 +274,7 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 4:
+    case 5:
       return (
         <Slide>
           <Kicker accent={accent}>Name it</Kicker>
@@ -147,7 +298,7 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 5:
+    case 6:
       return (
         <Slide wide>
           <Kicker accent={accent}>The players</Kicker>
@@ -179,7 +330,7 @@ export default function Ch05WhatLargeMeans({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 6:
+    case 7:
     default:
       return (
         <Recap
