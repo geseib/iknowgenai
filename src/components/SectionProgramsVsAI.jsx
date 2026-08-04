@@ -12,6 +12,7 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { useGrade } from "../data/GradeContext";
 
 const scenarios = [
   { Icon: Calculator,     label: "A calculator adds 2+2",              answer: "regular", why: "The rule '2+2=4' was written in by a programmer. It never learned — it just follows instructions." },
@@ -135,7 +136,16 @@ function ScenarioCard({ scenario, color, revealed, onReveal, pres }) {
   );
 }
 
-export default function SectionProgramsVsAI({ color, mode, slide }) {
+export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
+  const grade = useGrade();
+  // Band-aware presentation-slide remap. Authored slides: 0 intro, 1-4 two
+  // guess/reveal pairs, 5 the "programs follow RULES, AI LEARNS" takeaway.
+  // K-2 only shows 3 slides — without a remap it would render 0-2 and end on a
+  // pair *reveal* (slide 2), never reaching the takeaway. Route its 3 slides to a
+  // full guess/reveal pair + the takeaway (the unrevealed slide carries its own
+  // "AI or regular program?" framing). 3-5 / 7-8 (6 slides) are unchanged.
+  const K2_PRES_SLIDES = [1, 2, 5];
+  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState(new Set());
   const step1Ref = useRef(null);
