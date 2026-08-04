@@ -12,7 +12,7 @@ An interactive, presentation-style web app that teaches 3rd–5th graders how la
 | **Title** | How AI Thinks | How AI Actually Works |
 | **Audience** | Grades K-2 / 3-5 / 7-8, teacher-led or solo | Teens & adults, self-paced single track |
 | **Style** | Big, colorful, playful (cat included) | 3Blue1Brown-style: serif, dark, restrained |
-| **Shape** | Sections + grade bands + teacher notes | 14 chapters in 5 acts, ~110 min, final quiz |
+| **Shape** | Sections + grade bands + teacher notes | 15 chapters in 5 acts, ~110 min, final quiz |
 | **Demos** | Real AI + guided visuals | Real AI + live in-browser math — "no simulations" is a stated promise |
 | **Docs** | This README | [`docs/COURSE-14PLUS.md`](docs/COURSE-14PLUS.md) |
 

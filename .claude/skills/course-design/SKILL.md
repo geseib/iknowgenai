@@ -7,7 +7,7 @@ description: Design and flow conventions for the 14+ course ("How AI Actually Wo
 
 The 14+ course is a 3Blue1Brown-style guided tour of how LLMs work. When
 extending or editing it, follow these conventions exactly — they are what
-makes 14 chapters read as one piece. Full course map: `docs/COURSE-14PLUS.md`.
+makes 15 chapters read as one piece. Full course map: `docs/COURSE-14PLUS.md`.
 
 ## Chapter anatomy (the rhythm every chapter follows)
 

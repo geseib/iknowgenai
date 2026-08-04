@@ -1,5 +1,5 @@
 // Sidequest — Where You Put It Matters
-// The deep dive Chapter 9 (and Chapter 13) point at: if attention only looks
+// The deep dive Chapter 9 (and Chapter 14) point at: if attention only looks
 // backward, then WHERE information sits in the prompt changes the answer.
 // Lost in the Middle, the causal cause, prompt-order sensitivity, the reality
 // of 1M-token models, and needle-vs-reasoning. Every number on screen is
@@ -470,7 +470,7 @@ export default function SqPositionBias({ accent, slide }) {
           <Heading size="h2">Prompt-building is ordering, not just gathering.</Heading>
           <Prose>
             This is the quiet lesson behind a lot of “prompt engineering” and
-            <strong> RAG</strong> (Chapter 13). Retrieval decides <em>what</em>
+            <strong> RAG</strong> (Chapter 14). Retrieval decides <em>what</em>
             {" "}goes in the context; position bias means you also have to decide
             {" "}<em>where</em>. Two practical consequences fall straight out of
             everything you just watched:
