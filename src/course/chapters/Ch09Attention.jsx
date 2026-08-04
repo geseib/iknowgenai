@@ -2,15 +2,15 @@
 // The ambiguity problem ("bat"), a find-the-clues game with attention beams
 // and a live-updating vector, context moving a word across the meaning map,
 // the loaded final word, heads, and the Transformer.
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, SidequestLink, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
 import { predictNext } from "../lib/api.js";
 
 // Both sentences put every clue BEFORE "bat" on purpose: under the causal
 // rule (slide 5), a word can only look backward, so this is the only case
-// where "bat" can actually resolve itself. Slides 5-6 explore what happens
-// when the clues come later instead.
+// where "bat" can actually resolve itself. Slide 5 explores what happens
+// when the clues come later instead — and where the meaning goes then.
 const SENTENCES = [
   {
     words: ["With", "the", "ball", "pitched", "he", "swung", "the", "bat"],
@@ -432,6 +432,7 @@ function CausalSlide({ accent }) {
   const [sel, setSel] = useState(CAUSAL_WORDS.length - 1); // default: "cave" sees all
   const { pos, total } = rowLayout(CAUSAL_WORDS);
   const H = 104, BASE = 68;
+  const BAT_IDX = 1;
 
   return (
     <Slide wide>
@@ -487,6 +488,13 @@ function CausalSlide({ accent }) {
       <Prose muted style={{ fontSize: 15, minHeight: "3em" }}>
         {sel === 0 ? (
           <><Mono accent={accent}>“A”</Mono> is the first word — nothing sits behind it to look at yet.</>
+        ) : sel === BAT_IDX ? (
+          <>
+            <Mono accent={accent}>“bat”</Mono> sits near the front. It can look
+            back at <Mono accent={accent}>“A,”</Mono> and that's all — the clue
+            that it's an <em>animal</em> is still ahead, invisible to it. So
+            “bat” has to stay fuzzy.
+          </>
         ) : (
           <>
             <Mono accent={accent}>“{CAUSAL_WORDS[sel]}”</Mono> can look at the {sel} word{sel > 1 ? "s" : ""} before it. The
@@ -494,170 +502,35 @@ function CausalSlide({ accent }) {
           </>
         )}
       </Prose>
+      <Prose muted>
+        Here's the trap, and the payoff. A person reaches{" "}
+        <Mono accent={accent}>“cave,”</Mono> realises “bat” meant the animal, and
+        <em> goes back and rewrites “bat.”</em> A model can't — “bat” already
+        passed under the rule. <strong>You rewind; a model can't.</strong> So the
+        resolved meaning has nowhere to go but <em>forward</em>: it collects in{" "}
+        <Mono accent={accent}>“cave,”</Mono> a later word that <em>was</em>
+        allowed to look back. (Try it — tap “bat,” then tap “cave.”)
+      </Prose>
       <HonestNote>
         This one-directional constraint has a name: <strong>causal masking</strong>.
         In a GPT-style model, every score a word would give a <em>later</em> word
         is forced to zero before it can matter. Encoder models (like BERT) drop
         the mask and read both ways — but then they can't generate text one word
-        at a time. Want to watch the mask zero out real numbers? The{" "}
+        at a time. “Packs forward” is a simplification too: real models stack
+        ~100 layers, so information does creep around over many passes — but no
+        single position ever attends forward. That's Chapter 1's blindfold, made
+        mechanical. Want to watch the mask zero out real numbers? The{" "}
         <SidequestLink slug="attention" accent={accent}>Inside Attention</SidequestLink>{" "}
         sidequest does it by hand.
       </HonestNote>
       <Prose muted style={{ fontSize: 15 }}>
-        The quiet consequence: because each word absorbs only what came before
-        it, the <em>later</em> a word sits, the more it has seen — which is
-        exactly why the model reads its next-word guess off the very last
-        position. It also means <em>where</em> you place a fact in the prompt
-        changes what can see it — a real, measurable effect the{" "}
+        The same rule explains one more thing: because the <em>later</em> a word
+        sits the more it has seen, the model reads its next-word guess off the
+        very last position. And it means <em>where</em> you place a fact in the
+        prompt changes what can see it — a real, measurable effect the{" "}
         <SidequestLink slug="position-bias" accent={accent}>Where You Put It Matters</SidequestLink>{" "}
         sidequest explores.
       </Prose>
-    </Slide>
-  );
-}
-
-// ---- You rewind. A model can't. (forward-packing) ---------------------------
-const VS_WORDS = ["A", "bat", "flew", "into", "the", "cave"];
-
-function VsRow({ states, arcs, accent }) {
-  const { pos, total } = rowLayout(VS_WORDS, { charW: 8.2, gap: 12, start: 10 });
-  const H = 78, BASE = 46;
-  return (
-    <svg viewBox={`0 0 ${total} ${H}`} style={{ width: "100%", display: "block" }}>
-      {arcs.map((a, i) => {
-        const from = pos[a.from].cx, to = pos[a.to].cx;
-        return (
-          <path
-            key={i}
-            d={`M ${from} ${BASE - 15} Q ${(from + to) / 2} ${BASE - 15 - a.lift} ${to} ${BASE - 15}`}
-            fill="none" stroke={accent} strokeWidth="2"
-            strokeDasharray={a.dashed ? "5 4" : "none"} opacity="0.9"
-          />
-        );
-      })}
-      {VS_WORDS.map((w, i) => {
-        const s = states[i] || {};
-        let stroke = "rgba(255,255,255,.14)", fill = "transparent", tf = COLORS.muted, dash = "none";
-        if (s.reading) { stroke = COLORS.text; tf = COLORS.text; }
-        if (s.locked) { stroke = COLORS.faint; tf = COLORS.faint; dash = "3 3"; }
-        if (s.fixed || s.filled) { stroke = accent; fill = accent + "2e"; tf = accent; }
-        return (
-          <g key={i}>
-            <rect
-              x={pos[i].x - 5} y={BASE - 18} width={pos[i].width + 10} height={26} rx={7}
-              fill={fill} stroke={stroke} strokeWidth="1.3" strokeDasharray={dash}
-              style={{ transition: "all 320ms" }}
-            />
-            <text
-              x={pos[i].cx} y={BASE} textAnchor="middle" fontSize="13.5"
-              fontFamily="'JetBrains Mono', monospace" fill={tf}
-              style={{ transition: "fill 320ms" }}
-            >
-              {w}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-const VS_HUMAN_CAP = [
-  "Reads left to right, holding a fuzzy sense of “bat.”",
-  "Hits “bat” — could be animal or object. Holds it loosely.",
-  "Reaches “cave” — now it's obvious: the flying animal.",
-  "Goes back and rewrites “bat” itself. The past is edited.",
-];
-const VS_AI_CAP = [
-  "Reads left to right too — but under the backward-only rule.",
-  "At “bat”: nothing ahead to look at yet. It stays fuzzy.",
-  "At “cave”: now it can look back — at “bat” and “flew.”",
-  "“bat” stays locked. The whole picture piles into “cave” instead.",
-];
-
-function ForwardPackSlide({ accent }) {
-  const [hp, setHp] = useState(0);
-  const [ap, setAp] = useState(0);
-  const [tag, setTag] = useState(false);
-  const [status, setStatus] = useState("same sentence, same clues, two different strategies");
-  const runToken = useRef(0);
-  const timers = useRef([]);
-
-  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
-  useEffect(() => clearTimers, []);
-
-  const play = () => {
-    const token = ++runToken.current;
-    clearTimers();
-    setHp(0); setAp(0); setTag(false);
-    setStatus("reading …");
-    const T = (fn, ms) => timers.current.push(setTimeout(() => { if (runToken.current === token) fn(); }, ms));
-    T(() => setHp(1), 300);
-    T(() => setHp(2), 2000);
-    T(() => setHp(3), 3000);
-    T(() => setAp(1), 600);
-    T(() => setAp(2), 2300);
-    T(() => setAp(3), 3200);
-    T(() => { setTag(true); setStatus("done — one edits the past, the other builds forward"); }, 4200);
-  };
-
-  // Human: reads bat → reads cave → goes back and rewrites bat in place.
-  const humanStates = [];
-  if (hp === 1) humanStates[1] = { reading: true };
-  if (hp === 2) humanStates[5] = { reading: true };
-  if (hp >= 3) humanStates[1] = { fixed: true };
-  const humanArcs = hp >= 3 ? [{ from: 5, to: 1, lift: 34, dashed: true }] : [];
-
-  // AI: reads bat (then locked) → reads cave → cave attends back to bat + flew.
-  const aiStates = [];
-  if (ap === 1) aiStates[1] = { reading: true };
-  if (ap >= 2) aiStates[1] = { locked: true };
-  if (ap === 2) aiStates[5] = { reading: true };
-  if (ap >= 3) aiStates[5] = { filled: true };
-  const aiArcs = ap >= 3 ? [{ from: 5, to: 1, lift: 40 }, { from: 5, to: 2, lift: 24 }] : [];
-
-  const panel = { flex: "1 1 320px", background: COLORS.surface, border: `1px solid ${COLORS.hairline}`, borderRadius: 14, padding: SPACE.md };
-  const label = { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: COLORS.faint, display: "block", marginBottom: 10 };
-  const cap = { fontFamily: FONTS.mono, fontSize: 12.5, lineHeight: 1.5, color: COLORS.muted, minHeight: "3em", marginTop: 8 };
-
-  return (
-    <Slide wide>
-      <Kicker accent={accent}>The counterintuitive part</Kicker>
-      <Heading size="h2">You rewind. A model can't.</Heading>
-      <Prose muted>
-        Read this: <em>“A bat flew into the cave.”</em> The word “bat” comes
-        first — before any clue that it's an animal. Watch a person and a model
-        handle that same problem in completely different ways.
-      </Prose>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: SPACE.sm }}>
-        <div style={panel}>
-          <span style={label}>A person reading</span>
-          <VsRow states={humanStates} arcs={humanArcs} accent={accent} />
-          <div style={cap}>{VS_HUMAN_CAP[hp]}</div>
-        </div>
-        <div style={panel}>
-          <span style={label}>A model reading</span>
-          <VsRow states={aiStates} arcs={aiArcs} accent={accent} />
-          <div style={cap}>{VS_AI_CAP[ap]}</div>
-        </div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: SPACE.sm, flexWrap: "wrap" }}>
-        <Button accent={accent} onClick={play}>{hp === 0 && ap === 0 ? "Play both →" : "Replay"}</Button>
-        <Mono style={{ fontSize: 12, color: COLORS.faint }}>{status}</Mono>
-      </div>
-      <Prose style={{ fontSize: 16, textAlign: "center", opacity: tag ? 1 : 0.25, transition: "opacity 500ms" }}>
-        A person rewrites the past. A model can't — so it packs the meaning
-        <em> forward</em> instead.
-      </Prose>
-      <HonestNote>
-        Where does “bat's” meaning go, then? Since the model can never reach
-        back and update “bat,” the resolved picture — the cave that a real,
-        animal bat just flew into — collects in <strong>“cave,”</strong> a later
-        word that <em>was</em> allowed to look back. The meaning isn't lost; it
-        lives downstream. (Real models stack ~100 layers, so information does
-        creep around over many passes — but no single position ever attends
-        forward. That's Chapter 1's blindfold, made mechanical.)
-      </HonestNote>
     </Slide>
   );
 }
@@ -709,8 +582,6 @@ export default function Ch09Attention({ accent, slide }) {
     case 5:
       return <CausalSlide accent={accent} />;
     case 6:
-      return <ForwardPackSlide accent={accent} />;
-    case 7:
       return (
         <Slide>
           <Kicker accent={accent}>Not one spotlight — dozens</Kicker>
@@ -741,7 +612,7 @@ export default function Ch09Attention({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 8:
+    case 7:
       return (
         <Slide>
           <Kicker accent={accent}>Name it</Kicker>
@@ -782,7 +653,7 @@ export default function Ch09Attention({ accent, slide }) {
           </Prose>
         </Slide>
       );
-    case 9:
+    case 8:
     default:
       return (
         <Recap

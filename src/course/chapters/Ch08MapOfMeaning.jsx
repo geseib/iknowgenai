@@ -1,7 +1,7 @@
 // Chapter 8 — A Map of Meaning
 // The embedding scatter (live API), meaning-as-direction, the dimension
-// staircase, and the near-orthogonality playground: how 12,288 dimensions
-// hold millions of concepts (superposition).
+// staircase, and the near-orthogonality demo: how 12,288 dimensions hold
+// millions of concepts (superposition).
 import { useMemo, useState } from "react";
 import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, BlockedNote, CountUp, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
@@ -93,81 +93,7 @@ function ScatterDemo({ accent }) {
   );
 }
 
-// ---- 2D interference playground -------------------------------------------
-const CONCEPTS_2D = ["cat", "finance", "jazz", "gravity", "sarcasm", "pizza", "chess", "rain"];
-
-function Interference2D({ accent }) {
-  const [n, setN] = useState(2);
-  const spacing = 180 / n; // vectors spread evenly across a half-plane
-  const overlap = Math.cos((spacing * Math.PI) / 180);
-
-  return (
-    <Slide wide>
-      <Kicker accent={accent}>The problem, in two dimensions</Kicker>
-      <Heading size="h2">Unrelated should mean perpendicular.</Heading>
-      <Prose muted>
-        “Cat” and “finance” have nothing to do with each other — their
-        directions should meet at 90°, so that moving along one doesn't move
-        you along the other. Keep adding concepts and watch what 2D does.
-      </Prose>
-      <div style={{ display: "flex", gap: SPACE.md, flexWrap: "wrap", alignItems: "center" }}>
-        <Card style={{ padding: SPACE.sm, flex: "0 0 auto" }}>
-          <svg viewBox="-125 -122 250 145" style={{ width: 310, display: "block" }}>
-            <circle cx="0" cy="0" r="100" fill="none" stroke="rgba(255,255,255,.08)" />
-            {Array.from({ length: n }, (_, i) => {
-              const deg = i * spacing;
-              const rad = (deg * Math.PI) / 180;
-              const x = Math.cos(rad) * 100;
-              const y = -Math.sin(rad) * 100;
-              const color = DOT_COLORS[i % DOT_COLORS.length];
-              return (
-                <g key={i} className="reveal">
-                  <line x1="0" y1="0" x2={x} y2={y} stroke={color} strokeWidth="1.8" />
-                  <text
-                    x={x * 1.1} y={y * 1.1 + 2}
-                    textAnchor={Math.abs(x) < 40 ? "middle" : x > 0 ? "start" : "end"}
-                    fontSize="9" fill={color} fontFamily="Inter, sans-serif"
-                  >
-                    {CONCEPTS_2D[i]}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-        </Card>
-        <div style={{ flex: 1, minWidth: 240, display: "flex", flexDirection: "column", gap: SPACE.sm }}>
-          <div style={{ display: "flex", gap: SPACE.xs }}>
-            <Button accent={accent} onClick={() => setN((v) => Math.min(v + 1, CONCEPTS_2D.length))} disabled={n >= CONCEPTS_2D.length}>
-              Add a concept
-            </Button>
-            <Button accent="transparent" style={{ border: `1px solid ${COLORS.hairline}`, color: COLORS.muted }} onClick={() => setN(2)}>
-              Reset
-            </Button>
-          </div>
-          <Card>
-            <div style={{ fontFamily: FONTS.mono, fontSize: 14, lineHeight: 2 }}>
-              <div>concepts: <span style={{ color: accent }}>{n}</span></div>
-              <div>closest pair: <span style={{ color: spacing >= 89 ? COLORS.correct : spacing >= 45 ? "#E5B567" : COLORS.wrong }}>{spacing.toFixed(0)}°</span></div>
-              <div>overlap: <span style={{ color: overlap <= 0.02 ? COLORS.correct : overlap <= 0.72 ? "#E5B567" : COLORS.wrong }}>{(overlap * 100).toFixed(0)}%</span></div>
-            </div>
-          </Card>
-          <Prose muted style={{ fontSize: 15 }}>
-            {n === 2
-              ? "Two concepts fit perfectly — 90° apart, zero overlap."
-              : `With ${n} concepts, the closest pair is only ${spacing.toFixed(0)}° apart. Nudge “${CONCEPTS_2D[0]}” and you smear ${(overlap * 100).toFixed(0)}% of that nudge onto “${CONCEPTS_2D[1]}”. The concepts are bleeding into each other.`}
-          </Prose>
-        </div>
-      </div>
-      <Prose>
-        In 2D, only <strong>2</strong> directions can be mutually perpendicular.
-        In 12,288 dimensions, only 12,288 can. And a model knows millions of
-        things. So how does this possibly work?
-      </Prose>
-    </Slide>
-  );
-}
-
-// ---- High-dimensional near-orthogonality demo ------------------------------
+// ---- Counting problem lead-in + high-dimensional near-orthogonality demo --
 // Seeded PRNG so the demo is stable across replays.
 function mulberry32(seed) {
   return function () {
@@ -199,9 +125,51 @@ function pairwiseAngles(d, N = 30, seed = 7) {
   return angles;
 }
 
+// Small, static illustration of the crowding problem in 2D — a compressed
+// stand-in for what used to be its own interactive playground slide. Real
+// trigonometry, just fixed at one crowded arrangement instead of a slider.
+const MINI_CONCEPTS = ["cat", "finance", "jazz", "gravity", "sarcasm", "rain"];
+
+function MiniInterference() {
+  const n = MINI_CONCEPTS.length;
+  const spacing = 180 / (n - 1);
+  return (
+    <Card style={{ padding: SPACE.sm, display: "flex", gap: SPACE.md, alignItems: "center", flexWrap: "wrap" }}>
+      <svg viewBox="-105 -102 210 122" style={{ width: 220, flex: "0 0 auto", display: "block" }}>
+        <circle cx="0" cy="0" r="100" fill="none" stroke="rgba(255,255,255,.08)" />
+        {MINI_CONCEPTS.map((word, i) => {
+          const rad = (i * spacing * Math.PI) / 180;
+          const x = Math.cos(rad) * 100;
+          const y = -Math.sin(rad) * 100;
+          const color = DOT_COLORS[i % DOT_COLORS.length];
+          return (
+            <g key={word}>
+              <line x1="0" y1="0" x2={x} y2={y} stroke={color} strokeWidth="1.6" />
+              <text
+                x={x * 1.12} y={y * 1.12 + 2}
+                textAnchor={Math.abs(x) < 30 ? "middle" : x > 0 ? "start" : "end"}
+                fontSize="8" fill={color} fontFamily="Inter, sans-serif"
+              >
+                {word}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <Prose muted style={{ flex: 1, minWidth: 200, fontSize: 15 }}>
+        Six unrelated concepts, squeezed into 2 dimensions: only{" "}
+        <strong>2</strong> directions here can be truly perpendicular, so the
+        rest are forced to lean on each other — about {spacing.toFixed(0)}°
+        apart at best. In 12,288 dimensions, only 12,288 directions can be
+        exactly perpendicular too. A model needs millions.
+      </Prose>
+    </Card>
+  );
+}
+
 const DIM_STEPS = [2, 3, 10, 100, 1000, 12288];
 
-function HighDimDemo({ accent }) {
+function CountingProblemDemo({ accent }) {
   const [step, setStep] = useState(0);
   const d = DIM_STEPS[step];
   const angles = useMemo(() => pairwiseAngles(d), [d]);
@@ -210,12 +178,21 @@ function HighDimDemo({ accent }) {
 
   return (
     <Slide wide>
-      <Kicker accent={accent}>Computed live, right now, in your browser</Kicker>
-      <Heading size="h2">The high-dimensional loophole.</Heading>
+      <Kicker accent={accent}>The counting problem — solved live, in your browser</Kicker>
+      <Heading size="h2">12,288 axes. Millions of ideas.</Heading>
+      <Prose>
+        A <Term t="frontier" accent={accent}>frontier model</Term> knows about
+        cats, jazz, tax law, sarcasm, Python, the French Revolution, and
+        roughly everything else humans have written down —{" "}
+        <strong>millions of distinct concepts</strong>. If every concept
+        needed its own private, perpendicular axis, the model would need
+        millions of dimensions. It has twelve thousand.
+      </Prose>
+      <MiniInterference />
       <Prose muted>
-        30 <em>random</em> directions — 435 pairs of angles between them,
-        genuinely computed as you move the slider. Watch what happens to the
-        angles as the space grows.
+        The map should be hopelessly overcrowded. Watch what actually happens
+        to random directions as the space grows: 30 of them, 435 pairs of
+        angles between them, genuinely computed as you move the slider.
       </Prose>
       <Card>
         <div style={{ display: "flex", alignItems: "center", gap: SPACE.sm, marginBottom: SPACE.sm, flexWrap: "wrap" }}>
@@ -261,7 +238,7 @@ function HighDimDemo({ accent }) {
       </Card>
       <Prose>
         {d <= 3
-          ? "In 2 or 3 dimensions, random directions collide constantly — some pairs nearly parallel, some nearly opposite. This is the overcrowding from the last slide."
+          ? "In 2 or 3 dimensions, random directions collide constantly — some pairs nearly parallel, some nearly opposite. This is the overcrowding from above, playing out live."
           : d < 1000
             ? "The dots are pulling toward 90°. Random directions in higher dimensions are automatically more independent — no planning required."
             : <>At {d.toLocaleString()} dimensions, every pair is within a couple of degrees of perpendicular — <strong>by pure accident</strong>. Read that as capacity: you could add concept #31 <em>blindfolded</em>, as a random direction, and it would land almost perpendicular to all 30 existing ones. The map isn't crowded. It's practically empty.</>}
@@ -411,12 +388,26 @@ function CapacityDemo({ accent }) {
         </div>
       </Card>
       <Prose muted style={{ fontSize: 15 }}>{caption}</Prose>
+      <Prose>
+        Almost perpendicular is good enough: demand perfection and you get
+        thousands of concepts; accept <em>almost</em> and you get more than
+        there are atoms. And the tiny overlaps “almost” leaves behind aren't
+        even a bug — “cat” overlapping slightly with “dog,” a little with
+        “pet” — that residue of interference <em>is</em> similarity. The map
+        stores relatedness in exactly the imperfection it couldn't avoid.
+      </Prose>
       <HonestNote>
-        “At least” is doing real work: these come from a standard
+        “At least” is doing real work above: these come from a standard
         random-packing bound (about e^(d·ε²⁄4) directions fit with pairwise
         angles within ε of 90°) — the true maximum is even larger, and at
         exactly 90° the answer is exactly d. The point survives any choice of
-        constants: capacity is <em>exponential in dimensions</em>.
+        constants: capacity is <em>exponential in dimensions</em>. Researchers
+        call concepts sharing dimensions like this{" "}
+        <strong>superposition</strong>, and reading these tangled directions
+        back out of real models is an active field (
+        <Term t="interpretability" accent={accent}>mechanistic interpretability</Term>
+        ) — the packing math is solid; how models exploit it is still being
+        mapped.
       </HonestNote>
     </Slide>
   );
@@ -506,64 +497,10 @@ export default function Ch08MapOfMeaning({ accent, slide }) {
         </Slide>
       );
     case 4:
-      return (
-        <Slide>
-          <Kicker accent={accent}>The counting problem</Kicker>
-          <Heading size="h2">12,288 axes. Millions of ideas.</Heading>
-          <Prose>
-            A <Term t="frontier" accent={accent}>frontier model</Term> knows
-            about cats, jazz, tax law, sarcasm, Python,
-            the French Revolution, and roughly everything else humans have
-            written down — <strong>millions of distinct concepts</strong>.
-          </Prose>
-          <Prose>
-            If every concept needed its own private, perpendicular axis, the
-            model would need millions of dimensions. It has twelve thousand.
-            The map should be hopelessly overcrowded — concepts trampling each
-            other everywhere.
-          </Prose>
-          <Lead style={{ color: accent }}>
-            It isn't. The escape hatch is one of the most beautiful facts in
-            this course — and you can watch it happen.
-          </Lead>
-        </Slide>
-      );
+      return <CountingProblemDemo accent={accent} />;
     case 5:
-      return <Interference2D accent={accent} />;
-    case 6:
-      return <HighDimDemo accent={accent} />;
-    case 7:
       return <CapacityDemo accent={accent} />;
-    case 8:
-      return (
-        <Slide>
-          <Kicker accent={accent}>So what</Kicker>
-          <Heading size="h2">Almost perpendicular is good enough.</Heading>
-          <Prose>
-            That's the loophole, now with numbers attached: demand perfection
-            and you get thousands of concepts; accept <em>almost</em> and you
-            get more than there are atoms. The map was never overcrowded —
-            high dimensions are unimaginably roomier than 3D intuition
-            suggests, and the exponential only ignites at scale. A small model
-            couldn't do this.
-          </Prose>
-          <Prose>
-            And the tiny overlaps that “almost” leaves behind? They're not even
-            a bug. “Cat” overlapping slightly with “dog,” a little with “pet,”
-            barely with “jazz” — that residue of interference <em>is</em>
-            similarity. The map stores relatedness in exactly the imperfection
-            it couldn't avoid.
-          </Prose>
-          <HonestNote>
-            Researchers call concepts-sharing-dimensions <strong>superposition</strong>,
-            and reading these tangled directions back out of real models is an
-            active field
-            (<Term t="interpretability" accent={accent}>mechanistic interpretability</Term>). The exponential-packing
-            fact is solid math; how models exploit it is still being mapped.
-          </HonestNote>
-        </Slide>
-      );
-    case 9:
+    case 6:
     default:
       return (
         <Recap

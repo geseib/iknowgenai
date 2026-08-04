@@ -58,7 +58,7 @@ export const CHAPTERS = [
     id: "what-large-means", slug: "what-large-means", num: 5, act: 2,
     title: "What “Large” Means",
     blurb: "Trillions of words, billions of dials, months of compute. The scale that makes it work.",
-    minutes: 6, slideCount: 7, accent: ACT_ACCENTS[2], Component: Ch05,
+    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[2], Component: Ch05,
   },
   {
     id: "raised-by-humans", slug: "raised-by-humans", num: 6, act: 2,
@@ -76,13 +76,13 @@ export const CHAPTERS = [
     id: "map-of-meaning", slug: "map-of-meaning", num: 8, act: 3,
     title: "A Map of Meaning",
     blurb: "Every word is a point in a space with thousands of dimensions — and the space is roomier than it has any right to be.",
-    minutes: 10, slideCount: 10, accent: ACT_ACCENTS[3], Component: Ch08,
+    minutes: 7, slideCount: 7, accent: ACT_ACCENTS[3], Component: Ch08,
   },
   {
     id: "attention", slug: "attention", num: 9, act: 3,
     title: "Attention",
     blurb: "How “bat” knows whether it's baseball or a cave — the trick that made modern AI possible.",
-    minutes: 10, slideCount: 10, accent: ACT_ACCENTS[3], Component: Ch09,
+    minutes: 9, slideCount: 9, accent: ACT_ACCENTS[3], Component: Ch09,
   },
   {
     id: "layers-of-thought", slug: "layers-of-thought", num: 10, act: 3,
