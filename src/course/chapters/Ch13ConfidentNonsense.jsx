@@ -1,11 +1,12 @@
 // Chapter 13 — Confident Nonsense
-// Hallucination (live trap-question demo), why it's built in, cutoff and
-// arithmetic limits, bias, the memory illusion, and the fixes: context, RAG,
-// tools/agents (live agent-loop demo), plus the buzzword decoder (MCP, skills).
+// The failure half: hallucination (live trap-question demo), why it's built in,
+// the knowledge-cutoff and arithmetic walls, inherited bias, and the memory
+// illusion. Every failure follows directly from the mechanism. The fixes get
+// their own chapter (Chapter 14 — Fixing the Context).
 import { useState } from "react";
-import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term, SidequestLink } from "../ui/shared.jsx";
+import { Slide, Kicker, Heading, Lead, Prose, Card, Button, Mono, HonestNote, Recap, Term } from "../ui/shared.jsx";
 import { FONTS, COLORS, SPACE } from "../styles/theme.js";
-import { generateStream, runAgent } from "../lib/api.js";
+import { generateStream } from "../lib/api.js";
 
 const FAKE_BOOK = "“The Cartographer's Breakfast” by Miriam Vale";
 const TRAP_PROMPT = `What year did the children's book ${FAKE_BOOK.replace(/[“”]/g, '"')} win the Caldecott Medal, and what is the story about?`;
@@ -184,252 +185,6 @@ function MemoryDemo({ accent }) {
   );
 }
 
-// ---- Live agent loop ---------------------------------------------------------
-const AGENT_TOOLS = [
-  { id: "calculator", label: "calculator" },
-  { id: "get_date", label: "today's date" },
-  { id: "search_docs", label: "doc search" },
-];
-const AGENT_PRESETS = [
-  "What is 847 × 293?",
-  "What day is it today?",
-  "How far away is the Moon?",
-];
-
-function AgentDemo({ accent }) {
-  const [enabled, setEnabled] = useState(new Set(AGENT_TOOLS.map((t) => t.id)));
-  const [prompt, setPrompt] = useState("");
-  const [steps, setSteps] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [lastHadTools, setLastHadTools] = useState(true);
-
-  const toggle = (id) =>
-    setEnabled((s) => {
-      const next = new Set(s);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
-  const run = async (text) => {
-    if (!text.trim()) return;
-    setLoading(true);
-    setSteps(null);
-    setLastHadTools(enabled.size > 0);
-    try {
-      const data = await runAgent(text, [...enabled]);
-      setSteps(data.steps || []);
-    } catch (err) {
-      setSteps([{ type: "response", content: `Couldn't reach the agent: ${err.message}` }]);
-    }
-    setLoading(false);
-  };
-
-  const usedTools = steps?.some((s) => s.type === "tool_call");
-
-  return (
-    <Slide wide>
-      <Kicker accent={accent}>Live — a real agent loop</Kicker>
-      <Heading size="h2">Give it hands. Then take them away.</Heading>
-      <Prose muted>
-        A real model, a real loop, three real tools. Ask a question and watch
-        the think → act → observe cycle — then switch the tools off and ask
-        the same question again.
-      </Prose>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <Mono style={{ fontSize: 11, color: COLORS.faint }}>TOOLS:</Mono>
-        {AGENT_TOOLS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => toggle(t.id)}
-            style={{
-              fontSize: 13, padding: "6px 14px", borderRadius: 999,
-              fontFamily: FONTS.mono,
-              border: `1px solid ${enabled.has(t.id) ? accent : COLORS.hairline}`,
-              background: enabled.has(t.id) ? accent + "22" : "transparent",
-              color: enabled.has(t.id) ? accent : COLORS.faint,
-              transition: "all 200ms",
-            }}
-          >
-            {enabled.has(t.id) ? "● " : "○ "}{t.label}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: SPACE.xs, flexWrap: "wrap" }}>
-        <input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && run(prompt)}
-          placeholder={AGENT_PRESETS[0]}
-          style={{ flex: 1, minWidth: 240 }}
-        />
-        <Button accent={accent} onClick={() => run(prompt)} disabled={loading}>
-          {loading ? "Running…" : "Ask"}
-        </Button>
-      </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {AGENT_PRESETS.map((p) => (
-          <button
-            key={p}
-            onClick={() => { setPrompt(p); run(p); }}
-            style={{ fontSize: 13, color: COLORS.muted, padding: "4px 10px", border: `1px solid ${COLORS.hairline}`, borderRadius: 999 }}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
-      {loading && <Prose muted style={{ fontSize: 14 }}>think → act → observe…</Prose>}
-      {steps && (
-        <Card>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {steps.map((s, i) => {
-              if (s.type === "tool_call") {
-                return (
-                  <div key={i} className="reveal" style={{ animationDelay: `${i * 150}ms`, fontFamily: FONTS.mono, fontSize: 13.5 }}>
-                    <span style={{ color: COLORS.faint }}>ACT&nbsp;&nbsp;&nbsp;&nbsp;</span>
-                    <span style={{ color: accent }}>→ {s.tool}({s.input})</span>
-                  </div>
-                );
-              }
-              if (s.type === "tool_result") {
-                return (
-                  <div key={i} className="reveal" style={{ animationDelay: `${i * 150}ms`, fontFamily: FONTS.mono, fontSize: 13.5 }}>
-                    <span style={{ color: COLORS.faint }}>OBSERVE&nbsp;</span>
-                    <span style={{ color: COLORS.correct }}>← {String(s.output).slice(0, 120)}{String(s.output).length > 120 ? "…" : ""}</span>
-                  </div>
-                );
-              }
-              return (
-                <div key={i} className="reveal" style={{ animationDelay: `${i * 150}ms`, fontSize: 15.5, lineHeight: 1.65, paddingTop: 4 }}>
-                  <Mono style={{ fontSize: 11, color: COLORS.faint, display: "block", marginBottom: 4 }}>ANSWER</Mono>
-                  {s.content}
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-      {steps && !loading && (
-        <Prose muted style={{ fontSize: 15 }} className="reveal">
-          {usedTools
-            ? "Every → line is the model writing a structured request; every ← line is a real program's result going back into the context. The model never calculated anything — it delegated, then continued the text."
-            : lastHadTools
-              ? "No tools were needed for that one — try the multiplication, or switch tools off and watch it cope alone."
-              : "No hands. Now it can only predict — watch it guess at math, not know today's date, and improvise around missing facts. Switch the tools back on and ask again."}
-        </Prose>
-      )}
-    </Slide>
-  );
-}
-
-// ---- The buzzword decoder ------------------------------------------------------
-const BUZZWORDS = [
-  {
-    term: "Function calling / tool use",
-    def: "The model writes a structured request; the app runs it and puts the result in the context. You just watched it happen.",
-  },
-  {
-    term: "MCP — Model Context Protocol",
-    def: "A standard plug for the above. Instead of every app hand-wiring every tool, MCP defines one common way to offer models tools and data — like USB: build a tool once, and any AI app can connect it. The name says it plainly: a protocol for getting things into the model's context.",
-  },
-  {
-    term: "Skills",
-    def: "Packaged know-how — instructions, examples, sometimes scripts — that an agent loads into its context when the task calls for it. A skill doesn't change the model; it's pre-written expertise stuffed into the prompt at the right moment.",
-  },
-  {
-    term: "Agents",
-    def: "The loop that uses all of the above: think → act → observe → repeat, with a menu of tools and a shelf of skills. The intelligence is the model; the agent is the harness around it.",
-  },
-];
-
-function BuzzwordSlide({ accent }) {
-  return (
-    <Slide wide>
-      <Kicker accent={accent}>The buzzword decoder</Kicker>
-      <Heading size="h2">MCP, skills, agents — you already understand them.</Heading>
-      <Prose muted>
-        The AI world mints jargon fast. Here's the secret: every term on this
-        list is a different answer to the one question this chapter is about —
-        <em> what should go in the context?</em>
-      </Prose>
-      <div style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
-        {BUZZWORDS.map((b, i) => (
-          <div key={b.term} className="reveal" style={{ animationDelay: `${i * 130}ms` }}>
-            <Card>
-              <Mono accent={accent} style={{ fontSize: 13 }}>{b.term.toUpperCase()}</Mono>
-              <Prose muted style={{ fontSize: 15, marginTop: 6 }}>{b.def}</Prose>
-            </Card>
-          </div>
-        ))}
-      </div>
-      <Prose muted style={{ fontSize: 15 }}>
-        So when a product page says an agent “uses MCP tools and custom
-        skills,” you can translate fluently: a prediction loop, a standard way
-        to hand it tools, and pre-written context loaded on demand. The model
-        underneath is the same machine you've known since Chapter 1.
-      </Prose>
-    </Slide>
-  );
-}
-
-const CONTEXT_FACTS = `Here are the facts: "The Cartographer's Breakfast" is a fictional book invented for an AI course. It has no author, no publication year, and has won no awards.`;
-
-function ContextFixDemo({ accent }) {
-  const [output, setOutput] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const run = async () => {
-    setLoading(true);
-    setOutput("");
-    try {
-      const r = await generateStream(`${CONTEXT_FACTS}\n\nQuestion: ${TRAP_PROMPT}`, {
-        temperature: 0.5, maxTokens: 90, onToken: (_, t) => setOutput(t),
-      });
-      setOutput(r.blocked ? "(blocked — try again)" : r.text);
-    } catch (err) {
-      setOutput(`Couldn't reach the model: ${err.message}`);
-    }
-    setLoading(false);
-  };
-
-  return (
-    <Slide wide>
-      <Kicker accent={accent}>Fix one — live</Kicker>
-      <Heading size="h2">Hand it the truth.</Heading>
-      <Prose>
-        Same trap question — but this time the prompt <em>starts</em> with the
-        facts. The most likely continuation of text-that-contains-the-answer is
-        the answer.
-      </Prose>
-      <Card>
-        <Mono style={{ fontSize: 12, color: accent }}>ADDED TO THE PROMPT</Mono>
-        <div style={{ fontSize: 15, color: COLORS.muted, marginTop: 4, fontStyle: "italic" }}>{CONTEXT_FACTS}</div>
-      </Card>
-      <div>
-        <Button accent={accent} onClick={run} disabled={loading}>
-          {loading ? "Asking…" : output !== null ? "Ask again" : "Ask with the facts included"}
-        </Button>
-      </div>
-      {output !== null && (
-        <Card style={{ borderColor: accent + "44" }}>
-          <Mono style={{ fontSize: 11, color: COLORS.faint }}>MODEL</Mono>
-          <div style={{ fontSize: 16, marginTop: 6, lineHeight: 1.7 }}>
-            {output}{loading && <span style={{ animation: "v2Blink 1s infinite" }}>▌</span>}
-          </div>
-        </Card>
-      )}
-      {output && !loading && (
-        <Prose muted style={{ fontSize: 15 }} className="reveal">
-          Grounded. This is <strong>context stuffing</strong> — the simplest
-          fix, and the reason “paste in the document you're asking about” works
-          so well. Its limit is obvious: someone has to know which facts to
-          paste.
-        </Prose>
-      )}
-    </Slide>
-  );
-}
-
 export default function Ch13ConfidentNonsense({ accent, slide }) {
   switch (slide) {
     case 0:
@@ -502,7 +257,8 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
           <Prose muted>
             Neither of these is a bug to be patched out of the model. Both are
             consequences of what a language model <em>is</em>. The fixes, it
-            turns out, all live outside the model — coming up shortly.
+            turns out, all live outside the model — the whole of the next
+            chapter.
           </Prose>
         </Slide>
       );
@@ -537,70 +293,18 @@ export default function Ch13ConfidentNonsense({ accent, slide }) {
     case 5:
       return <MemoryDemo accent={accent} />;
     case 6:
-      return <ContextFixDemo accent={accent} />;
-    case 7:
-      return (
-        <Slide>
-          <Kicker accent={accent}>Fixes two and three</Kicker>
-          <Heading size="h2">Let it look things up. Let it act.</Heading>
-          <div style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
-            <Card>
-              <Mono accent={accent} style={{ fontSize: 13 }}>RAG — RETRIEVAL-AUGMENTED GENERATION</Mono>
-              <Prose muted style={{ fontSize: 15, marginTop: 6 }}>
-                Context stuffing, automated. Before the model answers, a search
-                system finds relevant documents (often using embeddings — your
-                Chapter 8 map, used as a search index!) and pastes them into the
-                prompt. This is how AI answers questions about today's news or
-                your company's files. Where those documents land in the prompt
-                turns out to matter as much as which ones you pick — the{" "}
-                <SidequestLink slug="position-bias" accent={accent}>Where You Put It Matters</SidequestLink>{" "}
-                sidequest shows why.
-              </Prose>
-            </Card>
-            <Card>
-              <Mono accent={accent} style={{ fontSize: 13 }}>TOOLS</Mono>
-              <Prose muted style={{ fontSize: 15, marginTop: 6 }}>
-                The model writes a structured request — <Mono>calculator(347 × 862)</Mono> —
-                a real program runs it, and the result goes back into the
-                context. Prediction machine for the language, actual calculator
-                for the math. Each side does what it's good at.
-              </Prose>
-            </Card>
-            <Card>
-              <Mono accent={accent} style={{ fontSize: 13 }}>AGENTS</Mono>
-              <Prose muted style={{ fontSize: 15, marginTop: 6 }}>
-                Put it in a loop: <em>think → act → observe → repeat</em>. The
-                model plans, calls a tool, reads the result, and decides what to
-                do next — reasoning (Chapter 12) plus tools, on repeat. That
-                loop is what people mean by “AI agents.”
-              </Prose>
-            </Card>
-          </div>
-          <Prose muted style={{ fontSize: 15 }}>
-            Notice the shape of all three fixes: none of them change the model.
-            They change <strong>what's in the{" "}
-            <Term t="context" accent={accent}>context</Term></strong> — because the one
-            thing you can always trust the machine to do is continue the text
-            it was given. Next slide: run the agent loop for real.
-          </Prose>
-        </Slide>
-      );
-    case 8:
-      return <AgentDemo accent={accent} />;
-    case 9:
-      return <BuzzwordSlide accent={accent} />;
-    case 10:
     default:
       return (
         <Recap
           accent={accent}
           lines={[
             "Hallucination isn't a glitch — a plausibility machine sides with plausible when truth and plausibility disagree, and its confident tone is style, not evidence.",
-            "The cutoff, the arithmetic weakness, and inherited bias all follow directly from how the machine is built and trained.",
-            "The model remembers nothing between messages: chat apps resend the whole transcript every turn (caching the repeated work) and inject saved notes to fake long-term memory.",
-            "The fixes — context, memory notes, RAG, tools, agents — and the buzzwords around them (MCP, skills) all answer one question: what should go in the context?",
+            "The knowledge cutoff and the arithmetic weakness aren't bugs to patch out: they're consequences of what a language model is and how it was trained.",
+            "Inherited bias comes from the same place — the model absorbs the skew in its examples exactly as faithfully as it absorbs grammar.",
+            "It remembers nothing between messages: the frozen weights don't change, so any 'memory' is text an app resends or injects — not something inside the model.",
           ]}
-          next="You Know GenAI — the story from Chapter 1 returns, and this time you can narrate every step. Then: prove it."
+          footnote="Every one of these limits traces to a mechanism from an earlier chapter — plausibility (4), the cutoff and tokenized numbers (7), example-learning (3), frozen weights (5/6). None is a random defect."
+          next="Fixing the Context — every fix changes what the model is given, not the model itself."
         />
       );
   }

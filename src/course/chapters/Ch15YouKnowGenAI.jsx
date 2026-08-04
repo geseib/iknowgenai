@@ -1,4 +1,4 @@
-// Chapter 14 — You Know GenAI
+// Chapter 15 — You Know GenAI
 // The payoff: Chapter 1's story returns with the pipeline annotated live,
 // the whole course in one map, a 13-question explained quiz, and the send-off.
 import { useRef, useState } from "react";
@@ -328,10 +328,10 @@ export default function Ch14YouKnowGenAI({ accent, slide }) {
     case 0:
       return (
         <Slide>
-          <Kicker accent={accent}>Act V · Powers and Limits — Chapter 14</Kicker>
+          <Kicker accent={accent}>Act V · Powers and Limits — Chapter 15</Kicker>
           <Heading>You Know GenAI</Heading>
           <Lead>
-            Thirteen chapters ago, a machine wrote a story one word at a time
+            Fourteen chapters ago, a machine wrote a story one word at a time
             and we called it impossible. Time to collect on everything you've
             learned.
           </Lead>

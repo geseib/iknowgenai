@@ -22,7 +22,7 @@ visually restrained, driven by "wait, how is that possible?"
   **Honest footnote** — the credibility contract with the audience.
 - **Playful but grown-up.** Wit stays; kid-styling goes.
 
-## The syllabus — 5 acts, 14 chapters (~110 min)
+## The syllabus — 5 acts, 15 chapters (~110 min)
 
 | # | Chapter | The beat | Signature demo |
 |---|---------|----------|----------------|
@@ -43,8 +43,9 @@ visually restrained, driven by "wait, how is that possible?"
 | 11 | Temperature | Greedy decoding fails; dice; top-p; apps hide the dials | Live temperature dial; same-prompt-twice experiment |
 | 12 | Thinking Out Loud | Chain of thought; reasoning models; hidden thinking tokens; RLVR ties back | Live direct-vs-step-by-step arithmetic; hidden-trace reveal |
 | **Act V — Powers and Limits** ||||
-| 13 | Confident Nonsense | Hallucination, cutoff, arithmetic, bias, no memory; fixes: context, RAG, tools, agents, MCP, skills | Live hallucination trap; memory-illusion chat replay; live agent loop with toggleable tools; buzzword decoder |
-| 14 | You Know GenAI | The payoff + proof | Annotated pipeline replay of Ch1's story; 13-question quiz with per-option explanations |
+| 13 | Confident Nonsense | Hallucination, cutoff, arithmetic, bias, no memory — every failure follows from the mechanism | Live hallucination trap; memory-illusion chat replay |
+| 14 | Fixing the Context | The fixes change what the model is given, not the model: context, RAG, tools, agents, MCP, skills | Context-stuffing fix; live agent loop with toggleable tools; buzzword decoder |
+| 15 | You Know GenAI | The payoff + proof | Annotated pipeline replay of Ch1's story; 13-question quiz with per-option explanations |
 
 ## Architecture
 

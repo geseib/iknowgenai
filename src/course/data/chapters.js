@@ -15,7 +15,8 @@ import Ch10 from "../chapters/Ch10LayersOfThought.jsx";
 import Ch11 from "../chapters/Ch11Temperature.jsx";
 import Ch12 from "../chapters/Ch12ThinkingOutLoud.jsx";
 import Ch13 from "../chapters/Ch13ConfidentNonsense.jsx";
-import Ch14 from "../chapters/Ch14YouKnowGenAI.jsx";
+import Ch14 from "../chapters/Ch14FixingTheContext.jsx";
+import Ch15 from "../chapters/Ch15YouKnowGenAI.jsx";
 
 export const COURSE_TITLE = "How AI Actually Works";
 export const COURSE_TAGLINE =
@@ -105,14 +106,20 @@ export const CHAPTERS = [
   {
     id: "confident-nonsense", slug: "confident-nonsense", num: 13, act: 5,
     title: "Confident Nonsense",
-    blurb: "Hallucinations, bias, no memory, knowledge cutoffs — why they happen, and the fixes: context, RAG, tools, agents, MCP, skills.",
-    minutes: 11, slideCount: 11, accent: ACT_ACCENTS[5], Component: Ch13,
+    blurb: "Hallucinations, bias, no memory, knowledge cutoffs — why every failure follows directly from the mechanism.",
+    minutes: 6, slideCount: 7, accent: ACT_ACCENTS[5], Component: Ch13,
   },
   {
-    id: "you-know-genai", slug: "you-know-genai", num: 14, act: 5,
+    id: "fixing-the-context", slug: "fixing-the-context", num: 14, act: 5,
+    title: "Fixing the Context",
+    blurb: "None of the fixes change the model — they change what it's given: context, RAG, tools, agents, and the buzzwords around them.",
+    minutes: 6, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch14,
+  },
+  {
+    id: "you-know-genai", slug: "you-know-genai", num: 15, act: 5,
     title: "You Know GenAI",
     blurb: "The story from Chapter 1 again — but this time, you can narrate every step of the machine. Then prove it.",
-    minutes: 10, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch14,
+    minutes: 10, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch15,
   },
 ];
 

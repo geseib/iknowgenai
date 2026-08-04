@@ -6,7 +6,7 @@ This repo hosts **two courses in one app**:
    K-2/3-5/7-8, teacher notes, playful neon design, cat mascot. Lives in
    `src/App.jsx` + `src/components/Section*.jsx` + `src/data/`.
 2. **14+ course** ("How AI Actually Works") — at `/course`. Single track,
-   14 chapters, refined design, final quiz. Lives entirely in `src/course/`.
+   15 chapters, refined design, final quiz. Lives entirely in `src/course/`.
    Full documentation: `docs/COURSE-14PLUS.md`. Design/flow conventions for
    editing it: the `course-design` skill in `.claude/skills/`.
 
