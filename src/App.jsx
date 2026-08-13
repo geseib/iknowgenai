@@ -153,9 +153,6 @@ const PRESENTATION_SKIP = {
 // Custom event for sections to signal they're fully revealed
 const SECTION_DONE_EVENT = "sectionFullyRevealed";
 
-// Map URL hash fragments to section indices
-const HASH_SECTIONS = { "try-it": SECTIONS_V1.length - 1 };
-
 // AI Cat: V2 section indices where the cat appears, with per-slide quotes
 // Each entry: { slide: number, quotes: string[] }
 const CAT_SECTIONS = {
@@ -245,22 +242,81 @@ const CAT_SECTIONS = {
   },
 };
 
+// Standalone playground shown for the /#try-it deep-link (the slide QR code).
+// Self-contained: its own grade context, styles, and background — so it works
+// on a phone without any of the presentation flow/flags being active.
+function TryItStandalone() {
+  const [grade, setGrade] = useState("3-5");
+  const color = "#9b5de5";
+  return (
+    <GradeContext.Provider value={grade}>
+      <style>{ALL_CSS}</style>
+      <div style={{
+        minHeight: "100vh", background: "#050512", color: "white",
+        fontFamily: "'Nunito',sans-serif", padding: "32px 18px 64px",
+      }}>
+        <div style={{ maxWidth: 720, margin: "0 auto" }}>
+          <h1 style={{
+            fontFamily: "'Fredoka',sans-serif", textAlign: "center",
+            fontSize: 34, margin: "8px 0 6px", color,
+          }}>
+            Try It Yourself!
+          </h1>
+          <p style={{
+            textAlign: "center", color: "rgba(255,255,255,.6)",
+            margin: "0 0 24px", fontSize: 16,
+          }}>
+            Use real AI — predict words, tokenize text, explore Word Space, and generate.
+          </p>
+          <div style={{
+            display: "flex", gap: 8, justifyContent: "center",
+            marginBottom: 28, flexWrap: "wrap",
+          }}>
+            {GRADES.map((g) => (
+              <button
+                key={g}
+                onClick={() => setGrade(g)}
+                style={{
+                  padding: "8px 18px", borderRadius: 999, cursor: "pointer",
+                  fontFamily: "'Fredoka',sans-serif", fontSize: 15,
+                  border: `2px solid ${grade === g ? color : "rgba(255,255,255,.18)"}`,
+                  background: grade === g ? `${color}22` : "transparent",
+                  color: grade === g ? "white" : "rgba(255,255,255,.6)",
+                }}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+          <SectionTryIt color={color} mode="scroll" slide={1} />
+        </div>
+      </div>
+    </GradeContext.Provider>
+  );
+}
+
 export default function App() {
   // If ?join=CODE is in the URL, render the mobile join page
   if (JOIN_CODE) {
     return <JoinRoom code={JOIN_CODE.toUpperCase()} />;
   }
 
-  // Check for hash deep-link on initial load
-  const hashTarget = window.location.hash.replace("#", "");
-  const deepLink = HASH_SECTIONS[hashTarget];
+  // Deep-link: /#try-it opens the interactive playground on its own, so a
+  // student can scan the slide's QR and use it on their device regardless of
+  // which flow flags (v1/v2/v3) the visitor happens to have saved. Rendering
+  // it standalone avoids the section-index machinery, whose ordering differs
+  // per flag version (the old flat-index deep-link landed on the wrong
+  // section — or nothing at all — and showed a blank screen).
+  if (window.location.hash.replace("#", "") === "try-it") {
+    return <TryItStandalone />;
+  }
 
   const [flags, setFlags] = useState(loadFlags);
-  const [mode, setMode] = useState(deepLink != null ? "student" : null);
+  const [mode, setMode] = useState(null);
   const [grade, setGrade] = useState("3-5");
   const [session, setSession] = useState(0);
-  const [sec, setSec] = useState(deepLink != null ? deepLink : 0);
-  const [slide, setSlide] = useState(deepLink != null ? 1 : 0);
+  const [sec, setSec] = useState(0);
+  const [slide, setSlide] = useState(0);
   const [done, setDone] = useState(new Set());
   const [navOpen, setNavOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
