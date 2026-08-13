@@ -72,7 +72,7 @@ export const SESSION_CONFIG = {
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: [5, 6, 7, 9, 10, 12],
+        sections: [5, 7, 9, 10, 12],
         review: [
           {
             question: "What did we build with AI last time?",
@@ -133,7 +133,7 @@ export const SESSION_CONFIG = {
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: [6, 7, 8, 9, 10, 11, 12, 13],
+        sections: [7, 8, 9, 10, 11, 12, 13],
         review: [
           {
             question: "What did we build with AI last time?",
