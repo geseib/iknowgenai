@@ -76,7 +76,7 @@ export const GRADE_CONFIG = {
       5,  // 10: Numbers & Words
       7,  // 11: Tokens — Not Quite Words
       8,  // 12: Words in Space
-      6,  // 13: Beyond 2D
+      0,  // 13: Beyond 2D — CUT (folded into §12 Words in Space)
       7,  // 14: Attention
       4,  // 15: The Thinking Layer
       2,  // 16: Rinse & Repeat
