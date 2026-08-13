@@ -49,7 +49,7 @@ export const GRADE_CONFIG = {
       8,  // 12: Words in Space
       0,  // 13: Beyond 2D — SKIP
       7,  // 14: Attention
-      4,  // 15: The Thinking Layer
+      5,  // 15: The Thinking Layer (+ Michael Jordan facts-are-stored intro)
       2,  // 16: Rinse & Repeat
       5,  // 17: Predict!
       2,  // 18: Try It!
@@ -78,7 +78,7 @@ export const GRADE_CONFIG = {
       8,  // 12: Words in Space
       0,  // 13: Beyond 2D — CUT (folded into §12 Words in Space)
       7,  // 14: Attention
-      4,  // 15: The Thinking Layer
+      5,  // 15: The Thinking Layer (+ Michael Jordan facts-are-stored intro)
       2,  // 16: Rinse & Repeat
       5,  // 17: Predict!
       2,  // 18: Try It!

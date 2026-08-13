@@ -432,6 +432,7 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
     if (slide === 4) return (
       <PresSlide>
         <BatAttentionAnim
+          key="bat-baseball"
           words={BAT_S1}
           batIdx={3}
           clueIndices={[1, 5, 7]}
@@ -449,6 +450,7 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
     if (slide === 5) return (
       <PresSlide>
         <BatAttentionAnim
+          key="bat-animal"
           words={BAT_S2}
           batIdx={1}
           clueIndices={[2, 6, 8]}
