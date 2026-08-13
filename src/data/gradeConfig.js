@@ -7,7 +7,7 @@ export const GRADE_CONFIG = {
     presentationSlides: [
       2,  // 0: Who's Used AI? — simplified
       6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      2,  // 2: What IS AI? — simplified
+      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
       3,  // 3: Rules vs Learning — 1 pair only
       4,  // 4: Brain vs AI — emotions only
       3,  // 5: What's an LLM? — simplified
@@ -36,7 +36,7 @@ export const GRADE_CONFIG = {
     presentationSlides: [
       3,  // 0: Who's Used AI?
       6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      2,  // 2: What IS AI?
+      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
       5,  // 5: What's an LLM?
@@ -65,7 +65,7 @@ export const GRADE_CONFIG = {
     presentationSlides: [
       3,  // 0: Who's Used AI?
       6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      2,  // 2: What IS AI?
+      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
       5,  // 5: What's an LLM?
