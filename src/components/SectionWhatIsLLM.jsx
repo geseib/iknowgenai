@@ -236,6 +236,12 @@ export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
               <strong>A massive mathematical system that learned language by reading an enormous amount of text</strong>
             </span>
           </div>
+          <div style={{ fontSize: 22, color: "rgba(255,255,255,.5)", textAlign: "center", lineHeight: 1.5, maxWidth: 720, margin: "22px auto 0" }}>
+            Lots of companies build their own: <strong style={{ color: "#00f5d4" }}>OpenAI</strong> makes ChatGPT,{" "}
+            <strong style={{ color: "#fb5607" }}>Anthropic</strong> makes Claude,{" "}
+            <strong style={{ color: "#f15bb5" }}>Google</strong> makes Gemini,{" "}
+            <strong style={{ color: "#00bbf9" }}>Meta</strong> makes Llama — all LLMs.
+          </div>
         </PresSlide>
       );
     }

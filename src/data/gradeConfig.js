@@ -40,7 +40,7 @@ export const GRADE_CONFIG = {
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
       5,  // 5: What's an LLM?
-      2,  // 6: Meet the Models — carousel + takeaway
+      0,  // 6: Meet the Models — CUT (folded into §5 What's an LLM)
       3,  // 7: The Big Question
       8,  // 8: How AI Learns
       0,  // 9: Three Steps to Helpful AI — SKIP
@@ -69,7 +69,7 @@ export const GRADE_CONFIG = {
       6,  // 3: Rules vs Learning
       8,  // 4: Brain vs AI
       5,  // 5: What's an LLM?
-      2,  // 6: Meet the Models — carousel + takeaway
+      0,  // 6: Meet the Models — CUT (folded into §5 What's an LLM)
       3,  // 7: The Big Question
       8,  // 8: How AI Learns
       9,  // 9: Three Steps to Helpful AI

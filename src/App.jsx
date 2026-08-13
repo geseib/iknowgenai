@@ -200,11 +200,12 @@ const CAT_SECTIONS = {
       "Bat? I prefer to attend to the tuna nearby.",
     ],
   },
-  6: {  // Meet the Models — introducing AI models
-    slide: 0,
+  5: {  // What's an LLM? — the "companies build LLMs" slide (Model synthesis)
+    slide: 3,
     quotes: [
       "Where's MY model card?",
-      "ChatGPT, Claude, Gemini... and ME!",
+      "ChatGPT, Claude, Gemini, Llama... and ME!",
+      "Every company's got an LLM. I've got nine lives.",
       "I'm the AI they didn't tell you about.",
     ],
   },
