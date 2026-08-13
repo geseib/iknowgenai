@@ -222,6 +222,11 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
           <PresText size={30} color="rgba(255,255,255,.45)">
             Can you tell which is which?
           </PresText>
+          <PresText size={22} color="rgba(255,255,255,.32)">
+            First, the big idea: AI isn't a robot or a brain — it's software
+            that <strong style={{ color }}>learns the rules from examples</strong>,
+            instead of being handed them.
+          </PresText>
         </PresSlide>
       );
     }

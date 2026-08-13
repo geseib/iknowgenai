@@ -11,7 +11,7 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3],
+        sections: [0, 1, 3],
         teaser: "Next time: how does AI actually DO all that?",
       },
       {
@@ -66,7 +66,7 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3, 4],
+        sections: [0, 1, 3, 4],
         teaser: "Next time: we open the hood and look inside",
       },
       {
@@ -127,7 +127,7 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3, 4, 5],
+        sections: [0, 1, 3, 4, 5],
         teaser: "Next time: we look inside the machine",
       },
       {
