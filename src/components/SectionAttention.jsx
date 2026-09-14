@@ -380,6 +380,8 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
           options={[{ id: "baseball", label: "A baseball bat", color: "#fee440" }, { id: "animal", label: "A flying animal", color: "#9b5de5" }]}
           tally={batVote}
           color={color}
+          roomId="bat-picture"
+          prompt="When you see the word bat — what do you picture?"
         />
       </PresSlide>
     );
@@ -448,6 +450,8 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
           correct={["swung", "hit", "ball"]}
           tally={clueVote1}
           color={color}
+          roomId="bat-clues-1"
+          roomPrompt="I swung the bat and hit the ball! — which word is a clue?"
           revealLabel="Watch the AI look"
           dense
         >
@@ -476,6 +480,8 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
           correct={["flew", "cave", "dusk"]}
           tally={clueVote2}
           color={color}
+          roomId="bat-clues-2"
+          roomPrompt="The bat flew out of the cave at dusk. — which word is a clue?"
           revealLabel="Watch the AI look"
           dense
         >

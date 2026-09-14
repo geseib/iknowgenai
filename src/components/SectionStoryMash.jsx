@@ -21,6 +21,7 @@ import {
 } from "@phosphor-icons/react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { useRoom } from "../data/room";
 
 /* ── Prompts by slot ── */
 const SLOT_CONFIG = [
@@ -309,6 +310,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
   const [speaking, setSpeaking] = useState(false);
   const storyRef = useRef(null);
   const pollRef = useRef(null);
+  const lessonRoom = useRoom(); // a live tablet/phones room means kids are already joined
 
   const allFilled = inputs.every(v => v.trim().length > 0);
 
@@ -323,10 +325,22 @@ export default function SectionStoryMash({ color, mode, slide }) {
   /* ── Create room for remote entry ── */
   const startRemote = async () => {
     setRemoteError(null);
+    // With a lesson room live, just switch the joined devices to Story Mash-Up.
+    if (lessonRoom.active) {
+      const ok = await lessonRoom.storymash(true, true);
+      if (ok?.ok) {
+        setRoomCode(lessonRoom.room.code);
+        setEntryMode("remote");
+        setPhase("remote-waiting");
+        setRoomStatus({ character: "", place: "", event: "", character_claimed: false, place_claimed: false, event_claimed: false });
+        return;
+      }
+    }
     try {
       const res = await fetch("/api/room-create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storymash: true }),
       });
       if (!res.ok) {
         let detail = `Server error ${res.status}`;
@@ -361,6 +375,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
         // Check if all 3 entries are filled
         if (data.character && data.place && data.event) {
           setInputs([data.character, data.place, data.event]);
+          if (lessonRoom.active) lessonRoom.storymash(false); // hand devices back to voting
           setPhase("locked");
           // Auto-start reveal
           setTimeout(() => { setRevealIdx(0); setPhase("revealing"); }, 600);
@@ -382,6 +397,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
   /* ── Switch from remote to manual ── */
   const switchToManual = () => {
     clearInterval(pollRef.current);
+    if (lessonRoom.active) lessonRoom.storymash(false);
     // Carry over any entries that already came in via remote
     if (roomStatus) {
       setInputs([
@@ -488,6 +504,7 @@ export default function SectionStoryMash({ color, mode, slide }) {
   const reset = () => {
     window.speechSynthesis?.cancel();
     clearInterval(pollRef.current);
+    if (lessonRoom.active) lessonRoom.storymash(false);
     setInputs(["", "", ""]);
     setPhase("entry-select");
     setEntryMode(null);
@@ -926,7 +943,9 @@ export default function SectionStoryMash({ color, mode, slide }) {
                 <QrCode size={48} weight="duotone" color={color} />
                 <span style={{ fontWeight: 700 }}>Remote Entry</span>
                 <span style={{ fontSize: 16, color: "rgba(255,255,255,.35)", fontWeight: 400 }}>
-                  Kids scan a QR code on their phones
+                  {lessonRoom.active
+                    ? (lessonRoom.mode === "tablet" ? "Type on the class tablet" : "Kids type on their joined phones")
+                    : "Kids scan a QR code on their phones"}
                 </span>
               </button>
               <button
@@ -967,7 +986,8 @@ export default function SectionStoryMash({ color, mode, slide }) {
               flexWrap: "wrap",
               marginBottom: 32,
             }}>
-              {/* QR code */}
+              {/* QR code — never shown in tablet mode (no URL for kids to grab) */}
+              {lessonRoom.mode !== "tablet" && (
               <div>
                 <div style={{
                   background: "white",
@@ -988,9 +1008,10 @@ export default function SectionStoryMash({ color, mode, slide }) {
                   fontSize: 16,
                   color: "rgba(255,255,255,.3)",
                 }}>
-                  Scan to join
+                  {lessonRoom.active ? "Already joined? It's on your phone now." : "Scan to join"}
                 </div>
               </div>
+              )}
 
               {/* Room code */}
               <div>

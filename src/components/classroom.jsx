@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { leaderOf } from "./useTally";
+import { useRoomVotes, mergeTally } from "../data/room";
 import { Plus, Minus, ArrowCounterClockwise, CheckCircle, Eye } from "@phosphor-icons/react";
 
 const FONT = "'Fredoka',sans-serif";
@@ -36,11 +37,17 @@ const pct = (v, total) => (total ? Math.round((v / total) * 100) : 0);
  *   compact   inline variant (pills) for use inside cards
  *   hint      teacher instruction line (default explains + and hotkeys)
  *   dense     tighter rows for slides that also carry a big visual
+ *   roomId    when a lesson room is live (tablet / phones), publish this question to
+ *             joined devices while the tally is unresolved, and add their votes to the bars
+ *   prompt    the question text shown on devices (only with roomId)
  */
-export function Tally({ options, tally, color, hotkeys, compare, compareLabel = "AI", correct, resolved = false, compact = false, hint, dense = false }) {
+export function Tally({ options, tally: manual, color, hotkeys, compare, compareLabel = "AI", correct, resolved = false, compact = false, hint, dense = false, roomId, prompt }) {
   const keys = hotkeys ?? options.map((_, i) => String(i + 1));
   const correctIds = correct == null ? [] : Array.isArray(correct) ? correct : [correct];
+  const room = useRoomVotes(roomId ? [{ id: roomId, prompt: prompt || "", options }] : [], !resolved);
+  const tally = roomId ? mergeTally(manual, room.counts[roomId]) : manual;
   const { counts, total, inc, dec, reset } = tally;
+  const live = roomId && room.live;
 
   useEffect(() => {
     if (!keys.length || resolved) return;
@@ -57,7 +64,9 @@ export function Tally({ options, tally, color, hotkeys, compare, compareLabel = 
   const leader = leaderOf(counts);
   const hintText = hint ?? (compact
     ? null
-    : `Teacher: tap + once per hand${keys.length ? ` (or press ${keys.slice(0, options.length).join(" ")} — Shift to undo)` : ""}.`);
+    : live
+      ? `Votes arrive from the room live. Add hands with + (or press ${keys.slice(0, options.length).join(" ")}).`
+      : `Teacher: tap + once per hand${keys.length ? ` (or press ${keys.slice(0, options.length).join(" ")} — Shift to undo)` : ""}.`);
 
   if (compact) {
     return (
@@ -141,7 +150,7 @@ export function Tally({ options, tally, color, hotkeys, compare, compareLabel = 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: dense ? 6 : 12, gap: 12, flexWrap: "wrap" }}>
         <div style={{ fontFamily: FONT, fontSize: 15, color: "rgba(255,255,255,.4)" }}>
           {total > 0
-            ? <>{total} vote{total === 1 ? "" : "s"}{leader != null && <> · most said <strong style={{ color: "white" }}>{options[leader].label}</strong></>}</>
+            ? <>{total} vote{total === 1 ? "" : "s"}{live && tally.roomTotal > 0 && <> ({tally.roomTotal} from devices)</>}{leader != null && <> · most said <strong style={{ color: "white" }}>{options[leader].label}</strong></>}</>
             : hintText}
         </div>
         {!resolved && total > 0 && (
@@ -204,11 +213,16 @@ function RoundBtn({ onClick, color, dim, title, small, children }) {
  *   onReveal     callback
  *   revealed     optional controlled flag (with onReveal) — otherwise internal
  *   dense        tighter layout for slides that also carry a big visual
+ *   roomId       publish to the lesson room (see Tally); closes at reveal
+ *   roomPrompt   plain-text prompt for devices (prompt itself may be JSX)
  *   children     node | (revealed: boolean) => node
  */
-export function PredictGate({ prompt, options, tally, color, correct, compare, compareLabel, hotkeys, revealLabel = "Reveal", revealKey = "Enter", resolution, onReveal, revealed: revealedProp, dense = false, children }) {
+export function PredictGate({ prompt, options, tally: manual, color, correct, compare, compareLabel, hotkeys, revealLabel = "Reveal", revealKey = "Enter", resolution, onReveal, revealed: revealedProp, dense = false, roomId, roomPrompt, children }) {
   const [revealedState, setRevealedState] = useState(false);
   const revealed = revealedProp ?? revealedState;
+  const room = useRoomVotes(roomId ? [{ id: roomId, prompt: roomPrompt || (typeof prompt === "string" ? prompt : ""), options }] : [], !revealed);
+  const tally = roomId ? mergeTally(manual, room.counts[roomId]) : manual;
+  const live = roomId && room.live;
   const reveal = useCallback(() => {
     if (revealed) return;
     setRevealedState(true);
@@ -244,7 +258,7 @@ export function PredictGate({ prompt, options, tally, color, correct, compare, c
           {revealed ? "The class said" : "First — call it"}
         </div>
         <div style={{ fontFamily: FONT, fontSize: dense ? 24 : 30, color: "white", textAlign: "center", lineHeight: 1.25 }}>{prompt}</div>
-        <Tally options={options} tally={tally} color={color} correct={correct} resolved={revealed} compare={revealed ? compare : undefined} compareLabel={compareLabel} hotkeys={hotkeys} dense={dense} />
+        <Tally options={options} tally={tally} color={color} correct={correct} resolved={revealed} compare={revealed ? compare : undefined} compareLabel={compareLabel} hotkeys={hotkeys} dense={dense} hint={live ? `Voting is open on ${room.joined || "the"} device${room.joined === 1 ? "" : "s"} — add hands with + too.` : undefined} />
         {!revealed && (
           <button onClick={reveal} className="cta-btn" style={{ background: color, color: "#08101c", fontSize: dense ? 18 : 22, padding: dense ? "9px 22px" : "12px 30px", display: "inline-flex", alignItems: "center", gap: 10, fontFamily: FONT, fontWeight: 700, border: "none", borderRadius: 999, cursor: "pointer" }}>
             <Eye size={22} weight="bold" /> {revealLabel}{revealKey === "Enter" && <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}> · Enter</span>}

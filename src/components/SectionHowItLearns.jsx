@@ -312,6 +312,8 @@ function RobotRoundSlide({ round, roundIdx, color, tally }) {
         correct={String(round.robots.findIndex(r => r.correct))}
         tally={tally}
         color={color}
+        roomId={`robot-round-${roundIdx}`}
+        roomPrompt={`"${round.prompt}" — which robot will get it right?`}
         revealed={revealed}
         onReveal={() => setRevealed(true)}
         dense

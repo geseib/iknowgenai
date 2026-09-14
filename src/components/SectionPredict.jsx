@@ -431,6 +431,8 @@ export default function SectionPredict({ color, mode, slide: slideProp }) {
             compareLabel="The AI"
             tally={nextWordVote}
             color={color}
+            roomId="next-word"
+            roomPrompt={`"${gc.sentenceStart} ___" — what's the next word?`}
             revealLabel="Show the AI's list"
             dense
           >

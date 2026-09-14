@@ -12,6 +12,7 @@ import { GRADE_CONFIG } from "../data/gradeConfig";
 import { GRADES } from "../data/GradeContext";
 import { SESSION_CONFIG, SESSION_COLORS } from "../data/sessionConfig";
 import RoamingCat from "./catai/cat_runner_react_component";
+import LessonMenu from "./LessonMenu";
 
 const modes = [
   {
@@ -34,7 +35,7 @@ const modes = [
 
 const SESSION_ICONS = [MagnifyingGlass, Compass, PaintBrush];
 
-export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags, session, onSessionChange }) {
+export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags, session, onSessionChange, lesson, onLessonChange, room }) {
   const gc = GRADE_CONFIG[grade];
   const slideCounts = Object.values(gc.slides);
   const totalSlides = slideCounts.reduce((a, b) => a + b, 0);
@@ -116,6 +117,24 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
             );
           })}
         </div>
+
+        {/* Build your lesson: Math / Checks / Interaction (Level is the grade toggle above) */}
+        {lesson && (
+          <div style={{ marginBottom: 28, textAlign: "left" }}>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 12, letterSpacing: 3, textTransform: "uppercase", color: "rgba(255,255,255,.3)", marginBottom: 8, textAlign: "center" }}>
+              Build your lesson
+            </div>
+            <LessonMenu lesson={lesson} onChange={onLessonChange} />
+            {room?.room && (
+              <div style={{ marginTop: 10, fontSize: 13, color: "rgba(255,255,255,.45)", textAlign: "center" }}>
+                Room <span style={{ fontFamily: "'Fredoka',sans-serif", color: "white", letterSpacing: 2 }}>{room.room.code}</span> is still running ({room.mode}).
+                {lesson.interaction === "projector" ? " Starting in Projector mode will end it." : " Starting will reuse it."}
+                {" "}<button onClick={() => room.end()} style={{ background: "none", border: "none", color: "#ff6b6b", cursor: "pointer", fontSize: 13, textDecoration: "underline" }}>End it now</button>
+              </div>
+            )}
+            {room?.error && <div style={{ marginTop: 8, fontSize: 13, color: "#ffb4a2", textAlign: "center" }}>{room.error}</div>}
+          </div>
+        )}
 
         {/* Session selector (v3 multi-session) */}
         {flags?.multiSession && (
