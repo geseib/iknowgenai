@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { PresSlide, PresText, KidNote } from "./shared";
+import MathMoment from "./MathMoment";
 
 /* ── Simple token lookup ─────────────────────────────────────────────── */
 const TOKEN_MAP = {
@@ -172,6 +173,7 @@ export default function SectionTokens({ color, mode, slide }) {
         <PresText size={24} color={color}>
           {exploded ? '11 tokens for just three words! Way too many pieces.' : 'Watch what happens...'}
         </PresText>
+        {exploded && <MathMoment id="tokens-per-word" compact />}
       </PresSlide>
     );
   }

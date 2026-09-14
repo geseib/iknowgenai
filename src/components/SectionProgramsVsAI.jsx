@@ -14,6 +14,8 @@ import {
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 import { Tally } from "./classroom";
 import { useTallySet } from "./useTally";
+import { useRoom, roomCountsFor } from "../data/room";
+import MathMoment from "./MathMoment";
 
 const VOTE_OPTIONS = [{ id: "ai", label: "AI" }, { id: "regular", label: "Regular" }];
 import { useGrade } from "../data/GradeContext";
@@ -151,6 +153,7 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
   const K2_PRES_SLIDES = [1, 2, 5];
   const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
   const cardVotes = useTallySet(scenarios.length, 2); // one AI/Regular tally per scenario (projector mode)
+  const { tally: roomTally } = useRoom();
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState(new Set());
   const step1Ref = useRef(null);
@@ -241,6 +244,8 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
       const pairIdx = Math.floor((slide - 1) / 2);
       const isRevealed = (slide - 1) % 2 === 1;
       const [a, b] = pairs[pairIdx];
+      const roomA = roomCountsFor(roomTally, `rules-${a}`, VOTE_OPTIONS);
+      const mergedA = cardVotes[a].counts.map((v, i) => v + roomA[i]);
       return (
         <PresSlide>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 700 }}>
@@ -256,6 +261,7 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
                     hotkeys={i === 0 ? ["1", "2"] : ["3", "4"]}
                     correct={scenarios[gi].answer}
                     resolved={isRevealed}
+                    hideUntilResolved
                     roomId={`rules-${gi}`}
                     prompt={`${scenarios[gi].label} — AI or regular program?`}
                   />
@@ -263,6 +269,9 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
               </div>
             ))}
           </div>
+          {isRevealed && (
+            <MathMoment id="class-fraction" data={{ counts: mergedA, labels: ["AI", "Regular"] }} />
+          )}
           {!isRevealed && (
             <PresText size={22} color="rgba(255,255,255,.3)">
               Hands up: AI or regular program? Teacher taps + once per hand (keys 1–2 for the top card, 3–4 for the bottom).

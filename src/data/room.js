@@ -112,6 +112,16 @@ export function useRoomVotes(questions, active = true) {
   return { counts, joined: tally?.joined || 0, live: Boolean(room && roomActive) };
 }
 
+/** Room counts for one question id, aligned to options — read-only, no publish. */
+export function roomCountsFor(tally, roomId, options) {
+  const t = roomId ? tally?.questions?.[roomId] : null;
+  return options.map(o => (t ? t.counts?.[o.id] || 0 : 0));
+}
+export function useRoomCounts(roomId, options) {
+  const { tally } = useRoom();
+  return roomCountsFor(tally, roomId, options);
+}
+
 /**
  * Merge a manual tally handle (useTally) with room counts so the projector shows
  * hands-up taps AND phone/tablet votes in one set of bars.

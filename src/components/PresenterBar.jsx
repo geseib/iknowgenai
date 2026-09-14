@@ -90,8 +90,13 @@ export default function PresenterBar({ lesson, onLessonChange }) {
                 </div>
               ) : (
                 <>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,.6)", lineHeight: 1.5, marginBottom: 8 }}>
-                    On the tablet: open the site, add <span style={{ fontFamily: FONT, color: "white" }}>?join={room.code}</span>, tap <em>make this device the class tablet</em>, then type its two-digit number here.
+                  <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
+                    <div style={{ background: "white", borderRadius: 10, padding: 6, flexShrink: 0 }}>
+                      <QRCodeSVG value={buildJoinUrl(room.code)} size={84} level="M" />
+                    </div>
+                    <div style={{ fontSize: 13, color: "rgba(255,255,255,.6)", lineHeight: 1.5 }}>
+                      Scan with the tablet (or open the site and add <span style={{ fontFamily: FONT, color: "white" }}>?join={room.code}</span>), tap <em>make this device the class tablet</em>, then type its two-digit number here. A phone that scans this only sees "Look up!".
+                    </div>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input

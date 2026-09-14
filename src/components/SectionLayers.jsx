@@ -12,6 +12,7 @@ import {
   Lightning,
 } from "@phosphor-icons/react";
 import { Label, H1, TriviaBox, TeacherNote, ModelNote, KidNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
 
 const LAYER_CARDS = [
   { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
@@ -658,6 +659,7 @@ export default function SectionLayers({ color, mode, slide }) {
           <PresText size={24}>
             <em>Each pass makes the understanding richer.</em>
           </PresText>
+          <MathMoment id="layer-passes" compact />
           <KidNote color={color}>96 is the layer count of one famous model. Some models use 32, some more than 100.</KidNote>
         </PresSlide>
       );

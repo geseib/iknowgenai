@@ -5,6 +5,8 @@
 //   math         off | light | full            — reserved for the math-moments phase
 //   checks       none | polls | quiz | both    — reserved for the checks phase
 
+import { createContext, useContext } from "react";
+
 const KEY = "iknowgenai_lesson";
 
 export const INTERACTION_MODES = [
@@ -15,8 +17,8 @@ export const INTERACTION_MODES = [
 
 export const MATH_LEVELS = [
   { id: "off", label: "Off" },
-  { id: "light", label: "Light", soon: true },
-  { id: "full", label: "Full", soon: true },
+  { id: "light", label: "Light", desc: "One math moment per act: counting, fractions and percent, chance, big numbers, coordinates, averages." },
+  { id: "full", label: "Full", desc: "Light, plus a numbers strip on every other quantitative slide (× 4, layer passes, ratios, decimals that sum to 1)." },
 ];
 
 export const CHECK_LEVELS = [
@@ -38,6 +40,12 @@ export function loadLesson() {
   } catch {
     return { ...DEFAULTS };
   }
+}
+
+/** The active lesson settings, provided by App. Defaults apply outside a provider (e.g. the 14+ course never uses this). */
+export const LessonContext = createContext(DEFAULTS);
+export function useLesson() {
+  return useContext(LessonContext) || DEFAULTS;
 }
 
 export function saveLesson(lesson) {

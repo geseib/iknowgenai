@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { getDeviceId } from "../data/room";
 import { Sparkle, PaperPlaneTilt, CheckCircle, Warning, CaretLeft, CaretRight, UserCircle, Users } from "@phosphor-icons/react";
 
 const ROLES = [
@@ -43,7 +44,7 @@ export default function JoinRoom({ code }) {
       const res = await fetch("/api/room-join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, role: roleKey }),
+        body: JSON.stringify({ code, role: roleKey, deviceId: getDeviceId() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -68,7 +69,7 @@ export default function JoinRoom({ code }) {
       const res = await fetch("/api/room-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, role, value: value.trim() }),
+        body: JSON.stringify({ code, role, value: value.trim(), deviceId: getDeviceId() }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -94,7 +95,7 @@ export default function JoinRoom({ code }) {
         await fetch("/api/room-join", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code, role: r.key }),
+          body: JSON.stringify({ code, role: r.key, deviceId: getDeviceId() }),
         });
       } catch (_) {}
     }
@@ -111,7 +112,7 @@ export default function JoinRoom({ code }) {
       const res = await fetch("/api/room-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, role: r.key, value: val }),
+        body: JSON.stringify({ code, role: r.key, value: val, deviceId: getDeviceId() }),
       });
       const data = await res.json();
       if (!res.ok) {

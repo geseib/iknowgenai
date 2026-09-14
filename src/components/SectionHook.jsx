@@ -4,6 +4,7 @@ import {
   Lightbulb,
 } from "@phosphor-icons/react";
 import { Label, H1, TriviaBox, TeacherNote, ModelNote, KidNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
 import CatIllustration from "./CatIllustration";
 import { useGrade } from "../data/GradeContext";
 
@@ -287,6 +288,7 @@ export default function SectionHook({ color, mode, slide: slideProp }) {
         }}>
           <VectorTicker color={color} pres />
         </div>
+        <MathMoment id="pages-of-numbers" compact />
         <KidNote color={color}>12,288 is one famous model's number. Smaller models use a few hundred; the demo in Try It uses 1,536. Same idea, different size.</KidNote>
       </PresSlide>
     );

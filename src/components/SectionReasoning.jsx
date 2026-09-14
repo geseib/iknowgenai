@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
 import { useGrade } from "../data/GradeContext";
 
 // ── Grade-differentiated content ──
@@ -693,6 +694,7 @@ export default function SectionReasoning({ color, mode, slide }) {
           <PresText size={20} color="rgba(255,255,255,.35)">
             Today's chatbots from OpenAI, Google and Anthropic all have a <strong>"thinking" mode</strong> that works this way
           </PresText>
+          <MathMoment id="thinking-pages" compact />
         </PresSlide>
       );
     }

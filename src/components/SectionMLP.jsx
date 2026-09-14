@@ -6,6 +6,7 @@ import {
   Key,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
 
 const notes = [
   "Analogy that works well: attention is reading the room and figuring out who's related to whom. MLP is flipping through your entire memory to decide what it all means.",
@@ -244,6 +245,7 @@ export default function SectionMLP({ color, mode, slide }) {
           <PresText size={22} color="rgba(255,255,255,.35)">
             The MLP checks all 49,152 at once — most won't apply!
           </PresText>
+          <MathMoment id="mlp-times-four" compact />
         </PresSlide>
       );
     }

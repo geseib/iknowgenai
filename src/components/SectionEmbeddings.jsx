@@ -17,6 +17,8 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TriviaBox, TeacherNote, KidNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
+import { useLesson } from "../data/lesson";
 import {
   WORD_MAP,
   GROUP_COLORS as GC,
@@ -222,6 +224,7 @@ export default function SectionEmbeddings({ color, mode, slide }) {
   const grade = useGrade();
   const gradeDimensions = GRADE_EXAMPLES[grade].dimensions;
   const [sel, setSel] = useState(null);
+  const showAxes = useLesson().math !== "off"; // Math moments: label the axes and number the grid
   const [step, setStep] = useState(0);
   const [part2Done, setPart2Done] = useState(false);
   const step1Ref = useRef(null);
@@ -317,6 +320,9 @@ export default function SectionEmbeddings({ color, mode, slide }) {
         <PresText size={40} color="white">
           Similar words end up <span style={{ color }}>close together</span>
         </PresText>
+        {(() => { const sw = WORD_MAP.find(x => x.w === sel); return sw ? (
+          <MathMoment id="coordinates" data={{ word: sw.w, across: Math.round(sw.x / 10), up: Math.round((100 - sw.y) / 10) }} compact />
+        ) : null; })()}
         <Card style={{ padding: "18px 18px", width: "100%", maxWidth: 800 }}>
           <div style={{
             position: "relative", width: "100%", paddingTop: "65%",
@@ -333,6 +339,20 @@ export default function SectionEmbeddings({ color, mode, slide }) {
                 <cl.Icon size={20} weight="duotone" /> {cl.label}
               </div>
             ))}
+            {showAxes && (
+              <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(t => (
+                  <g key={t}>
+                    <line x1={`${t * 10}%`} y1="0" x2={`${t * 10}%`} y2="100%" stroke="rgba(255,255,255,.06)" />
+                    <line x1="0" y1={`${100 - t * 10}%`} x2="100%" y2={`${100 - t * 10}%`} stroke="rgba(255,255,255,.06)" />
+                    <text x={`${t * 10}%`} y="97%" fill="rgba(255,255,255,.35)" fontSize="11" textAnchor="middle" fontFamily="'Fredoka',sans-serif">{t}</text>
+                    <text x="1%" y={`${100 - t * 10 + 1.5}%`} fill="rgba(255,255,255,.35)" fontSize="11" fontFamily="'Fredoka',sans-serif">{t}</text>
+                  </g>
+                ))}
+                <text x="96%" y="97%" fill="rgba(255,255,255,.45)" fontSize="11" textAnchor="end" fontFamily="'Fredoka',sans-serif">across →</text>
+                <text x="1%" y="5%" fill="rgba(255,255,255,.45)" fontSize="11" fontFamily="'Fredoka',sans-serif">up ↑</text>
+              </svg>
+            )}
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
               {selGroup && WORD_MAP.filter(w => w.g === selGroup && w.w !== sel).map(w => {
                 const from = WORD_MAP.find(x => x.w === sel);
