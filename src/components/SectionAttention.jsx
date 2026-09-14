@@ -6,6 +6,8 @@ import {
   Lightbulb,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
+import { Tally, PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
 
 const BAT_IMG_BASE = `${import.meta.env.BASE_URL}bat-baseball.png`;
@@ -271,6 +273,10 @@ function ContinueButton({ onClick, color, label }) {
 
 /* ── Main Section ───────────────────────────────────────────────────────────── */
 export default function SectionAttention({ color, mode, slide }) {
+  // Projector-mode votes: what the room pictures for "bat", and which words it calls as clues
+  const batVote = useTally(2);
+  const clueVote1 = useTally(4);
+  const clueVote2 = useTally(4);
   const [step, setStep] = useState(0);
   const [guess, setGuess] = useState(null);
   const [s1words, setS1words] = useState(0);
@@ -358,6 +364,11 @@ export default function SectionAttention({ color, mode, slide }) {
         <PresText size={36}>
           When you see this word — what do you picture?
         </PresText>
+        <Tally
+          options={[{ id: "baseball", label: "A baseball bat", color: "#fee440" }, { id: "animal", label: "A flying animal", color: "#9b5de5" }]}
+          tally={batVote}
+          color={color}
+        />
       </PresSlide>
     );
 
@@ -419,6 +430,15 @@ export default function SectionAttention({ color, mode, slide }) {
     /* Slide 4: Sentence 1 — animated attention from bat, baseball wins */
     if (slide === 4) return (
       <PresSlide>
+        <PredictGate
+          prompt={<>"I swung the bat and hit the ball!" — which words are the clues?</>}
+          options={["I", "swung", "hit", "ball"].map(w => ({ id: w, label: w }))}
+          correct={["swung", "hit", "ball"]}
+          tally={clueVote1}
+          color={color}
+          revealLabel="Watch the AI look"
+          dense
+        >
         <BatAttentionAnim
           words={BAT_S1}
           batIdx={3}
@@ -430,12 +450,22 @@ export default function SectionAttention({ color, mode, slide }) {
           loseLabel="Flying animal"
           color={color}
         />
+        </PredictGate>
       </PresSlide>
     );
 
     /* Slide 5: Sentence 2 — animated attention from bat, animal wins */
     if (slide === 5) return (
       <PresSlide>
+        <PredictGate
+          prompt={<>"The bat flew out of the cave at dusk." — which words are the clues?</>}
+          options={["The", "flew", "cave", "dusk"].map(w => ({ id: w, label: w }))}
+          correct={["flew", "cave", "dusk"]}
+          tally={clueVote2}
+          color={color}
+          revealLabel="Watch the AI look"
+          dense
+        >
         <BatAttentionAnim
           words={BAT_S2}
           batIdx={1}
@@ -447,6 +477,7 @@ export default function SectionAttention({ color, mode, slide }) {
           loseLabel="Baseball bat"
           color={color}
         />
+        </PredictGate>
       </PresSlide>
     );
 

@@ -11,6 +11,8 @@ import {
   Target,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
+import { PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 import { applyTemp, sampleWord, tempMeta } from "../data/predict";
 import { useGrade } from "../data/GradeContext";
 import { GRADE_EXAMPLES } from "../data/gradeContent";
@@ -327,6 +329,7 @@ export default function SectionPredict({ color, mode, slide }) {
   const grade = useGrade();
   const gc = GRADE_EXAMPLES[grade].predict;
   const P_POSITIONS = gc.positions;
+  const nextWordVote = useTally(4); // projector-mode: top 3 candidates + "something else"
 
   const [temp, setTemp] = useState(.8);
   const [words, setWords] = useState([]);
@@ -404,13 +407,25 @@ export default function SectionPredict({ color, mode, slide }) {
     /* Slide 2: Probability list — the last word carries everything */
     if (slide === 2) {
       const candidates = gc.rankedCandidates;
+      const voteOptions = [
+        ...candidates.slice(0, 3).map(c => ({ id: c.word, label: c.word })),
+        { id: "other", label: "something else" },
+      ];
       return (
         <PresSlide>
-          <PresText size={26} color="rgba(255,255,255,.55)">
-            After 96 layers, the last position holds <em>everything</em> —
-          </PresText>
-          <PresText size={24} color="rgba(255,255,255,.45)">
-            all the words, all the context, all the facts it gathered.
+          <PredictGate
+            prompt={<>"{gc.sentenceStart} ___" — what's the next word?</>}
+            options={voteOptions}
+            correct={candidates[0].word}
+            compare={candidates.slice(0, 3).map(c => ({ id: c.word, pct: c.pct }))}
+            compareLabel="The AI"
+            tally={nextWordVote}
+            color={color}
+            revealLabel="Show the AI's list"
+            dense
+          >
+          <PresText size={24} color="rgba(255,255,255,.5)">
+            After all its layers, the last position holds <em>everything</em> — every word, all the context, all the facts.
           </PresText>
           <PresText size={28} color="white">
             It turns that into a <span style={{ color, fontWeight: 700 }}>ranked list</span> of what could come next:
@@ -495,6 +510,7 @@ export default function SectionPredict({ color, mode, slide }) {
           <PresText size={20} color="rgba(255,255,255,.4)">
             The top word wins — unless temperature adds some randomness.
           </PresText>
+          </PredictGate>
         </PresSlide>
       );
     }

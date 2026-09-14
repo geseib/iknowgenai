@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Robot, Desktop, Brain, Lightbulb, ArrowDown } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Tally } from "./classroom";
+import { useTally } from "./useTally";
 
 const choices = [
   { id: "robot",   Icon: Robot,   label: "A robot",                response: "Great guess! But AI doesn't need a body. It can live entirely inside a computer — no arms, no legs required." },
@@ -39,6 +41,7 @@ function ContinueButton({ onClick, color, label }) {
 }
 
 export default function SectionWhatIsAI({ color, mode, slide }) {
+  const classVote = useTally(choices.length); // projector-mode hands-up tally
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState(null);
   const step1Ref = useRef(null);
@@ -103,6 +106,12 @@ export default function SectionWhatIsAI({ color, mode, slide }) {
               </div>
             ))}
           </div>
+          <Tally
+            options={choices.map(c => ({ id: c.id, label: c.label }))}
+            tally={classVote}
+            color={color}
+            hint="Hands up for each one — teacher taps + once per hand (or press 1 2 3)."
+          />
           <PresText size={24} color="rgba(255,255,255,.35)">
             They're all a little right... but what makes AI <em>special</em>?
           </PresText>

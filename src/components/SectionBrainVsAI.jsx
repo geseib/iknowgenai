@@ -8,6 +8,10 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Tally } from "./classroom";
+import { useTallySet } from "./useTally";
+
+const SAME_DIFF = [{ id: "same", label: "Similar" }, { id: "diff", label: "Different" }];
 
 const rows = [
   { topic: "How it learns",       brain: "From experience and practice",          ai: "From millions of training examples",     match: true },
@@ -141,6 +145,7 @@ function ComparisonCard({ row, color, pres }) {
 }
 
 export default function SectionBrainVsAI({ color, mode, slide }) {
+  const rowVotes = useTallySet(3, 2); // one Similar/Different tally per presented comparison
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -236,7 +241,7 @@ export default function SectionBrainVsAI({ color, mode, slide }) {
               What do you think? Same or different?
             </PresText>
 
-            {/* Skip button */}
+            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} />
 
           </PresSlide>
         );
@@ -311,6 +316,9 @@ export default function SectionBrainVsAI({ color, mode, slide }) {
             </div>
           </div>
 
+          {rowVotes[selIdx].total > 0 && (
+            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} correct={row.match ? "same" : "diff"} resolved />
+          )}
         </PresSlide>
       );
     }
