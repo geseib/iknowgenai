@@ -687,7 +687,7 @@ const MORE_OPTIONS = [
   { id: "1", label: "1 more" },
   { id: "3", label: "3 more" },
   { id: "12", label: "12 more" },
-  { id: "93", label: "93 more" },
+  { id: "95", label: "95 more" },
   { id: "3200", label: "3,200 more" },
 ];
 
@@ -721,7 +721,7 @@ export default function SectionLayers({ color, mode, slide }) {
               prompt="Doing that once isn't enough. How many MORE times does a big AI do it — just to add ONE word?"
               roomPrompt="How many MORE times does a big AI look-then-think to add one word?"
               options={MORE_OPTIONS}
-              correct="93"
+              correct="95"
               tally={moreVote}
               color={color}
               roomId="layers-more"
@@ -733,14 +733,14 @@ export default function SectionLayers({ color, mode, slide }) {
                 Today's biggest models: about <strong style={{ color }}>50–100</strong> layers.
               </PresText>
               <PresText size={26} color="rgba(255,255,255,.65)">
-                Our example does it <strong style={{ color: "white" }}>93 more times</strong> — all to add <strong style={{ color }}>one word</strong>.
+                Our example does it <strong style={{ color: "white" }}>95 more times</strong> — all to add <strong style={{ color }}>one word</strong>.
               </PresText>
               <button
                 onClick={runRest}
                 className="cta-btn"
                 style={{ background: color, color: "#000", fontSize: 22, padding: "12px 30px", border: "none", borderRadius: 999, cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700 }}
               >
-                Run the other 93 layers ▶ <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}>· Enter</span>
+                Run the other 95 layers ▶ <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}>· Enter</span>
               </button>
             </PredictGate>
           )}
