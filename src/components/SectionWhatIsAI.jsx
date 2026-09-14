@@ -110,6 +110,8 @@ export default function SectionWhatIsAI({ color, mode, slide }) {
             options={choices.map(c => ({ id: c.id, label: c.label }))}
             tally={classVote}
             color={color}
+            roomId="what-is-ai"
+            prompt="What do you think AI is?"
             hint="Hands up for each one — teacher taps + once per hand (or press 1 2 3)."
           />
           <PresText size={24} color="rgba(255,255,255,.35)">

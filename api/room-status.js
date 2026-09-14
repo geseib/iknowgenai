@@ -1,40 +1,49 @@
 import { redis } from "./_redis.js";
+import { readRoom, parseQuestions, normalizeCode, devicesKey } from "./_room.js";
+
+// Public room snapshot, polled by student phones / the class tablet (and by Story
+// Mash-Up's teacher screen). Never returns the hostKey or other devices' votes.
+// Query: ?code=XXXX[&deviceId=...]  — deviceId lets the caller learn if it is the tablet.
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "GET only" });
   }
 
-  const code = (req.query.code || "").toUpperCase();
+  const code = normalizeCode(req.query.code);
   if (!code) {
     return res.status(400).json({ error: "code required" });
   }
 
-  const key = `room:${code}`;
-  const data = await redis("HGETALL", key);
-
-  // HGETALL returns null or empty array when key doesn't exist
-  if (!data || (Array.isArray(data) && data.length === 0)) {
+  const room = await readRoom(code);
+  if (!room) {
     return res.status(404).json({ error: "room_not_found" });
   }
 
-  // Upstash returns HGETALL as a flat array: [field, value, field, value, ...]
-  // Convert to object
-  const obj = {};
-  if (Array.isArray(data)) {
-    for (let i = 0; i < data.length; i += 2) {
-      obj[data[i]] = data[i + 1];
-    }
-  } else {
-    Object.assign(obj, data);
-  }
+  const deviceId = typeof req.query.deviceId === "string" ? req.query.deviceId.slice(0, 64) : "";
+  const questions = parseQuestions(room);
+  const open = Object.entries(questions)
+    .filter(([, q]) => q.open)
+    .map(([id, q]) => ({ id, prompt: q.prompt, options: q.options }));
+
+  let joined = 0;
+  try { joined = Number(await redis("SCARD", devicesKey(code))) || 0; } catch { /* non-fatal */ }
 
   return res.status(200).json({
-    character: obj.character || "",
-    place: obj.place || "",
-    event: obj.event || "",
-    character_claimed: obj.character_claimed === "1",
-    place_claimed: obj.place_claimed === "1",
-    event_claimed: obj.event_claimed === "1",
+    // Story Mash-Up fields (unchanged contract)
+    character: room.character || "",
+    place: room.place || "",
+    event: room.event || "",
+    character_claimed: room.character_claimed === "1",
+    place_claimed: room.place_claimed === "1",
+    event_claimed: room.event_claimed === "1",
+    // Lesson-room fields
+    mode: room.mode || "phones",
+    frozen: room.frozen === "1",
+    storymash: room.storymash === "1",
+    tabletPaired: Boolean(room.tablet),
+    isTablet: Boolean(deviceId) && room.tablet === deviceId,
+    joined,
+    questions: open,
   });
 }

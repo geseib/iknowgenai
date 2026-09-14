@@ -1,6 +1,7 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
+import RoomProvider from './components/RoomProvider.jsx'
 
 // The 14+ course lives at /course; everything else is the original app.
 // BASE_URL is '/iknowgenai/' in local dev and '/' on Vercel.
@@ -17,7 +18,9 @@ createRoot(document.getElementById('root')).render(
         <CourseApp />
       </Suspense>
     ) : (
-      <App />
+      <RoomProvider>
+        <App />
+      </RoomProvider>
     )}
   </StrictMode>,
 )

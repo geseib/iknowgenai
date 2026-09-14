@@ -250,7 +250,7 @@ export default function SectionBrainVsAI({ color, mode, slide: slideProp }) {
               What do you think? Same or different?
             </PresText>
 
-            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} />
+            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} roomId={`brain-${selIdx}`} prompt={`${row.topic}: brain vs AI — similar or different?`} />
 
           </PresSlide>
         );

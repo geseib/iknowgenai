@@ -10,7 +10,10 @@ import TeacherDrawer from "./components/TeacherDrawer";
 import ModeSelect from "./components/ModeSelect";
 import Glossary from "./components/Glossary";
 import KnowledgeCheck from "./components/KnowledgeCheck";
-import JoinRoom from "./components/JoinRoom";
+import StudentView from "./components/StudentView";
+import PresenterBar from "./components/PresenterBar";
+import { useRoom } from "./data/room";
+import { loadLesson, saveLesson } from "./data/lesson";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 import SessionReview, { SessionTeaser } from "./components/SessionReview";
 import RoamingCat from "./components/catai/cat_runner_react_component";
@@ -195,7 +198,7 @@ function TryItStandalone() {
 export default function App() {
   // If ?join=CODE is in the URL, render the mobile join page
   if (JOIN_CODE) {
-    return <JoinRoom code={JOIN_CODE.toUpperCase()} />;
+    return <StudentView code={JOIN_CODE.toUpperCase()} />;
   }
 
   // Deep-link: /#try-it opens the interactive playground on its own, so a
@@ -210,6 +213,21 @@ export default function App() {
 
   const [flags, setFlags] = useState(loadFlags);
   const [mode, setMode] = useState(null);
+  const [lesson, setLessonState] = useState(loadLesson);
+  const roomCtx = useRoom();
+  const setLesson = (next) => { setLessonState(next); saveLesson(next); };
+
+  // Entering the lesson creates / retargets / ends the room to match the Interaction choice.
+  const enterMode = async (m) => {
+    if (m === "student" || m === "teacher") {
+      try {
+        if (lesson.interaction === "projector") { if (roomCtx.room) await roomCtx.end(); }
+        else if (!roomCtx.room) await roomCtx.start(lesson.interaction);
+        else if (roomCtx.mode !== lesson.interaction) await roomCtx.setMode(lesson.interaction);
+      } catch { /* the landing page shows the room error */ }
+    }
+    setMode(m);
+  };
   const [grade, setGrade] = useState("3-5");
   const [session, setSession] = useState(0);
   const [sec, setSec] = useState(0);
@@ -385,7 +403,7 @@ export default function App() {
     return () => window.removeEventListener("jumpToSlide", handler);
   }, []);
 
-  if (!mode) return <ModeSelect onSelect={setMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} session={session} onSessionChange={setSession} />;
+  if (!mode) return <ModeSelect onSelect={enterMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} session={session} onSessionChange={setSession} lesson={lesson} onLessonChange={setLesson} room={roomCtx} />;
   if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
   if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} flags={flags} /></>;
@@ -423,6 +441,9 @@ export default function App() {
     <GradeContext.Provider value={grade}>
     <div style={{ minHeight: "100vh", background: "#050512", color: "white", fontFamily: "'Nunito',sans-serif", position: "relative" }}>
       <style>{ALL_CSS}</style>
+
+      {/* Room controls (only while a tablet/phones room exists) */}
+      <PresenterBar lesson={lesson} onLessonChange={setLesson} />
 
       {/* Starfield */}
       {(

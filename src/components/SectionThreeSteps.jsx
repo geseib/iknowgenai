@@ -356,6 +356,8 @@ export default function SectionThreeSteps({ color, mode, slide }) {
           options={[{ id: "a", label: "A" }, { id: "b", label: "B" }]}
           tally={roundVotes[roundIdx]}
           color={color}
+          roomId={`rlhf-${roundIdx}`}
+          prompt={`"${round.prompt}" — which response is better?`}
           hint="Teacher: tap a card (or +) once per hand — keys 1 and 2 work too."
         />
 

@@ -256,6 +256,8 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
                     hotkeys={i === 0 ? ["1", "2"] : ["3", "4"]}
                     correct={scenarios[gi].answer}
                     resolved={isRevealed}
+                    roomId={`rules-${gi}`}
+                    prompt={`${scenarios[gi].label} — AI or regular program?`}
                   />
                 </div>
               </div>
