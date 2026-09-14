@@ -12,9 +12,9 @@ import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 const rows = [
   { topic: "How it learns",       brain: "From experience and practice",          ai: "From millions of training examples",     match: true },
   { topic: "Can make mistakes",   brain: "Yes — humans get things wrong",    ai: "Yes — AI gets things wrong too!",    match: true },
-  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "It can act like it — but doesn't actually feel",  match: false },
+  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "It can sound like it — whether it truly feels is still debated",  match: false },
   { topic: "Gets tired",          brain: "Yes — needs sleep and rest",        ai: "No — it can run 24/7",               match: false },
-  { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Only what it was trained on",             match: false },
+  { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Its training, plus what you tell it in this chat",             match: false },
   { topic: "Understands meaning", brain: "Deeply — we live in the world",    ai: "Sort of — in a very different way",   match: false },
   { topic: "Can be creative",     brain: "Yes — art, music, stories",        ai: "Sort of — by remixing patterns",      match: true },
 ];

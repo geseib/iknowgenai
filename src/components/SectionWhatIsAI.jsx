@@ -5,7 +5,7 @@ import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 const choices = [
   { id: "robot",   Icon: Robot,   label: "A robot",                response: "Great guess! But AI doesn't need a body. It can live entirely inside a computer — no arms, no legs required." },
   { id: "program", Icon: Desktop, label: "A really smart program", response: "You're onto something! It IS a program — but there's one important twist that makes it different from all other programs." },
-  { id: "brain",   Icon: Brain,   label: "A digital brain",        response: "Interesting! AI was inspired by how brains work — it can even sound emotional, but it's predicting what to say, not actually feeling anything." },
+  { id: "brain",   Icon: Brain,   label: "A digital brain",        response: "Interesting! AI was inspired by how brains work — it can even sound emotional, because it's predicting what a person would say. Whether it feels anything is a question scientists are still arguing about." },
 ];
 
 const notes = [

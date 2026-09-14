@@ -500,10 +500,10 @@ export default function SectionHowItLearns({ color, mode, slide }) {
             every <strong style={{ color: "white" }}>book</strong>,{" "}
             every <strong style={{ color: "white" }}>paper</strong>,{" "}
             <strong style={{ color: "white" }}>magazine</strong>,{" "}
-            <strong style={{ color: "white" }}>Instagram post</strong>,{" "}
-            <strong style={{ color: "white" }}>social media conversation</strong>,{" "}
-            <strong style={{ color: "white" }}>email</strong>,{" "}
-            <strong style={{ color: "white" }}>text</strong>...
+            <strong style={{ color: "white" }}>Wikipedia article</strong>,{" "}
+            <strong style={{ color: "white" }}>public forum post</strong>,{" "}
+            <strong style={{ color: "white" }}>recipe</strong>,{" "}
+            <strong style={{ color: "white" }}>song lyric</strong>...
           </PresText>
           <PresText size={28} color="rgba(255,255,255,.65)">
             Reading a word and predicting the next word.<br />
@@ -673,9 +673,9 @@ export default function SectionHowItLearns({ color, mode, slide }) {
               <strong style={{ color }}>book</strong>,{" "}
               <strong style={{ color }}>paper</strong>,{" "}
               <strong style={{ color }}>magazine</strong>,{" "}
-              <strong style={{ color }}>Instagram post</strong>,{" "}
-              <strong style={{ color }}>social media conversation</strong>,{" "}
-              <strong style={{ color }}>email</strong>, and <strong style={{ color }}>text</strong>.
+              <strong style={{ color }}>Wikipedia article</strong>,{" "}
+              <strong style={{ color }}>public forum post</strong>,{" "}
+              <strong style={{ color }}>recipe</strong>, and <strong style={{ color }}>song lyric</strong> that's out on the public internet.
               Reading a word and predicting the next word. Sentence after sentence. That's training.
             </div>
           </div>

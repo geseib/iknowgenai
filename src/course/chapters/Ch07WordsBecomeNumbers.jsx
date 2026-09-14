@@ -172,7 +172,7 @@ export default function Ch07WordsBecomeNumbers({ accent, slide }) {
           <Heading size="h2">Two steps from text to numbers.</Heading>
           <div style={{ display: "flex", flexDirection: "column", gap: SPACE.sm }}>
             {[
-              ["1 · CHOP", "Split the text into pieces from a fixed menu — about 100,000 reusable fragments called tokens."],
+              ["1 · CHOP", "Split the text into pieces from a fixed menu — roughly 100,000 to 200,000 reusable fragments called tokens."],
               ["2 · LOOK UP", "Swap each piece for a long list of numbers that captures its meaning — an embedding."],
             ].map(([label, text], i) => (
               <div key={label} className="reveal" style={{ animationDelay: `${i * 150}ms`, display: "flex", gap: 14, alignItems: "baseline" }}>
@@ -233,16 +233,18 @@ export default function Ch07WordsBecomeNumbers({ accent, slide }) {
           <Card>
             <div style={{ fontFamily: FONTS.mono, fontSize: 16, lineHeight: 2.2 }}>
               <span style={{ color: COLORS.muted }}>cat → </span><span style={{ color: accent }}>#9059</span>
-              <span style={{ color: COLORS.faint }}>   kitten → </span><span style={{ color: accent }}>#74076</span>
-              <span style={{ color: COLORS.faint }}>   carburetor → </span><span style={{ color: accent }}>#9060</span>
+              <span style={{ color: COLORS.faint }}>   crypt → </span><span style={{ color: accent }}>#9060</span>
+              <span style={{ color: COLORS.faint }}>   kitten → </span><span style={{ color: accent }}>#114502</span>
             </div>
           </Card>
           <Prose>
-            Token #9059 and #9060 are neighbors in the vocabulary — and have
-            nothing to do with each other. The IDs are alphabetical accidents.
-            If the machine is going to <em>reason</em> with these numbers,
-            “cat” and “kitten” need to be numerically close, and “carburetor”
-            far away.
+            Those are real IDs from the tokenizer this chapter demos. #9059
+            and #9060 are neighbors in the vocabulary — and have nothing to do
+            with each other. The IDs are accidents of how the menu was built
+            (roughly the order pieces were discovered while scanning text), not
+            meaning. If the machine is going to <em>reason</em> with these
+            numbers, “cat” and “kitten” need to be numerically close, and
+            “crypt” far away.
           </Prose>
           <Prose muted>
             One number per token can't do that. So each token gets thousands.

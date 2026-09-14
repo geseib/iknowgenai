@@ -699,7 +699,7 @@ export default function SectionReasoning({ color, mode, slide }) {
             })}
           </div>
           <PresText size={20} color="rgba(255,255,255,.35)">
-            Models like <strong>o1</strong>, <strong>o3</strong> and <strong>Claude</strong> with extended thinking use this approach
+            Today's chatbots from OpenAI, Google and Anthropic all have a <strong>"thinking" mode</strong> that works this way
           </PresText>
         </PresSlide>
       );

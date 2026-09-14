@@ -436,7 +436,7 @@ export default function SectionBeyondKnowledge({ color, mode, slide }) {
             <BrainBox color={OUTSIDE_COLOR} label="Retriever (Program)">
               <BookOpen size={36} weight="duotone" color={OUTSIDE_COLOR} />
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 12, color: "rgba(255,255,255,.5)", marginTop: 6 }}>
-                Searches documents<br /><em>Rule-based — not AI</em>
+                Searches documents<br /><em>Uses the word-map from Words in Space</em>
               </div>
             </BrainBox>
 

@@ -3,7 +3,7 @@ import {
   ArrowDown,
   Lightbulb,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote, KidNote, PresSlide, PresText } from "./shared";
 import CatIllustration from "./CatIllustration";
 
 const notes = [
@@ -106,7 +106,7 @@ function VectorTicker({ color, pres }) {
         marginTop: 14,
         lineHeight: 1.5,
       }}>
-        No pictures. No feelings. Just <strong style={{ color }}>12,288 numbers</strong> for every single word — enough to cover a basketball court with tennis balls.
+        No pictures. No feelings. Just <strong style={{ color }}>12,288 numbers</strong> for every single word — about 25 pages of nothing but numbers.
       </div>
     </div>
   );
@@ -276,6 +276,7 @@ export default function SectionHook({ color, mode, slide }) {
         }}>
           <VectorTicker color={color} pres />
         </div>
+        <KidNote color={color}>12,288 is one famous model's number. Smaller models use a few hundred; the demo in Try It uses 1,536. Same idea, different size.</KidNote>
       </PresSlide>
     );
   }
@@ -505,7 +506,7 @@ export default function SectionHook({ color, mode, slide }) {
           </div>
 
           <TriviaBox mode={mode} visible={true} color={color} number="12,288" label="numbers per word"
-            fact="Imagine covering an entire basketball court with tennis balls, packed side by side. That's about 12,000 balls — almost exactly how many numbers the AI uses for a single word like 'cat'." />
+            fact="Imagine printing 12,288 numbers, one after another, in a normal book. That's about 25 pages of nothing but numbers — all to describe the single word 'cat'." />
           <ModelNote color={color} mode={mode}>
             The numbers in this lesson (like 12,288 and 96 layers) come from one specific large model. Every AI model uses different numbers — some smaller, some bigger. And as AI keeps getting better, these numbers keep changing! The <strong style={{ color: "rgba(255,255,255,.55)" }}>ideas</strong> stay the same though.
           </ModelNote>

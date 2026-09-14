@@ -143,7 +143,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
         Real AI doesn't just read <em>one</em> joke...
       </PresText>
       <PresText size={48} color={color}>
-        It reads the ENTIRE internet.
+        It reads a HUGE slice of the internet.
       </PresText>
       <PresText size={24} color="rgba(255,255,255,.35)">
         But raw reading isn't enough to be helpful.

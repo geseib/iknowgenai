@@ -751,8 +751,8 @@ export default function SectionAttention({ color, mode, slide }) {
         </div>
       )}
 
-      <TriviaBox mode={mode} visible={step === 4} color={color} number="96" label="attention heads at once"
-        fact="Claude runs 96 different spotlights at the same time — each one looking for different types of relationships. It's like 96 readers, each hunting for something different in the same sentence." />
+      <TriviaBox mode={mode} visible={step === 4} color={color} number="96" label="spotlights at once (in one famous model)"
+        fact="Big models run dozens of spotlights at the same time — one well-known model used 96 in every layer. Each spotlight hunts for a different kind of relationship, like 96 readers each looking for something different in the same sentence." />
       {step === 4 && (
         <ModelNote color={color} mode={mode}>
           Different models use different numbers of attention heads — some use 32, some 96, some even more. The idea is the same: multiple spotlights working together.
