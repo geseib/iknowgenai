@@ -223,7 +223,10 @@ export default function App() {
       try {
         if (lesson.interaction === "projector") { if (roomCtx.room) await roomCtx.end(); }
         else if (!roomCtx.room) await roomCtx.start(lesson.interaction);
-        else if (roomCtx.mode !== lesson.interaction) await roomCtx.setMode(lesson.interaction);
+        else {
+          if (roomCtx.mode !== lesson.interaction) await roomCtx.setMode(lesson.interaction);
+          await roomCtx.clearVotes(); // a reused room starts every lesson with clean votes
+        }
       } catch { /* the landing page shows the room error */ }
     }
     setMode(m);

@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { DeviceMobile, DeviceTablet, PauseCircle, PlayCircle, X, Users, Power, Warning } from "@phosphor-icons/react";
+import { DeviceMobile, DeviceTablet, PauseCircle, PlayCircle, X, Users, Power, Warning, ArrowCounterClockwise } from "@phosphor-icons/react";
 import { useRoom, buildJoinUrl } from "../data/room";
 import { INTERACTION_MODES } from "../data/lesson";
 import LessonMenu from "./LessonMenu";
@@ -13,7 +13,7 @@ import LessonMenu from "./LessonMenu";
 const FONT = "'Fredoka',sans-serif";
 
 export default function PresenterBar({ lesson, onLessonChange }) {
-  const { room, mode, tally, error, setMode, end, freeze, pair, unpair, clearError } = useRoom();
+  const { room, mode, tally, error, setMode, end, freeze, pair, unpair, clearError, clearVotes } = useRoom();
   const [open, setOpen] = useState(false);
   const [pairCode, setPairCode] = useState("");
   const [pairMsg, setPairMsg] = useState(null);
@@ -118,7 +118,10 @@ export default function PresenterBar({ lesson, onLessonChange }) {
 
           <LessonMenu lesson={{ ...lesson, interaction: mode }} onChange={l => changeMode(l.interaction)} compact />
 
-          <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+          <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+            <button onClick={() => { if (window.confirm("Reset every vote in this room? Devices stay joined.")) clearVotes(); }} style={{ flex: "1 1 100%", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "9px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,.18)", background: "transparent", color: "white", fontFamily: FONT, fontSize: 14, cursor: "pointer" }}>
+              <ArrowCounterClockwise size={18} weight="bold" /> Reset all votes
+            </button>
             <button onClick={() => freeze(!frozen)} style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "9px 10px", borderRadius: 10, border: `1px solid ${frozen ? "#fb5607" : "rgba(255,255,255,.18)"}`, background: frozen ? "#fb560722" : "transparent", color: "white", fontFamily: FONT, fontSize: 14, cursor: "pointer" }}>
               {frozen ? <><PlayCircle size={18} weight="duotone" /> Resume devices</> : <><PauseCircle size={18} weight="duotone" /> Freeze devices</>}
             </button>

@@ -74,7 +74,7 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
   const keys = hotkeys ?? options.map((_, i) => String(i + 1));
   const correctIds = correct == null ? [] : Array.isArray(correct) ? correct : [correct];
   const room = useRoomVotes(roomId ? [{ id: roomId, prompt: prompt || "", options }] : [], !resolved);
-  const tally = roomId ? mergeTally(manual, room.counts[roomId]) : manual;
+  const tally = roomId ? mergeTally(manual, room.counts[roomId], () => room.resetQuestion(roomId)) : manual;
   const { counts, total, inc, dec, reset } = tally;
   const live = roomId && room.live;
 
@@ -107,6 +107,11 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
           </span>
         )}
         {verdict && <VerdictChip verdict={verdict} color={color} />}
+        {total > 0 && (
+          <button onClick={reset} title="Reset votes (hands and devices)" aria-label="Reset votes" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.3)", display: "inline-flex", padding: 2 }}>
+            <ArrowCounterClockwise size={16} weight="bold" />
+          </button>
+        )}
         {options.map((o, i) => {
           const isCorrect = resolved && correctIds.includes(o.id);
           const isWrong = resolved && correctIds.length > 0 && !isCorrect;
@@ -204,8 +209,8 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
             {peek ? <EyeSlash size={16} weight="bold" /> : <Eye size={16} weight="bold" />} {peek ? "hide" : "peek"}
           </button>
         )}
-        {!resolved && total > 0 && (
-          <button onClick={reset} title="Reset votes" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.35)", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT, fontSize: 14 }}>
+        {total > 0 && (
+          <button onClick={reset} title="Reset votes (hands and devices)" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.35)", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT, fontSize: 14 }}>
             <ArrowCounterClockwise size={16} weight="bold" /> reset
           </button>
         )}
@@ -272,7 +277,7 @@ export function PredictGate({ prompt, options, tally: manual, color, correct, co
   const [revealedState, setRevealedState] = useState(false);
   const revealed = revealedProp ?? revealedState;
   const room = useRoomVotes(roomId ? [{ id: roomId, prompt: roomPrompt || (typeof prompt === "string" ? prompt : ""), options }] : [], !revealed);
-  const tally = roomId ? mergeTally(manual, room.counts[roomId]) : manual;
+  const tally = roomId ? mergeTally(manual, room.counts[roomId], () => room.resetQuestion(roomId)) : manual;
   const live = roomId && room.live;
   const reveal = useCallback(() => {
     if (revealed) return;
