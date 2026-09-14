@@ -21,13 +21,13 @@ const rows = [
   { topic: "Gets tired",          brain: "Yes — needs sleep and rest",        ai: "No — it can run 24/7",               match: false },
   { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Its training, plus what you tell it in this chat",             match: false },
   { topic: "Understands meaning", brain: "Deeply — we live in the world",    ai: "Sort of — in a very different way",   match: false },
-  { topic: "Can be creative",     brain: "Yes — art, music, stories",        ai: "Sort of — by remixing patterns",      match: true },
+  { topic: "Can be creative",     brain: "Yes — art, music, stories",        ai: "Mixes patterns with a dash of randomness — whether that's real creativity is still debated",      match: true },
 ];
 
 const notes = [
   "Kids often ask 'does AI think like us?' — it's worth being honest: we don't fully know. What we do know is that it processes differently from a human brain.",
   "The 'has emotions' row is tricky. AI can say 'I'm excited!' or 'That makes me sad' — and it feels real. But it learned those words from human writing. It's predicting what an emotional response looks like, not actually feeling anything. A good analogy: an actor can cry on cue without being sad.",
-  "The 'can be creative' row often sparks good debate. AI combines and remixes patterns from training data. Is that 'real' creativity? Great open question for the class.",
+  "The 'can be creative' row often sparks good debate. AI mixes patterns it learned, finds compromises between them, and samples with a bit of randomness — which is a fair description of a lot of human creativity too. Whether novelty without intent or lived experience counts as 'real' creativity is genuinely still debated. Great open question for the class.",
   "Key point: AI was inspired by neurons and how brains connect, but an AI model is ultimately a giant math function — billions of multiplication operations happening in sequence.",
   "Avoid saying AI 'knows' or 'understands' things the way humans do. Safer phrasing: 'it processes' or 'it was trained on' to avoid overclaiming.",
   "Great discussion question: 'What would AI need to have before you'd say it was truly like a brain?'",
