@@ -80,6 +80,7 @@ const noop = async () => {};
 const INERT_ROOM = {
   room: null, active: false, mode: "projector", tally: null, error: null,
   start: noop, setMode: noop, end: noop, publish: noop, close: noop, freeze: noop, pair: noop, unpair: noop, storymash: noop,
+  resetQuestion: noop, clearVotes: noop,
 };
 
 /**
@@ -89,7 +90,7 @@ const INERT_ROOM = {
  * projector mode) it returns zeros and does nothing.
  */
 export function useRoomVotes(questions, active = true) {
-  const { room, active: roomActive, publish, close, tally } = useRoom();
+  const { room, active: roomActive, publish, close, tally, resetQuestion } = useRoom();
   const ids = questions.map(q => q.id).join("|");
   const optionSig = questions.map(q => q.options.map(o => o.id).join(",")).join("|");
   const questionsRef = useRef(questions);
@@ -109,7 +110,7 @@ export function useRoomVotes(questions, active = true) {
     const t = tally?.questions?.[q.id];
     counts[q.id] = q.options.map(o => (t ? t.counts?.[o.id] || 0 : 0));
   }
-  return { counts, joined: tally?.joined || 0, live: Boolean(room && roomActive) };
+  return { counts, joined: tally?.joined || 0, live: Boolean(room && roomActive), resetQuestion };
 }
 
 /** Room counts for one question id, aligned to options — read-only, no publish. */
@@ -126,8 +127,9 @@ export function useRoomCounts(roomId, options) {
  * Merge a manual tally handle (useTally) with room counts so the projector shows
  * hands-up taps AND phone/tablet votes in one set of bars.
  */
-export function mergeTally(tally, roomCounts) {
+export function mergeTally(tally, roomCounts, onResetRoom) {
   if (!roomCounts) return tally;
+  const reset = () => { tally.reset(); onResetRoom?.(); };
   const counts = tally.counts.map((v, i) => v + (roomCounts[i] || 0));
   const total = counts.reduce((a, b) => a + b, 0);
   let best = -1, leader = null, tie = false;
@@ -135,7 +137,7 @@ export function mergeTally(tally, roomCounts) {
     if (v > best) { best = v; leader = i; tie = false; }
     else if (v === best && v > 0) tie = true;
   });
-  return { ...tally, counts, total, leader: best > 0 && !tie ? leader : null, roomTotal: roomCounts.reduce((a, b) => a + b, 0) };
+  return { ...tally, reset, counts, total, leader: best > 0 && !tie ? leader : null, roomTotal: roomCounts.reduce((a, b) => a + b, 0) };
 }
 
 /* ── polling helper (used by the provider and the student view) ──────── */

@@ -75,6 +75,9 @@ export default function RoomProvider({ children }) {
     scheduleSync();
   }, [scheduleSync]);
   const freeze = useCallback((frozen) => act("freeze", { frozen }), [act]);
+  const refreshTally = useCallback(async () => { const res = await act("tally"); if (res?.ok) setTally(res); }, [act]);
+  const resetQuestion = useCallback(async (id) => { await act("resetQuestion", { id }); await refreshTally(); }, [act, refreshTally]);
+  const clearVotes = useCallback(async () => { await act("clear"); await refreshTally(); }, [act, refreshTally]);
   const pair = useCallback((pairing) => act("pair", { pairing }), [act]);
   const unpair = useCallback(() => act("unpair"), [act]);
   const storymash = useCallback((open, reset = false) => act("storymash", { open, reset }), [act]);
@@ -94,9 +97,9 @@ export default function RoomProvider({ children }) {
 
   const value = useMemo(() => ({
     room, active, mode, tally, error,
-    start, setMode, end, publish, close, freeze, pair, unpair, storymash,
+    start, setMode, end, publish, close, freeze, pair, unpair, storymash, resetQuestion, clearVotes,
     clearError: () => setError(null),
-  }), [room, active, mode, tally, error, start, setMode, end, publish, close, freeze, pair, unpair, storymash]);
+  }), [room, active, mode, tally, error, start, setMode, end, publish, close, freeze, pair, unpair, storymash, resetQuestion, clearVotes]);
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
 }

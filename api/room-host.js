@@ -14,6 +14,7 @@ import {
 //                                           (the client sends its whole mounted set, serialized)
 //   close      { ids: [] }                   closes those questions (votes are kept for the tally)
 //   clear                                    forgets all questions and their votes
+//   resetQuestion { id }                     wipes one question's votes (it stays open)
 //   freeze     { frozen: bool }              pauses every phone/tablet ("look up!")
 //   pair       { pairing: "42" }             confirms the 2-digit code shown on the tablet
 //   unpair                                   forgets the tablet
@@ -72,6 +73,12 @@ export default async function handler(req, res) {
         const ids = Array.isArray(body.ids) ? body.ids : [];
         for (const id of ids) if (questions[id]) questions[id].open = false;
         await redis("HSET", key, "questions", JSON.stringify(questions));
+        return res.status(200).json({ ok: true });
+      }
+      case "resetQuestion": {
+        const id = String(body.id || "");
+        if (!id || !questions[id]) return res.status(400).json({ error: "unknown_question" });
+        await redisPipeline([["DEL", votesKey(code, id)], ["DEL", tapsKey(code, id)]]);
         return res.status(200).json({ ok: true });
       }
       case "clear": {
