@@ -74,6 +74,15 @@ function ContinueButton({ onClick, color, label }) {
 }
 
 export default function SectionMLP({ color, mode, slide }) {
+  // Slide 1 (Michael Jordan): keep the blank empty until the class has shouted an answer
+  const [mjRevealed, setMjRevealed] = useState(false);
+  useEffect(() => { setMjRevealed(false); }, [slide]);
+  useEffect(() => {
+    if (mode !== "presentation" || slide !== 1 || mjRevealed) return;
+    const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); setMjRevealed(true); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode, slide, mjRevealed]);
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState(0);
   const [hasRun, setHasRun] = useState(false);
@@ -161,10 +170,26 @@ export default function SectionMLP({ color, mode, slide }) {
           }}>
             Michael Jordan played{" "}
             <span style={{
-              color, padding: "2px 20px", borderRadius: 10,
+              color, padding: "2px 20px", borderRadius: 10, display: "inline-block", minWidth: 260,
               background: `${color}18`, borderBottom: `4px solid ${color}`,
-            }}>basketball 🏀</span>
+              transition: "all .3s ease",
+            }}>{mjRevealed ? "basketball 🏀" : "\u00a0"}</span>
           </div>
+          {!mjRevealed ? (
+            <>
+              <PresText size={28} color="rgba(255,255,255,.55)">
+                Shout it out — what goes in the blank?
+              </PresText>
+              <button
+                onClick={() => setMjRevealed(true)}
+                className="cta-btn"
+                style={{ background: color, color: "#000", fontSize: 22, padding: "12px 30px", border: "none", borderRadius: 999, cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700 }}
+              >
+                Reveal <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}>· Enter</span>
+              </button>
+            </>
+          ) : (
+          <>
           <PresText size={28} color="rgba(255,255,255,.5)">
             You knew that instantly. But look at the words:
           </PresText>
@@ -196,6 +221,8 @@ export default function SectionMLP({ color, mode, slide }) {
             <strong style={{ color }}>Thinking Layer</strong>. Attention reads the sentence; the MLP
             looks up what it <em>knows</em> about Michael Jordan.
           </div>
+          </>
+          )}
         </PresSlide>
       );
     }
