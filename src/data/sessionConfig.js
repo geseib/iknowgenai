@@ -1,8 +1,9 @@
 /**
- * Multi-Session (v3) configuration.
+ * Multi-Session (v3) configuration — an OPT-IN way to split the lesson into
+ * three bite-sized sessions (Discover, Explore, Create). Off by default.
  *
- * Maps each grade band to three sessions: Discover, Explore, Create.
- * Section indices reference the V2 ordering defined in App.jsx.
+ * Each session lists the sections it contains by their stable `id`
+ * (see src/data/sections.js). Sections render in the order listed here.
  */
 
 export const SESSION_CONFIG = {
@@ -11,13 +12,13 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3],
+        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning"],
         teaser: "Next time: how does AI actually DO all that?",
       },
       {
         name: "Explore",
         subtitle: "How AI thinks",
-        sections: [5, 7, 10],
+        sections: ["what-is-llm", "how-it-learns", "numbers-words"],
         review: [
           {
             question: "What did we build with AI last time?",
@@ -43,7 +44,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: [12, 14, 17, 18, 19],
+        sections: ["embeddings", "attention", "predict", "reasoning", "try-it"],
         review: [
           {
             question: "How does AI see words?",
@@ -66,13 +67,13 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3, 4],
+        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning", "brain-vs-ai"],
         teaser: "Next time: we open the hood and look inside",
       },
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: [5, 6, 7, 9, 10, 12],
+        sections: ["what-is-llm", "meet-models", "how-it-learns", "the-bridge", "numbers-words", "embeddings"],
         review: [
           {
             question: "What did we build with AI last time?",
@@ -98,7 +99,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: [14, 15, 16, 17, 18, 19],
+        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it"],
         review: [
           {
             question: "How does AI see the word 'cat'?",
@@ -127,13 +128,13 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: [0, 1, 2, 3, 4, 5],
+        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning", "brain-vs-ai", "what-is-llm"],
         teaser: "Next time: we look inside the machine",
       },
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: [6, 7, 8, 9, 10, 11, 12, 13],
+        sections: ["meet-models", "how-it-learns", "three-steps", "the-bridge", "numbers-words", "tokens", "embeddings", "beyond-2d"],
         review: [
           {
             question: "What did we build with AI last time?",
@@ -159,7 +160,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "The full pipeline",
-        sections: [14, 15, 16, 17, 18, 19, 20],
+        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it", "beyond-knowledge"],
         review: [
           {
             question: "How does AI see the word 'cat'?",

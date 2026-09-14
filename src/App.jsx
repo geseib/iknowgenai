@@ -1,36 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import { Robot, ChalkboardTeacher, GameController, Eye, ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle, GraduationCap } from "@phosphor-icons/react";
+import { ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
-import { COLORS, TOTAL, GROUPS, TITLES } from "./data/constants";
-import { TEACHER_NOTES } from "./data/teacherNotes";
-import { GRADE_CONFIG } from "./data/gradeConfig";
+import { SECTIONS as ALL_SECTIONS, SECTION_BY_ID, SECTION_INDEX, buildGroups } from "./data/sections";
+import { NOTES_BY_ID } from "./data/teacherNotes";
+import { GRADE_CONFIG, slidesFor } from "./data/gradeConfig";
 import { GradeContext, GRADES } from "./data/GradeContext";
 import TeacherDrawer from "./components/TeacherDrawer";
 
 import ModeSelect from "./components/ModeSelect";
 import Glossary from "./components/Glossary";
 import KnowledgeCheck from "./components/KnowledgeCheck";
-import SectionWhoIsHere from "./components/SectionWhoIsHere";
-import SectionStoryMash from "./components/SectionStoryMash";
-import SectionWhatIsAI from "./components/SectionWhatIsAI";
-import SectionProgramsVsAI from "./components/SectionProgramsVsAI";
-import SectionHowItLearns from "./components/SectionHowItLearns";
-import SectionBrainVsAI from "./components/SectionBrainVsAI";
-import SectionWhatIsLLM from "./components/SectionWhatIsLLM";
-import SectionMeetModels from "./components/SectionMeetModels";
-import SectionTheBridge from "./components/SectionTheBridge";
-import SectionThreeSteps from "./components/SectionThreeSteps";
-import SectionHook from "./components/SectionHook";
-import SectionTokens from "./components/SectionTokens";
-import SectionEmbeddings from "./components/SectionEmbeddings";
-import SectionBeyond2D from "./components/SectionBeyond2D";
-import SectionAttention from "./components/SectionAttention";
-import SectionMLP from "./components/SectionMLP";
-import SectionLayers from "./components/SectionLayers";
-import SectionPredict from "./components/SectionPredict";
-import SectionReasoning from "./components/SectionReasoning";
-import SectionTryIt from "./components/SectionTryIt";
-import SectionBeyondKnowledge from "./components/SectionBeyondKnowledge";
 import JoinRoom from "./components/JoinRoom";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 import SessionReview, { SessionTeaser } from "./components/SessionReview";
@@ -40,126 +19,28 @@ import { SESSION_CONFIG, SESSION_COLORS } from "./data/sessionConfig";
 // If ?join=CODE is in the URL, render the mobile join page instead
 const JOIN_CODE = new URLSearchParams(window.location.search).get("join");
 
-// ── V1: Current section order ──
-const SECTIONS_V1 = [
-  SectionWhoIsHere,
-  SectionStoryMash,
-  SectionWhatIsAI,
-  SectionProgramsVsAI,
-  SectionBrainVsAI,
-  SectionWhatIsLLM,
-  SectionMeetModels,
-  SectionTheBridge,
-  SectionHowItLearns,
-  SectionThreeSteps,
-  SectionHook,
-  SectionTokens,
-  SectionEmbeddings,
-  SectionBeyond2D,
-  SectionAttention,
-  SectionMLP,
-  SectionLayers,
-  SectionPredict,
-  SectionTryIt,
-  SectionBeyondKnowledge,
-];
+// Canonical course flow lives in src/data/sections.js. Everything below is
+// derived from it and keyed by stable section id — never by array position.
 
-// ── V2: Proposed reordering ──
-// Changes: BrainVsAI stays in group 1, HowItLearns+ThreeSteps move before TheBridge
-const SECTIONS_V2 = [
-  SectionWhoIsHere,     // 0  — Group 1: What Is AI?
-  SectionStoryMash,     // 1
-  SectionWhatIsAI,      // 2
-  SectionProgramsVsAI,  // 3
-  SectionBrainVsAI,     // 4  — now in group 1 (was group 2)
-  SectionWhatIsLLM,     // 5  — Group 2: Meet the LLMs
-  SectionMeetModels,    // 6
-  SectionHowItLearns,   // 7  — moved up (was 8)
-  SectionThreeSteps,    // 8  — moved up (was 9)
-  SectionTheBridge,     // 9  — Group 3: Inside the Machine (was 7, now opens the deep dive)
-  SectionHook,          // 10
-  SectionTokens,        // 11
-  SectionEmbeddings,    // 12
-  SectionBeyond2D,      // 13
-  SectionAttention,     // 14
-  SectionMLP,           // 15 — Group 4: How AI Writes
-  SectionLayers,        // 16
-  SectionPredict,       // 17
-  SectionReasoning,     // 18 — NEW: Think First!
-  SectionTryIt,             // 19 — Group 5: Try It!
-  SectionBeyondKnowledge,   // 20 — Group 6: Bonus
-];
+// Nav groups (contiguous act runs), plus title/color/notes arrays aligned to
+// the canonical section order.
+const GROUPS = buildGroups(ALL_SECTIONS);
+const TITLES = ALL_SECTIONS.map(s => s.title);
+const COLORS = ALL_SECTIONS.map(s => s.color);
+const NOTES = ALL_SECTIONS.map(s => NOTES_BY_ID[s.id] || {});
 
-// V2 index mapping: v2Position → v1Position (for slide count remapping)
-const V2_TO_V1 = [0, 1, 2, 3, 4, 5, 6, 8, 9, 7, 10, 11, 12, 13, 14, 15, 16, 17, 20, 18, 19];
-
-// V2 groups and titles
-const GROUPS_V2 = [
-  { name: "What Is AI?",        start: 0,  end: 4  },
-  { name: "Meet the LLMs",      start: 5,  end: 8  },
-  { name: "Inside the Machine", start: 9,  end: 14 },
-  { name: "How AI Writes",      start: 15, end: 18 },
-  { name: "Try It!",            start: 19, end: 19 },
-  { name: "Bonus",              start: 20, end: 20 },
-];
-
-const TITLES_V2 = [
-  "Who's Used AI?",          // 0
-  "Story Mash-Up!",          // 1
-  "What IS AI?",             // 2
-  "Rules vs Learning",       // 3
-  "Brain vs AI",             // 4
-  "What's an LLM?",          // 5
-  "Meet the Models",         // 6
-  "How AI Learns",           // 7 (was index 8)
-  "Three Steps to Helpful AI", // 8 (was index 9)
-  "The Big Question",        // 9 (was index 7)
-  "Numbers & Words",         // 10
-  "Tokens — Not Quite Words",// 11
-  "Words in Space",          // 12
-  "Beyond 2D",               // 13
-  "Attention!",              // 14
-  "The Thinking Layer",      // 15
-  "Rinse & Repeat",          // 16
-  "Predict!",                // 17
-  "Think First!",            // 18 — NEW: Reasoning
-  "Try It Yourself!",        // 19
-  "Beyond What AI Knows",    // 20
-];
-
-// Remap colors for v2 ordering
-const COLORS_V2 = V2_TO_V1.map(oldIdx => COLORS[oldIdx % COLORS.length]);
-
-// Remap grade slide counts for v2
-function getV2Slides(gradeKey) {
-  const original = GRADE_CONFIG[gradeKey].presentationSlides;
-  return V2_TO_V1.map(oldIdx => original[oldIdx] || 0);
-}
-
-// Remap teacher notes for v2
-function getV2TeacherNotes() {
-  return V2_TO_V1.map(oldIdx => TEACHER_NOTES[oldIdx] || {});
-}
-
-// Default slide counts (3-5 grade level) — overridden by GRADE_CONFIG
-const DEFAULT_SLIDES = GRADE_CONFIG["3-5"].presentationSlides;
-
-// Sections with a "skip to takeaway" button — maps section index → takeaway slide
+// Sections with a "skip to takeaway" button — section id → takeaway slide index
 const PRESENTATION_SKIP = {
-  3: 5,   // SectionProgramsVsAI → insight slide
-  4: 7,   // SectionBrainVsAI → insight slide
+  "rules-vs-learning": 5,
+  "brain-vs-ai": 7,
 };
 
-// Custom event for sections to signal they're fully revealed
-const SECTION_DONE_EVENT = "sectionFullyRevealed";
+// Map URL hash fragments to section ids
+const HASH_SECTIONS = { "try-it": "try-it" };
 
-// Map URL hash fragments to section indices
-const HASH_SECTIONS = { "try-it": SECTIONS_V1.length - 1 };
-
-// AI Cat: V2 section indices where the cat appears, with per-slide quotes
-// Each entry: { slide: number, quotes: string[] }
+// AI Cat cameos — section id → { slide, quotes }
 const CAT_SECTIONS = {
-  3: {  // Rules vs Learning — appears after reveal that cat/dog app is AI
+  "rules-vs-learning": {  // appears after reveal that cat/dog app is AI
     slide: 2,
     quotes: [
       "They used ME as an example? Typical.",
@@ -168,13 +49,21 @@ const CAT_SECTIONS = {
       "Cat detection: the OG AI flex.",
     ],
   },
-  7: {  // How AI Learns — knock-knock joke opening
+  "how-it-learns": {  // knock-knock joke opening
     slide: 0,
     quotes: [
       "Meow, who's there?",
     ],
   },
-  10: { // Numbers & Words — "when you see 'cat', what do you think?"
+  "meet-models": {  // introducing AI models
+    slide: 0,
+    quotes: [
+      "Where's MY model card?",
+      "ChatGPT, Claude, Gemini... and ME!",
+      "I'm the AI they didn't tell you about.",
+    ],
+  },
+  "numbers-words": {  // "when you see 'cat', what do you think?"
     slide: 1,
     quotes: [
       "ME!",
@@ -182,7 +71,7 @@ const CAT_SECTIONS = {
       "You called?",
     ],
   },
-  11: { // Tokens — words chopped into pieces
+  "tokens": {  // words chopped into pieces
     slide: 0,
     quotes: [
       "They tokenized my name into 'c' + 'at'. Rude.",
@@ -191,7 +80,7 @@ const CAT_SECTIONS = {
       "Meow = token #28719. Just checked.",
     ],
   },
-  14: { // Attention! — bat disambiguation
+  "attention": {  // bat disambiguation
     slide: 0,
     quotes: [
       "Wait... bat like the animal, right? Asking for a friend.",
@@ -200,15 +89,7 @@ const CAT_SECTIONS = {
       "Bat? I prefer to attend to the tuna nearby.",
     ],
   },
-  6: {  // Meet the Models — introducing AI models
-    slide: 0,
-    quotes: [
-      "Where's MY model card?",
-      "ChatGPT, Claude, Gemini... and ME!",
-      "I'm the AI they didn't tell you about.",
-    ],
-  },
-  16: { // Rinse & Repeat (Layers) — 96 layers and "cat sat on the mat"
+  "layers": {  // 96 layers and "cat sat on the mat"
     slide: 1,
     quotes: [
       "96 layers? That's a lot of thinking about me.",
@@ -216,7 +97,7 @@ const CAT_SECTIONS = {
       "After 96 layers, they finally got my name right.",
     ],
   },
-  17: { // Predict! — interactive prediction
+  "predict": {  // interactive prediction
     slide: 0,
     quotes: [
       "I predict... dinner. Always dinner.",
@@ -225,7 +106,7 @@ const CAT_SECTIONS = {
       "Randomness set to maximum. Chaos cat activated.",
     ],
   },
-  18: { // Think First! — reasoning models
+  "reasoning": {  // reasoning models
     slide: 0,
     quotes: [
       "Thinking before speaking? Revolutionary.",
@@ -234,12 +115,20 @@ const CAT_SECTIONS = {
       "My reasoning: if it fits, I sits.",
     ],
   },
-  20: { // Beyond What AI Knows — farewell
+  "beyond-knowledge": {  // bonus: tools & RAG
     slide: 0,
     quotes: [
       "Beyond what AI knows? I know it's treat time.",
+      "Tools? My only tool is the snooze button.",
+      "RAG: Retrieval-Augmented... Gato.",
+    ],
+  },
+  "wrap-up": {  // farewell
+    slide: 1,
+    quotes: [
       "Thanks for learning with me!",
       "You now know more about AI than most cats.",
+      "Go use AI for good. And treats.",
     ],
   },
 };
@@ -252,7 +141,8 @@ export default function App() {
 
   // Check for hash deep-link on initial load
   const hashTarget = window.location.hash.replace("#", "");
-  const deepLink = HASH_SECTIONS[hashTarget];
+  const deepLinkId = HASH_SECTIONS[hashTarget];
+  const deepLink = deepLinkId != null ? SECTION_INDEX[deepLinkId] : null;
 
   const [flags, setFlags] = useState(loadFlags);
   const [mode, setMode] = useState(deepLink != null ? "student" : null);
@@ -273,11 +163,10 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const isV2 = flags.flowVersion;
   const isV3 = flags.multiSession;
 
   // ── V3 multi-session logic ──
-  // When v3 is active, we build a session-scoped view on top of the V2 section order.
+  // When v3 is active, we build a session-scoped view on top of the canonical order.
   const v3SessionConfig = isV3 ? SESSION_CONFIG[grade]?.sessions?.[session] : null;
   const v3Reviews = v3SessionConfig?.review || [];
   const v3HasReview = session > 0 && v3Reviews.length > 0;
@@ -286,31 +175,24 @@ export default function App() {
   const v3TeaserSlideCount = v3HasTeaser ? 1 : 0;
   const v3NextSession = isV3 && session < 2 ? SESSION_CONFIG[grade]?.sessions?.[session + 1] : null;
 
-  // Build the active section list
+  // Build the active section list (a session subset in v3, otherwise the full arc).
   let SECTIONS, activeGROUPS, activeTITLES, activeCOLORS, activeNOTES;
 
   if (isV3) {
-    // V3 always uses V2 ordering as its base
-    const sessionSections = v3SessionConfig?.sections || [];
-    SECTIONS = sessionSections.map(idx => SECTIONS_V2[idx]);
-    activeTITLES = sessionSections.map(idx => TITLES_V2[idx]);
-    activeCOLORS = sessionSections.map(idx => COLORS_V2[idx % COLORS_V2.length]);
-    activeNOTES = sessionSections.map(idx => getV2TeacherNotes()[idx] || {});
+    const sessionSections = v3SessionConfig?.sections || []; // array of section ids
+    SECTIONS = sessionSections.map(id => SECTION_BY_ID[id]?.Component);
+    activeTITLES = sessionSections.map(id => SECTION_BY_ID[id]?.title);
+    activeCOLORS = sessionSections.map(id => SECTION_BY_ID[id]?.color);
+    activeNOTES = sessionSections.map(id => NOTES_BY_ID[id] || {});
     activeGROUPS = [
       { name: v3SessionConfig?.name || "Session", start: 0, end: sessionSections.length - 1 },
     ];
-  } else if (isV2) {
-    SECTIONS = SECTIONS_V2;
-    activeGROUPS = GROUPS_V2;
-    activeTITLES = TITLES_V2;
-    activeCOLORS = COLORS_V2;
-    activeNOTES = getV2TeacherNotes();
   } else {
-    SECTIONS = SECTIONS_V1;
+    SECTIONS = ALL_SECTIONS.map(s => s.Component);
     activeGROUPS = GROUPS;
     activeTITLES = TITLES;
     activeCOLORS = COLORS;
-    activeNOTES = TEACHER_NOTES;
+    activeNOTES = NOTES;
   }
 
   // Total number of "slots" the user navigates through
@@ -323,17 +205,14 @@ export default function App() {
   // Build presentation slide counts
   let PRESENTATION_SLIDES;
   if (isV3) {
-    const sessionSections = v3SessionConfig?.sections || [];
-    const v2Slides = getV2Slides(grade);
-    const sectionSlides = sessionSections.map(idx => v2Slides[idx] || 1);
+    const sessionSections = v3SessionConfig?.sections || []; // ids
+    const sectionSlides = sessionSections.map(id => slidesFor(grade, id) || 1);
     // Prepend review slides, append teaser
     const reviewSlides = v3HasReview ? Array(v3ReviewSlideCount).fill(1) : [];
     const teaserSlides = v3HasTeaser ? [1] : [];
     PRESENTATION_SLIDES = [...reviewSlides, ...sectionSlides, ...teaserSlides];
-  } else if (isV2) {
-    PRESENTATION_SLIDES = getV2Slides(grade);
   } else {
-    PRESENTATION_SLIDES = GRADE_CONFIG[grade]?.presentationSlides || DEFAULT_SLIDES;
+    PRESENTATION_SLIDES = ALL_SECTIONS.map(s => slidesFor(grade, s.id));
   }
 
   // In v3, map logical sec index to what kind of slot it is
@@ -452,18 +331,6 @@ export default function App() {
   const color = (isV3 && (v3IsReviewSlide || v3IsTeaserSlide))
     ? v3SessionColor
     : (isV3 ? activeCOLORS[v3ContentSecIndex % activeCOLORS.length] : activeCOLORS[sec % activeCOLORS.length]);
-
-  // For the nav drawer, offset groups by the review slide count in v3
-  const v3NavGroups = isV3
-    ? [{
-        name: v3SessionConfig?.name || "Session",
-        start: v3ReviewSlideCount,
-        end: v3ReviewSlideCount + v3SectionCount - 1,
-      }]
-    : activeGROUPS;
-  const currentGroup = isV3
-    ? v3NavGroups[0]
-    : activeGROUPS.find(g => sec >= g.start && sec <= g.end);
 
   // Progress — always slide-based
   const totalSlideCount = PRESENTATION_SLIDES.reduce((a, b) => a + b, 0);
@@ -634,7 +501,6 @@ export default function App() {
                   const sessColor = SESSION_COLORS[si];
                   const hasReview = si > 0 && (sess.review?.length > 0);
                   const reviewCount = hasReview ? 1 + sess.review.length : 0;
-                  const v2Slides = getV2Slides(grade);
 
                   return (
                     <div key={si}>
@@ -675,20 +541,20 @@ export default function App() {
                       </div>
 
                       {/* Section items for this session */}
-                      {sess.sections.map((v2Idx, posInSession) => {
+                      {sess.sections.map((secId, posInSession) => {
                         const secSlot = reviewCount + posInSession;
                         const isActive = isCurrentSession && secSlot === sec;
                         const isDone = isCurrentSession && done.has(secSlot);
-                        const sColor = COLORS_V2[v2Idx % COLORS_V2.length];
-                        const title = TITLES_V2[v2Idx];
-                        const totalSlidesInSec = v2Slides[v2Idx] || 1;
+                        const sColor = SECTION_BY_ID[secId]?.color || "#fff";
+                        const title = SECTION_BY_ID[secId]?.title || secId;
+                        const totalSlidesInSec = slidesFor(grade, secId) || 1;
                         const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
                         const pct = (slidesDone / totalSlidesInSec) * 100;
                         const dimmed = !isCurrentSession;
 
                         return (
                           <div
-                            key={`${si}-${v2Idx}`}
+                            key={`${si}-${secId}`}
                             onClick={() => isCurrentSession ? jumpToSection(secSlot) : jumpToV3Section(si, posInSession)}
                             style={{
                               display: "flex",
@@ -1076,12 +942,12 @@ export default function App() {
 
         {/* AI Cat — appears on select sections/slides when flag is on */}
         {flags.roamingCat && (() => {
-          const v2Idx = isV3
-            ? (v3SessionConfig?.sections?.[v3ContentSecIndex] ?? -1)
-            : (isV2 ? sec : -1);
-          const catConfig = CAT_SECTIONS[v2Idx];
+          const secId = isV3
+            ? (v3SessionConfig?.sections?.[v3ContentSecIndex] ?? null)
+            : (ALL_SECTIONS[sec]?.id ?? null);
+          const catConfig = secId ? CAT_SECTIONS[secId] : null;
           if (!catConfig || slide !== catConfig.slide) return null;
-          return <RoamingCat key={`${v2Idx}-${slide}`} quotes={catConfig.quotes} />;
+          return <RoamingCat key={`${secId}-${slide}`} quotes={catConfig.quotes} />;
         })()}
       </div>
 
@@ -1098,15 +964,19 @@ export default function App() {
           <div>{currentSlideNum} / {totalSlideCount}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {!isV3 && PRESENTATION_SKIP[sec] !== undefined && slide < PRESENTATION_SKIP[sec] && (
-            <button
-              onClick={() => setSlide(PRESENTATION_SKIP[sec])}
-              className="ghost-btn"
-              style={{ opacity: 0.45, fontSize: 13, gap: 5, padding: "8px 14px" }}
-            >
-              Skip <FastForward size={15} weight="bold" />
-            </button>
-          )}
+          {(() => {
+            const skipTarget = !isV3 ? PRESENTATION_SKIP[ALL_SECTIONS[sec]?.id] : undefined;
+            if (skipTarget === undefined || slide >= skipTarget) return null;
+            return (
+              <button
+                onClick={() => setSlide(skipTarget)}
+                className="ghost-btn"
+                style={{ opacity: 0.45, fontSize: 13, gap: 5, padding: "8px 14px" }}
+              >
+                Skip <FastForward size={15} weight="bold" />
+              </button>
+            );
+          })()}
           {sec < sectionTotal - 1 || slide < (PRESENTATION_SLIDES[sec] || 1) - 1
             ? <button onClick={next} className="ghost-btn" style={{ opacity: 0.5 }}>
                 <ArrowRight size={18} weight="bold" />
