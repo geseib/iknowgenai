@@ -458,25 +458,25 @@ function OverviewPipelineAnim({ color }) {
                 gap: 10,
                 padding: "10px 16px",
                 borderRadius: 12,
-                height: 52,
+                height: 64,
                 background: subPhase === "attn" ? `${color}15` : "rgba(255,255,255,.03)",
                 border: `2px solid ${subPhase === "attn" ? `${color}50` : "rgba(255,255,255,.06)"}`,
                 transition: "background .1s ease, border-color .1s ease, box-shadow .1s ease",
                 boxShadow: subPhase === "attn" ? `0 0 14px ${color}25` : "none",
               }}>
                 <ChatCircleDots
-                  size={22}
+                  size={30}
                   weight="duotone"
                   color={subPhase === "attn" ? color : "rgba(255,255,255,.2)"}
                   style={{ flexShrink: 0, transition: "color .1s ease" }}
                 />
                 <span style={{
                   fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 16,
-                  color: subPhase === "attn" ? "rgba(255,255,255,.8)" : "rgba(255,255,255,.25)",
+                  fontSize: 22,
+                  color: subPhase === "attn" ? "white" : "rgba(255,255,255,.25)",
                   transition: "color .1s ease",
                 }}>
-                  Attention <span style={{ fontSize: 13, opacity: 0.6 }}>(words look at each other)</span>
+                  Attention <span style={{ fontSize: 17, opacity: 0.7 }}>— every word looks at the other words</span>
                 </span>
               </div>
 
@@ -487,22 +487,22 @@ function OverviewPipelineAnim({ color }) {
                 gap: 10,
                 padding: "10px 16px",
                 borderRadius: 12,
-                height: 52,
+                height: 64,
                 background: subPhase === "think" ? `${color}15` : "rgba(255,255,255,.03)",
                 border: `2px solid ${subPhase === "think" ? `${color}50` : "rgba(255,255,255,.06)"}`,
                 transition: "background .1s ease, border-color .1s ease, box-shadow .1s ease",
                 boxShadow: subPhase === "think" ? `0 0 14px ${color}25` : "none",
               }}>
                 <Brain
-                  size={22}
+                  size={30}
                   weight="duotone"
                   color={subPhase === "think" ? color : "rgba(255,255,255,.2)"}
                   style={{ flexShrink: 0, transition: "color .1s ease" }}
                 />
                 <span style={{
                   fontFamily: "'Fredoka',sans-serif",
-                  fontSize: layerNum <= 6 ? 20 : (layerNum <= 15 ? 17 : 15),
-                  color: subPhase === "think" ? "rgba(255,255,255,.8)" : "rgba(255,255,255,.25)",
+                  fontSize: layerNum <= 6 ? 26 : (layerNum <= 15 ? 22 : 19),
+                  color: subPhase === "think" ? "white" : "rgba(255,255,255,.25)",
                   transition: "color .1s ease",
                   flex: 1,
                   overflow: "hidden",
@@ -511,7 +511,7 @@ function OverviewPipelineAnim({ color }) {
                 }}>
                   {subPhase === "think" && currentQuestion
                     ? <em style={{ color: `${color}cc` }}>"{currentQuestion}"</em>
-                    : <span>MLP <span style={{ fontSize: 13, opacity: 0.6 }}>(asks questions about each word)</span></span>}
+                    : <span>MLP <span style={{ fontSize: 17, opacity: 0.7 }}>— asks questions: spelling, grammar, facts, meaning</span></span>}
                 </span>
                 <Lightning
                   size={18}

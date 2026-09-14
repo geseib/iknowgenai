@@ -1042,14 +1042,15 @@ export default function App() {
         position: "fixed", bottom: 0, left: 0, right: 0, padding: "13px 22px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: "transparent", zIndex: 100,
+        pointerEvents: "none", // only the buttons inside should catch clicks; slide content underneath stays clickable
       }}>
-        <button onClick={prev} disabled={sec === 0 && slide === 0} className="ghost-btn" style={{ opacity: (sec === 0 && slide === 0) ? 0.2 : 0.5 }}>
+        <button onClick={prev} disabled={sec === 0 && slide === 0} className="ghost-btn" style={{ opacity: (sec === 0 && slide === 0) ? 0.2 : 0.5, pointerEvents: "auto" }}>
           <ArrowLeft size={18} weight="bold" />
         </button>
         <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 13, color: "rgba(255,255,255,.3)", textAlign: "center", lineHeight: 1.3 }}>
           <div>{currentSlideNum} / {totalSlideCount}</div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, pointerEvents: "auto" }}>
           {(() => {
             const skipTarget = !isV3 ? PRESENTATION_SKIP[ALL_SECTIONS[sec]?.id] : undefined;
             if (skipTarget === undefined || slide >= skipTarget) return null;
