@@ -316,8 +316,12 @@ export default function SectionTokens({ color, mode, slide }) {
           </div>
         )}
         {chunks.length > 0 && (
-          <PresText size={20} color="rgba(255,255,255,.35)">
-            {chunks.length} token{chunks.length !== 1 ? "s" : ""} — each one is a number the AI processes
+          <PresText size={22} color="rgba(255,255,255,.55)">
+            {chunks.length} token{chunks.length !== 1 ? "s" : ""}. Each one gets an ID number — and then a list of{" "}
+            <strong style={{ color }}>12,288 numbers</strong> that describe what it means.
+          </PresText>
+          <PresText size={18} color="rgba(255,255,255,.35)">
+            (A token is the piece. The 12,288 numbers are its meaning. That list is what "Words in Space" is about next.)
           </PresText>
         )}
         <PresText size={16} color="rgba(255,255,255,.2)">
@@ -374,6 +378,9 @@ export default function SectionTokens({ color, mode, slide }) {
       </div>
       <PresText size={24} color="rgba(255,255,255,.45)">
         For every single position in a sentence, AI chooses from all ~100,000 tokens.
+      </PresText>
+      <PresText size={24} color="rgba(255,255,255,.55)">
+        And every one of those tokens carries its own list of <strong style={{ color }}>12,288 numbers</strong>. Next: what those numbers mean.
       </PresText>
       <KidNote color={color}>The exact size depends on the model — older ones used about 50,000, the newest around 200,000.</KidNote>
     </PresSlide>
