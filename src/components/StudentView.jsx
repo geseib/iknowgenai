@@ -44,7 +44,7 @@ export default function StudentView({ code }) {
       await deviceAction(code, "vote", { questionId: q.id, optionId });
       if (status?.isTablet) {
         setTabletFlash(q.id);
-        setTimeout(() => setTabletFlash(null), 1400);
+        setTimeout(() => setTabletFlash(null), 900);
       } else {
         setPicks(p => ({ ...p, [q.id]: optionId }));
       }

@@ -53,8 +53,27 @@ export default function RoomProvider({ children }) {
     setTally(null);
   }, [act, persist]);
 
-  const publish = useCallback((questions) => act("publish", { questions }), [act]);
-  const close = useCallback((ids) => act("close", { ids }), [act]);
+  // Questions currently mounted on the projector, in mount order. Every change is
+  // debounced into ONE "sync" call and calls are chained, so a fast run through
+  // several slides can never leave a stale question open on the phones.
+  const mountedRef = useRef(new Map());
+  const syncTimer = useRef(null);
+  const chain = useRef(Promise.resolve());
+  const scheduleSync = useCallback(() => {
+    clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      const questions = Array.from(mountedRef.current.values());
+      chain.current = chain.current.then(() => act("sync", { questions })).catch(() => {});
+    }, 60);
+  }, [act]);
+  const publish = useCallback((questions) => {
+    for (const q of questions) mountedRef.current.set(q.id, q);
+    scheduleSync();
+  }, [scheduleSync]);
+  const close = useCallback((ids) => {
+    for (const id of ids) mountedRef.current.delete(id);
+    scheduleSync();
+  }, [scheduleSync]);
   const freeze = useCallback((frozen) => act("freeze", { frozen }), [act]);
   const pair = useCallback((pairing) => act("pair", { pairing }), [act]);
   const unpair = useCallback(() => act("unpair"), [act]);

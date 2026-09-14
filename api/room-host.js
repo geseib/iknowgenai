@@ -10,6 +10,8 @@ import {
 //
 //   setMode    { mode }                      projector | tablet | phones
 //   publish    { questions: [{id, prompt, options:[{id,label,color?}]}] }  opens them (merge)
+//   sync       { questions: [...] }         opens exactly these and closes every other question
+//                                           (the client sends its whole mounted set, serialized)
 //   close      { ids: [] }                   closes those questions (votes are kept for the tally)
 //   clear                                    forgets all questions and their votes
 //   freeze     { frozen: bool }              pauses every phone/tablet ("look up!")
@@ -45,9 +47,16 @@ export default async function handler(req, res) {
         await touch(code);
         return res.status(200).json({ ok: true, mode: body.mode });
       }
-      case "publish": {
-        const list = sanitizeQuestions(body.questions);
+      case "publish":
+      case "sync": {
+        const list = body.action === "sync" && Array.isArray(body.questions) && body.questions.length === 0
+          ? []
+          : sanitizeQuestions(body.questions);
         if (!list) return res.status(400).json({ error: "bad_questions" });
+        if (body.action === "sync") {
+          const keep = new Set(list.map(q => q.id));
+          for (const id of Object.keys(questions)) if (!keep.has(id)) questions[id].open = false;
+        }
         for (const q of list) {
           const prev = questions[q.id];
           // Re-publishing the same question keeps its votes; a changed option set resets them.

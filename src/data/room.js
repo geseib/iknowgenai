@@ -98,6 +98,7 @@ export function useRoomVotes(questions, active = true) {
   useEffect(() => {
     if (!room || !roomActive || !active) return;
     const qs = questionsRef.current;
+    if (qs.length === 0) return;
     publish(qs);
     return () => { close(qs.map(q => q.id)); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
