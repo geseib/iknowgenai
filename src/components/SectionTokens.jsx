@@ -316,13 +316,15 @@ export default function SectionTokens({ color, mode, slide }) {
           </div>
         )}
         {chunks.length > 0 && (
-          <PresText size={22} color="rgba(255,255,255,.55)">
-            {chunks.length} token{chunks.length !== 1 ? "s" : ""}. Each one gets an ID number — and then a list of{" "}
-            <strong style={{ color }}>12,288 numbers</strong> that describe what it means.
-          </PresText>
-          <PresText size={18} color="rgba(255,255,255,.35)">
-            (A token is the piece. The 12,288 numbers are its meaning. That list is what "Words in Space" is about next.)
-          </PresText>
+          <>
+            <PresText size={22} color="rgba(255,255,255,.55)">
+              {chunks.length} token{chunks.length !== 1 ? "s" : ""}. Each one gets an ID number — and then a list of{" "}
+              <strong style={{ color }}>12,288 numbers</strong> that describe what it means.
+            </PresText>
+            <PresText size={18} color="rgba(255,255,255,.35)">
+              (A token is the piece. The 12,288 numbers are its meaning. That list is what "Words in Space" is about next.)
+            </PresText>
+          </>
         )}
         <PresText size={16} color="rgba(255,255,255,.2)">
           Try: unbelievable, basketball, homework, butterfly, impossible
