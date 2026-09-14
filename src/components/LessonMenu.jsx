@@ -43,6 +43,7 @@ function Pill({ on, soon, color, onClick, children, title }) {
 export default function LessonMenu({ lesson, onChange, compact = false }) {
   const set = (k, v) => onChange({ ...lesson, [k]: v });
   const current = INTERACTION_MODES.find(m => m.id === lesson.interaction);
+  const mathMeta = MATH_LEVELS.find(m => m.id === lesson.math);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <Row label="Interaction" hint={compact ? null : "what's in the room"}>
@@ -56,8 +57,11 @@ export default function LessonMenu({ lesson, onChange, compact = false }) {
       {!compact && (
         <>
           <Row label="Math" hint="teach some along the way">
-            {MATH_LEVELS.map(m => <Pill key={m.id} on={lesson.math === m.id} soon={m.soon} color="#fee440" onClick={() => set("math", m.id)}>{m.label}</Pill>)}
+            {MATH_LEVELS.map(m => <Pill key={m.id} on={lesson.math === m.id} soon={m.soon} color="#fee440" onClick={() => set("math", m.id)} title={m.desc}>{m.label}</Pill>)}
           </Row>
+          {mathMeta?.desc && (
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,.38)", textAlign: "left", padding: "0 12px", lineHeight: 1.5 }}>{mathMeta.desc}</div>
+          )}
           <Row label="Checks" hint="see if it landed">
             {CHECK_LEVELS.map(m => <Pill key={m.id} on={lesson.checks === m.id} soon={m.soon} color="#f15bb5" onClick={() => set("checks", m.id)}>{m.label}</Pill>)}
           </Row>

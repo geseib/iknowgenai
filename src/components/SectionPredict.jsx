@@ -13,6 +13,8 @@ import {
 import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
 import { PredictGate } from "./classroom";
 import { useTally } from "./useTally";
+import { useRoomCounts } from "../data/room";
+import MathMoment from "./MathMoment";
 import { applyTemp, sampleWord, tempMeta } from "../data/predict";
 import { useGrade } from "../data/GradeContext";
 import { GRADE_EXAMPLES } from "../data/gradeContent";
@@ -340,6 +342,8 @@ export default function SectionPredict({ color, mode, slide: slideProp }) {
   const gc = GRADE_EXAMPLES[grade].predict;
   const P_POSITIONS = gc.positions;
   const nextWordVote = useTally(4); // projector-mode: top 3 candidates + "something else"
+  const nextWordOptions = [...gc.rankedCandidates.slice(0, 3).map(c => ({ id: c.word, label: c.word })), { id: "other", label: "something else" }];
+  const nextWordRoom = useRoomCounts("next-word", nextWordOptions);
 
   const [temp, setTemp] = useState(.8);
   const [words, setWords] = useState([]);
@@ -417,10 +421,11 @@ export default function SectionPredict({ color, mode, slide: slideProp }) {
     /* Slide 2: Probability list — the last word carries everything */
     if (slide === 2) {
       const candidates = gc.rankedCandidates;
-      const voteOptions = [
-        ...candidates.slice(0, 3).map(c => ({ id: c.word, label: c.word })),
-        { id: "other", label: "something else" },
-      ];
+      const voteOptions = nextWordOptions;
+      const mergedCounts = nextWordVote.counts.map((v, i) => v + nextWordRoom[i]);
+      const mergedTotal = mergedCounts.reduce((x, y) => x + y, 0);
+      const leaderIdx = mergedTotal ? mergedCounts.indexOf(Math.max(...mergedCounts)) : -1;
+      const shown = candidates.reduce((x, c) => x + c.pct, 0);
       return (
         <PresSlide>
           <PredictGate
@@ -522,6 +527,7 @@ export default function SectionPredict({ color, mode, slide: slideProp }) {
           <PresText size={20} color="rgba(255,255,255,.4)">
             The top word wins — unless temperature adds some randomness.
           </PresText>
+          <MathMoment id="next-word-percent" data={{ top: candidates[0], counts: mergedCounts, total: mergedTotal, classLeader: leaderIdx >= 0 ? voteOptions[leaderIdx].label : null, shown }} />
           </PredictGate>
         </PresSlide>
       );

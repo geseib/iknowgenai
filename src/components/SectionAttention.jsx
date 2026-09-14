@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
 import { Tally, PredictGate } from "./classroom";
+import MathMoment from "./MathMoment";
 import { useTally } from "./useTally";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
 import { useGrade } from "../data/GradeContext";
@@ -517,6 +518,7 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
         <PresText size={28} color="rgba(255,255,255,.55)">
           Same word, completely different meaning — depending on which other words shine their spotlight on it.
         </PresText>
+        <MathMoment id="attention-share" compact />
       </PresSlide>
     );
   }

@@ -10,6 +10,7 @@ import {
   VideoCamera,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import MathMoment from "./MathMoment";
 import { useGrade } from "../data/GradeContext";
 
 const ICON_MAP = {
@@ -170,6 +171,7 @@ export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
           <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
             {p.reveal}
           </div>
+          <MathMoment id="wikipedias" compact />
         </PresSlide>
       );
     }

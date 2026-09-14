@@ -13,7 +13,7 @@ import KnowledgeCheck from "./components/KnowledgeCheck";
 import StudentView from "./components/StudentView";
 import PresenterBar from "./components/PresenterBar";
 import { useRoom } from "./data/room";
-import { loadLesson, saveLesson } from "./data/lesson";
+import { loadLesson, saveLesson, LessonContext } from "./data/lesson";
 import FeatureFlags, { loadFlags } from "./components/FeatureFlags";
 import SessionReview, { SessionTeaser } from "./components/SessionReview";
 import RoamingCat from "./components/catai/cat_runner_react_component";
@@ -439,6 +439,7 @@ export default function App() {
 
   return (
     <GradeContext.Provider value={grade}>
+    <LessonContext.Provider value={lesson}>
     <div style={{ minHeight: "100vh", background: "#050512", color: "white", fontFamily: "'Nunito',sans-serif", position: "relative" }}>
       <style>{ALL_CSS}</style>
 
@@ -1077,6 +1078,7 @@ export default function App() {
         </div>
       </div>
     </div>
+    </LessonContext.Provider>
     </GradeContext.Provider>
   );
 }

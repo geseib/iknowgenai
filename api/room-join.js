@@ -1,4 +1,5 @@
 import { redis } from "./_redis.js";
+import { readRoom } from "./_room.js";
 
 const VALID_ROLES = ["character", "place", "event"];
 
@@ -13,9 +14,13 @@ export default async function handler(req, res) {
   }
 
   const key = `room:${code.toUpperCase()}`;
-  const exists = await redis("EXISTS", key);
-  if (!exists) {
+  const room = await readRoom(code.toUpperCase());
+  if (!room) {
     return res.status(404).json({ error: "room_not_found" });
+  }
+  // In pass-around mode only the paired class tablet may enter ingredients.
+  if (room.mode === "tablet" && room.tablet !== (req.body?.deviceId || "")) {
+    return res.status(403).json({ error: "tablet_only" });
   }
 
   // Check if role is already claimed

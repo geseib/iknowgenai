@@ -9,6 +9,7 @@ import {
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 import { PredictGate } from "./classroom";
 import { useTallySet } from "./useTally";
+import MathMoment from "./MathMoment";
 
 const JOKE_DISPLAY = [
   "Knock knock.",
@@ -319,9 +320,12 @@ function RobotRoundSlide({ round, roundIdx, color, tally }) {
         dense
       >
         {(isRevealed) => isRevealed && (
-          <PresText size={22} color="rgba(255,255,255,.4)">
-            Wrong robots adjust their weights and try again next round!
-          </PresText>
+          <>
+            <PresText size={22} color="rgba(255,255,255,.4)">
+              Wrong robots adjust their weights and try again next round!
+            </PresText>
+            <MathMoment id="robot-chance" data={{ round: roundIdx }} compact />
+          </>
         )}
       </PredictGate>
     </PresSlide>

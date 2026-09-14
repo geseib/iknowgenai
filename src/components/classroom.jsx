@@ -16,11 +16,36 @@
 import { useState, useEffect, useCallback } from "react";
 import { leaderOf } from "./useTally";
 import { useRoomVotes, mergeTally } from "../data/room";
-import { Plus, Minus, ArrowCounterClockwise, CheckCircle, Eye } from "@phosphor-icons/react";
+import { Plus, Minus, ArrowCounterClockwise, CheckCircle, Eye, EyeSlash } from "@phosphor-icons/react";
 
 const FONT = "'Fredoka',sans-serif";
 
 const pct = (v, total) => (total ? Math.round((v / total) * 100) : 0);
+
+/** Did the majority of those who answered pick a correct option? */
+function verdictFor(options, counts, correctIds) {
+  const total = counts.reduce((a, b) => a + b, 0);
+  if (!correctIds.length || total === 0) return null;
+  const right = counts.reduce((s, v, i) => s + (correctIds.includes(options[i].id) ? v : 0), 0);
+  if (right * 2 > total) return { kind: "win", right, total, text: `Most of the room got it: ${right} of ${total}` };
+  if (right * 2 === total) return { kind: "split", right, total, text: `Split down the middle: ${right} of ${total} got it` };
+  return { kind: "miss", right, total, text: `Tricky one! Only ${right} of ${total} got it` };
+}
+
+function VerdictChip({ verdict, color, big = false }) {
+  if (!verdict) return null;
+  const tone = verdict.kind === "win" ? color : verdict.kind === "split" ? "#fee440" : "#fb5607";
+  return (
+    <div style={{
+      display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT, fontWeight: 700,
+      fontSize: big ? 22 : 16, padding: big ? "8px 18px" : "5px 12px", borderRadius: 999,
+      background: `${tone}22`, border: `2px solid ${tone}`, color: "white", boxShadow: `0 0 18px ${tone}55`,
+      animation: "fadeUp .4s ease", whiteSpace: "nowrap",
+    }}>
+      {verdict.kind === "win" ? "🎉" : verdict.kind === "split" ? "🤝" : "🤔"} {verdict.text}
+    </div>
+  );
+}
 
 /* ── Tally ───────────────────────────────────────────────────────────── */
 
@@ -40,8 +65,12 @@ const pct = (v, total) => (total ? Math.round((v / total) * 100) : 0);
  *   roomId    when a lesson room is live (tablet / phones), publish this question to
  *             joined devices while the tally is unresolved, and add their votes to the bars
  *   prompt    the question text shown on devices (only with roomId)
+ *   hideUntilResolved  keep the split secret while voting is open (only "N votes in" shows),
+ *             so early voters don't sway the room; the teacher can peek
  */
-export function Tally({ options, tally: manual, color, hotkeys, compare, compareLabel = "AI", correct, resolved = false, compact = false, hint, dense = false, roomId, prompt }) {
+export function Tally({ options, tally: manual, color, hotkeys, compare, compareLabel = "AI", correct, resolved = false, compact = false, hint, dense = false, roomId, prompt, hideUntilResolved = false }) {
+  const [peek, setPeek] = useState(false);
+  const masked = hideUntilResolved && !resolved && !peek;
   const keys = hotkeys ?? options.map((_, i) => String(i + 1));
   const correctIds = correct == null ? [] : Array.isArray(correct) ? correct : [correct];
   const room = useRoomVotes(roomId ? [{ id: roomId, prompt: prompt || "", options }] : [], !resolved);
@@ -62,6 +91,7 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
   }, [keys.join(","), resolved, inc, dec]);
 
   const leader = leaderOf(counts);
+  const verdict = resolved ? verdictFor(options, counts, correctIds) : null;
   const hintText = hint ?? (compact
     ? null
     : live
@@ -71,21 +101,31 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
   if (compact) {
     return (
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        {masked && (
+          <span style={{ fontFamily: FONT, fontSize: 14, color: "rgba(255,255,255,.5)", whiteSpace: "nowrap" }}>
+            <strong style={{ color: "white" }}>{total}</strong> in
+          </span>
+        )}
+        {verdict && <VerdictChip verdict={verdict} color={color} />}
         {options.map((o, i) => {
           const isCorrect = resolved && correctIds.includes(o.id);
-          const isLeader = leader === i;
+          const isWrong = resolved && correctIds.length > 0 && !isCorrect;
+          const isLeader = !masked && leader === i;
           return (
             <div key={o.id} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "6px 8px 6px 14px", borderRadius: 999,
-              background: isCorrect ? `${o.color || color}22` : isLeader ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.04)",
+              background: isCorrect ? `${o.color || color}33` : isLeader ? "rgba(255,255,255,.08)" : "rgba(255,255,255,.04)",
               border: `2px solid ${isCorrect ? (o.color || color) : isLeader ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.12)"}`,
+              boxShadow: isCorrect ? `0 0 22px ${o.color || color}66` : "none",
+              transform: isCorrect ? "scale(1.08)" : "none",
+              opacity: isWrong ? .45 : 1,
               fontFamily: FONT, fontSize: 18, color: "white",
-              transition: "all .25s ease",
+              transition: "all .3s ease",
             }}>
-              {isCorrect && <CheckCircle size={20} weight="fill" color={o.color || color} />}
-              <span>{o.label}</span>
-              <span style={{ fontWeight: 700, minWidth: 22, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>{counts[i]}</span>
+              {isCorrect && <CheckCircle size={22} weight="fill" color={o.color || color} />}
+              <span style={{ textDecoration: isWrong ? "line-through" : "none", fontWeight: isCorrect ? 700 : 500 }}>{o.label}</span>
+              <span style={{ fontWeight: 700, minWidth: 22, textAlign: "center", fontVariantNumeric: "tabular-nums", color: masked ? "rgba(255,255,255,.35)" : "white" }}>{masked ? "?" : counts[i]}</span>
               {!resolved && (
                 <>
                   <RoundBtn onClick={() => inc(i)} color={o.color || color} title={keys[i] ? `+1 (key ${keys[i]})` : "+1"} small><Plus size={16} weight="bold" /></RoundBtn>
@@ -108,24 +148,27 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
           const share = pct(counts[i], total);
           const cmp = compare?.find(c => c.id === o.id);
           const isCorrect = resolved && correctIds.includes(o.id);
-          const isLeader = leader === i;
+          const isWrong = resolved && correctIds.length > 0 && !isCorrect;
+          const isLeader = !masked && leader === i;
           const barColor = o.color || color;
           return (
             <div key={o.id} style={{
               display: "grid", gridTemplateColumns: "minmax(120px, 210px) 1fr 96px auto",
               gap: 12, alignItems: "center",
               padding: dense ? "4px 10px" : "8px 12px", borderRadius: 14,
-              background: isCorrect ? `${barColor}14` : "transparent",
-              border: `2px solid ${isCorrect ? `${barColor}66` : "transparent"}`,
+              background: isCorrect ? `${barColor}1f` : "transparent",
+              border: `2px solid ${isCorrect ? barColor : "transparent"}`,
+              boxShadow: isCorrect ? `0 0 24px ${barColor}44` : "none",
+              opacity: isWrong ? .5 : 1,
               transition: "all .3s ease",
             }}>
               <div style={{ fontFamily: FONT, fontSize: dense ? 20 : 24, fontWeight: isLeader || isCorrect ? 700 : 500, color: "white", display: "flex", alignItems: "center", gap: 8, lineHeight: 1.15 }}>
                 {isCorrect && <CheckCircle size={dense ? 20 : 24} weight="fill" color={barColor} style={{ flexShrink: 0 }} />}
-                <span style={{ overflowWrap: "anywhere" }}>{o.label}</span>
+                <span style={{ overflowWrap: "anywhere", textDecoration: isWrong ? "line-through" : "none" }}>{o.label}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <div style={{ height: cmp ? 14 : dense ? 16 : 22, background: "rgba(255,255,255,.07)", borderRadius: 11, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${(share / maxShare) * 100}%`, background: barColor, borderRadius: 11, transition: "width .35s ease", boxShadow: isLeader ? `0 0 14px ${barColor}55` : "none" }} />
+                  <div style={{ height: "100%", width: masked ? "0%" : `${(share / maxShare) * 100}%`, background: barColor, borderRadius: 11, transition: "width .35s ease", boxShadow: isLeader ? `0 0 14px ${barColor}55` : "none" }} />
                 </div>
                 {cmp && (
                   <div style={{ height: 10, background: "rgba(255,255,255,.05)", borderRadius: 5, overflow: "hidden" }}>
@@ -134,8 +177,8 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
                 )}
               </div>
               <div style={{ fontFamily: FONT, fontVariantNumeric: "tabular-nums", textAlign: "right", lineHeight: 1.15 }}>
-                <div style={{ fontSize: dense ? 19 : 22, fontWeight: 700, color: "white" }}>
-                  {counts[i]}<span style={{ fontSize: 15, color: "rgba(255,255,255,.45)", fontWeight: 500 }}> · {share}%</span>
+                <div style={{ fontSize: dense ? 19 : 22, fontWeight: 700, color: masked ? "rgba(255,255,255,.3)" : "white" }}>
+                  {masked ? "?" : <>{counts[i]}<span style={{ fontSize: 15, color: "rgba(255,255,255,.45)", fontWeight: 500 }}> · {share}%</span></>}
                 </div>
                 {cmp && <div style={{ fontSize: 13, color: "rgba(255,255,255,.4)" }}>{compareLabel} {cmp.pct}%</div>}
               </div>
@@ -147,12 +190,20 @@ export function Tally({ options, tally: manual, color, hotkeys, compare, compare
           );
         })}
       </div>
+      {verdict && <div style={{ marginTop: 10, textAlign: "center" }}><VerdictChip verdict={verdict} color={color} big /></div>}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: dense ? 6 : 12, gap: 12, flexWrap: "wrap" }}>
         <div style={{ fontFamily: FONT, fontSize: 15, color: "rgba(255,255,255,.4)" }}>
           {total > 0
-            ? <>{total} vote{total === 1 ? "" : "s"}{live && tally.roomTotal > 0 && <> ({tally.roomTotal} from devices)</>}{leader != null && <> · most said <strong style={{ color: "white" }}>{options[leader].label}</strong></>}</>
+            ? masked
+              ? <><strong style={{ color: "white" }}>{total} vote{total === 1 ? "" : "s"} in</strong>{live && tally.roomTotal > 0 && <> ({tally.roomTotal} from devices)</>} · results after the reveal</>
+              : <>{total} vote{total === 1 ? "" : "s"}{live && tally.roomTotal > 0 && <> ({tally.roomTotal} from devices)</>}{leader != null && <> · most said <strong style={{ color: "white" }}>{options[leader].label}</strong></>}</>
             : hintText}
         </div>
+        {hideUntilResolved && !resolved && (
+          <button onClick={() => setPeek(p => !p)} title={peek ? "Hide results again" : "Teacher peek at the split"} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.35)", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT, fontSize: 14 }}>
+            {peek ? <EyeSlash size={16} weight="bold" /> : <Eye size={16} weight="bold" />} {peek ? "hide" : "peek"}
+          </button>
+        )}
         {!resolved && total > 0 && (
           <button onClick={reset} title="Reset votes" style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.35)", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT, fontSize: 14 }}>
             <ArrowCounterClockwise size={16} weight="bold" /> reset
@@ -241,14 +292,16 @@ export function PredictGate({ prompt, options, tally: manual, color, correct, co
 
   const correctIds = correct == null ? [] : Array.isArray(correct) ? correct : [correct];
   const leaderId = tally.leader != null ? options[tally.leader].id : null;
-  const calledIt = leaderId != null && correctIds.includes(leaderId);
+  const verdict = revealed ? verdictFor(options, tally.counts, correctIds) : null;
+  const calledIt = verdict?.kind === "win";
 
   let outcome = null;
   if (revealed) {
     if (resolution) outcome = resolution(leaderId, correctIds);
-    else if (correctIds.length && leaderId == null) outcome = tally.total ? "It was a tie — so half of you called it." : "No votes were entered — next time, predict first!";
-    else if (correctIds.length && calledIt) outcome = `You called it — most of the class said ${options[tally.leader].label}.`;
-    else if (correctIds.length) outcome = `Surprise! Most of the class said ${options[tally.leader].label}. Here's why it's different →`;
+    else if (correctIds.length && !tally.total) outcome = "No votes were entered — next time, predict first!";
+    else if (correctIds.length && calledIt) outcome = "You called it. Here's why →";
+    else if (correctIds.length && verdict?.kind === "split") outcome = "Half of you called it — here's what settles it →";
+    else if (correctIds.length) outcome = `Surprise! Most of the class said ${leaderId != null ? options[tally.leader].label : "something else"}. Here's why it's different →`;
   }
 
   return (
@@ -258,7 +311,7 @@ export function PredictGate({ prompt, options, tally: manual, color, correct, co
           {revealed ? "The class said" : "First — call it"}
         </div>
         <div style={{ fontFamily: FONT, fontSize: dense ? 24 : 30, color: "white", textAlign: "center", lineHeight: 1.25 }}>{prompt}</div>
-        <Tally options={options} tally={tally} color={color} correct={correct} resolved={revealed} compare={revealed ? compare : undefined} compareLabel={compareLabel} hotkeys={hotkeys} dense={dense} hint={live ? `Voting is open on ${room.joined || "the"} device${room.joined === 1 ? "" : "s"} — add hands with + too.` : undefined} />
+        <Tally options={options} tally={tally} color={color} correct={correct} resolved={revealed} compare={revealed ? compare : undefined} compareLabel={compareLabel} hotkeys={hotkeys} dense={dense} hideUntilResolved hint={live ? `Voting is open on ${room.joined || "the"} device${room.joined === 1 ? "" : "s"} — add hands with + too.` : undefined} />
         {!revealed && (
           <button onClick={reveal} className="cta-btn" style={{ background: color, color: "#08101c", fontSize: dense ? 18 : 22, padding: dense ? "9px 22px" : "12px 30px", display: "inline-flex", alignItems: "center", gap: 10, fontFamily: FONT, fontWeight: 700, border: "none", borderRadius: 999, cursor: "pointer" }}>
             <Eye size={22} weight="bold" /> {revealLabel}{revealKey === "Enter" && <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}> · Enter</span>}

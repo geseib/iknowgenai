@@ -18,6 +18,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Card, PresSlide, PresText } from "./shared";
 import { useGrade } from "../data/GradeContext";
 import { GRADE_EXAMPLES } from "../data/gradeContent";
+import MathMoment from "./MathMoment";
 
 /* ── Did You Know facts (per tab) ────────────────────────────────────── */
 const PREDICT_FACTS = [
@@ -887,6 +888,7 @@ function TokenizeTab({ color }) {
               </span>
             </div>
           </div>
+          <MathMoment id="chars-per-token" data={{ chars: result.charCount, tokens: result.count }} compact style={{ marginBottom: 16 }} />
 
           {/* Token chips */}
           <div style={{
