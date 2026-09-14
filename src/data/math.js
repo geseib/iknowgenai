@@ -131,9 +131,9 @@ export const MATH_MOMENTS = {
     tier: "full", section: "attention",
     topic: { "K-2": "sharing one whole", "3-5": "fractions of a whole", "7-8": "decimals sum to 1" },
     grades: {
-      "K-2": () => ({ big: "One spotlight, shared out: a big piece for 'swung', smaller pieces for the rest.", note: "Like cutting one pizza into uneven slices: bigger slices for the words that matter more." }),
-      "3-5": () => ({ big: "½ + ¼ + ¼ = 1 whole spotlight", note: "Attention shares one whole spotlight among the other words. Bigger fractions for better clues, but the pieces always add up to exactly one." }),
-      "7-8": () => ({ big: "0.5 + 0.3 + 0.2 = 1.00", note: "Attention weights are decimals that sum to 1. More weight on one word means less on the others: it's a budget, not a volume knob." }),
+      "K-2": () => ({ big: "\"bat\" has ONE flashlight. It shines half on \"swung\", a quarter on \"hit\", a quarter on \"ball\".", note: "Half + a quarter + a quarter = the whole flashlight. It can't shine more than one flashlight's worth. (Example shares.)" }),
+      "3-5": () => ({ big: "\"bat\" splits its attention: swung ½ + hit ¼ + ball ¼ = 1 whole", note: "In \"I swung the bat and hit the ball\", the word bat has exactly one whole of attention to share among its clues. A bigger slice for one word means smaller slices for the others. (Example shares.)" }),
+      "7-8": () => ({ big: "For \"bat\": swung 0.50 + hit 0.30 + ball 0.20 = 1.00", note: "Attention weights are a budget that always totals 1. Turning one up forces the others down. That's why a strong clue like \"swung\" crowds out the animal meaning. (Example weights.)" }),
     },
   },
   "thinking-pages": {
