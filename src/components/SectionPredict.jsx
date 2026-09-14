@@ -431,8 +431,15 @@ export default function SectionPredict({ color, mode, slide: slideProp }) {
           <PredictGate
             prompt={<>"{gc.sentenceStart} ___" — what's the next word?</>}
             options={voteOptions}
-            correct={candidates[0].word}
             compare={candidates.slice(0, 3).map(c => ({ id: c.word, pct: c.pct }))}
+            resolution={() => {
+              // No right answer here: the AI's top word is the MOST LIKELY pick, not a guarantee.
+              const top = candidates[0];
+              const idx = voteOptions.findIndex(o => o.id === top.word);
+              const agreed = idx >= 0 ? mergedCounts[idx] : 0;
+              const runnerUp = candidates[1];
+              return `The AI's most likely word: "${top.word}" (${top.pct}%). ${agreed} of ${mergedTotal} of you picked it. Most likely isn't guaranteed — it could still say "${runnerUp.word}".`;
+            }}
             compareLabel="The AI"
             tally={nextWordVote}
             color={color}
