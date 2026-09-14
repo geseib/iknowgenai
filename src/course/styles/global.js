@@ -148,4 +148,20 @@ export const COURSE_CSS = `
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Presentation mode — a speaker drives; the slide is headline + visual.
+   All body prose, leads, and honest footnotes drop off the projected slide
+   (the speaker delivers them from the notes panel), leaving the kicker,
+   heading, and the interactive/visual. Everything scales up for a room. */
+.v2 .presenting .present-hide,
+.v2 .presenting .honest-note {
+  display: none !important;
+}
+.v2 .presenting .present-stage {
+  zoom: 1.18;
+}
+/* Fallback for engines without zoom: nudge base text up instead. */
+@supports not (zoom: 1) {
+  .v2 .presenting .present-stage { font-size: 1.12em; }
+}
 `;

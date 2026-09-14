@@ -145,8 +145,62 @@ export default function SectionMLP({ color, mode, slide }) {
         </PresSlide>
       );
     }
-    /* Slide 1: Expand — the brainstorm phase */
+    /* Slide 1: Michael Jordan — facts are STORED in the MLP */
     if (slide === 1) {
+      const plainWords = [
+        { w: "Michael", note: "just a first name" },
+        { w: "Jordan", note: "a name… also a country!" },
+        { w: "played", note: "you play games, music, cards…" },
+      ];
+      return (
+        <PresSlide>
+          <div style={{
+            fontFamily: "'Fredoka',sans-serif", fontSize: 46, fontWeight: 700,
+            color: "white", textAlign: "center", lineHeight: 1.3,
+          }}>
+            Michael Jordan played{" "}
+            <span style={{
+              color, padding: "2px 20px", borderRadius: 10,
+              background: `${color}18`, borderBottom: `4px solid ${color}`,
+            }}>basketball 🏀</span>
+          </div>
+          <PresText size={28} color="rgba(255,255,255,.5)">
+            You knew that instantly. But look at the words:
+          </PresText>
+
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            {plainWords.map((it, i) => (
+              <div key={it.w} style={{
+                padding: "14px 22px", borderRadius: 16, maxWidth: 230,
+                background: "rgba(255,255,255,.04)", border: "2px solid rgba(255,255,255,.12)",
+                animation: `fadeUp .4s ${0.2 + i * 0.15}s ease both`,
+              }}>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 26, color: "white", marginBottom: 6 }}>{it.w}</div>
+                <div style={{ fontSize: 17, color: "rgba(255,255,255,.45)", lineHeight: 1.4 }}>{it.note}</div>
+              </div>
+            ))}
+          </div>
+
+          <PresText size={28} color="rgba(255,255,255,.65)">
+            None of those words <em>mean</em> basketball. So where did the answer come from?
+          </PresText>
+
+          <div style={{
+            padding: "20px 28px", borderRadius: 18, maxWidth: 740,
+            background: `${color}12`, border: `2px solid ${color}45`,
+            fontFamily: "'Fredoka',sans-serif", fontSize: 26, color: "white", lineHeight: 1.55,
+            textAlign: "center",
+          }}>
+            It's a <strong style={{ color }}>fact the AI memorized</strong> — tucked away in the{" "}
+            <strong style={{ color }}>Thinking Layer</strong>. Attention reads the sentence; the MLP
+            looks up what it <em>knows</em> about Michael Jordan.
+          </div>
+        </PresSlide>
+      );
+    }
+
+    /* Slide 2: Expand — the brainstorm phase */
+    if (slide === 2) {
       const questions = [
         { q: "Is it alive?", lit: false },
         { q: "Is it a sport thing?", lit: true },
@@ -194,8 +248,8 @@ export default function SectionMLP({ color, mode, slide }) {
       );
     }
 
-    /* Slide 2: Compress — keep only what matters */
-    if (slide === 2) {
+    /* Slide 3: Compress — keep only what matters */
+    if (slide === 3) {
       const kept = [
         { q: "Is it a sport thing?", icon: "⚾" },
         { q: "Is it wooden?", icon: "🪵" },
@@ -237,8 +291,8 @@ export default function SectionMLP({ color, mode, slide }) {
       );
     }
 
-    /* Slide 3: Analogy summary */
-    if (slide === 3) {
+    /* Slide 4: Analogy summary */
+    if (slide === 4) {
       return (
         <PresSlide>
           <PresText size={30}>

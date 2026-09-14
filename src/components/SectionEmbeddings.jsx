@@ -359,6 +359,17 @@ export default function SectionEmbeddings({ color, mode, slide }) {
             })}
           </div>
         </Card>
+        {/* Affordance: make it obvious the scatter is tappable */}
+        {sel ? (
+          <PresText size={26} color="rgba(255,255,255,.7)">
+            <span style={{ color: GC[selGroup], fontWeight: 700 }}>"{sel}"</span> lights up its
+            {" "}<span style={{ color: GC[selGroup], fontWeight: 700 }}>{selGroup}</span> neighbors — similar meanings sit close together. Try another!
+          </PresText>
+        ) : (
+          <PresText size={26} color={color}>
+            👆 Tap any word — watch its neighbors light up
+          </PresText>
+        )}
       </PresSlide>
     );
     /* Slides 2-6: Key DimensionExplorer steps rendered as individual slides */

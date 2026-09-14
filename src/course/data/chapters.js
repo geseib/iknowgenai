@@ -15,7 +15,8 @@ import Ch10 from "../chapters/Ch10LayersOfThought.jsx";
 import Ch11 from "../chapters/Ch11Temperature.jsx";
 import Ch12 from "../chapters/Ch12ThinkingOutLoud.jsx";
 import Ch13 from "../chapters/Ch13ConfidentNonsense.jsx";
-import Ch14 from "../chapters/Ch14YouKnowGenAI.jsx";
+import Ch14 from "../chapters/Ch14FixingTheContext.jsx";
+import Ch15 from "../chapters/Ch15YouKnowGenAI.jsx";
 
 export const COURSE_TITLE = "How AI Actually Works";
 export const COURSE_TAGLINE =
@@ -58,7 +59,7 @@ export const CHAPTERS = [
     id: "what-large-means", slug: "what-large-means", num: 5, act: 2,
     title: "What “Large” Means",
     blurb: "Trillions of words, billions of dials, months of compute. The scale that makes it work.",
-    minutes: 6, slideCount: 7, accent: ACT_ACCENTS[2], Component: Ch05,
+    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[2], Component: Ch05,
   },
   {
     id: "raised-by-humans", slug: "raised-by-humans", num: 6, act: 2,
@@ -76,13 +77,13 @@ export const CHAPTERS = [
     id: "map-of-meaning", slug: "map-of-meaning", num: 8, act: 3,
     title: "A Map of Meaning",
     blurb: "Every word is a point in a space with thousands of dimensions — and the space is roomier than it has any right to be.",
-    minutes: 10, slideCount: 10, accent: ACT_ACCENTS[3], Component: Ch08,
+    minutes: 7, slideCount: 7, accent: ACT_ACCENTS[3], Component: Ch08,
   },
   {
     id: "attention", slug: "attention", num: 9, act: 3,
     title: "Attention",
     blurb: "How “bat” knows whether it's baseball or a cave — the trick that made modern AI possible.",
-    minutes: 8, slideCount: 8, accent: ACT_ACCENTS[3], Component: Ch09,
+    minutes: 9, slideCount: 9, accent: ACT_ACCENTS[3], Component: Ch09,
   },
   {
     id: "layers-of-thought", slug: "layers-of-thought", num: 10, act: 3,
@@ -105,14 +106,20 @@ export const CHAPTERS = [
   {
     id: "confident-nonsense", slug: "confident-nonsense", num: 13, act: 5,
     title: "Confident Nonsense",
-    blurb: "Hallucinations, bias, no memory, knowledge cutoffs — why they happen, and the fixes: context, RAG, tools, agents, MCP, skills.",
-    minutes: 11, slideCount: 11, accent: ACT_ACCENTS[5], Component: Ch13,
+    blurb: "Hallucinations, bias, no memory, knowledge cutoffs — why every failure follows directly from the mechanism.",
+    minutes: 6, slideCount: 7, accent: ACT_ACCENTS[5], Component: Ch13,
   },
   {
-    id: "you-know-genai", slug: "you-know-genai", num: 14, act: 5,
+    id: "fixing-the-context", slug: "fixing-the-context", num: 14, act: 5,
+    title: "Fixing the Context",
+    blurb: "None of the fixes change the model — they change what it's given: context, RAG, tools, agents, and the buzzwords around them.",
+    minutes: 6, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch14,
+  },
+  {
+    id: "you-know-genai", slug: "you-know-genai", num: 15, act: 5,
     title: "You Know GenAI",
     blurb: "The story from Chapter 1 again — but this time, you can narrate every step of the machine. Then prove it.",
-    minutes: 10, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch14,
+    minutes: 10, slideCount: 6, accent: ACT_ACCENTS[5], Component: Ch15,
   },
 ];
 

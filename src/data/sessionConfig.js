@@ -12,7 +12,7 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning"],
+        sections: ["who-is-here", "story-mash", "rules-vs-learning"],
         teaser: "Next time: how does AI actually DO all that?",
       },
       {
@@ -67,13 +67,13 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning", "brain-vs-ai"],
+        sections: ["who-is-here", "story-mash", "rules-vs-learning", "brain-vs-ai"],
         teaser: "Next time: we open the hood and look inside",
       },
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: ["what-is-llm", "meet-models", "how-it-learns", "the-bridge", "numbers-words", "embeddings"],
+        sections: ["what-is-llm", "how-it-learns", "the-bridge", "numbers-words", "embeddings"],
         review: [
           {
             question: "What did we build with AI last time?",
@@ -128,13 +128,13 @@ export const SESSION_CONFIG = {
       {
         name: "Discover",
         subtitle: "What is AI?",
-        sections: ["who-is-here", "story-mash", "what-is-ai", "rules-vs-learning", "brain-vs-ai", "what-is-llm"],
+        sections: ["who-is-here", "story-mash", "rules-vs-learning", "brain-vs-ai", "what-is-llm"],
         teaser: "Next time: we look inside the machine",
       },
       {
         name: "Explore",
         subtitle: "Inside the machine",
-        sections: ["meet-models", "how-it-learns", "three-steps", "the-bridge", "numbers-words", "tokens", "embeddings", "beyond-2d"],
+        sections: ["how-it-learns", "three-steps", "the-bridge", "numbers-words", "tokens", "embeddings"],
         review: [
           {
             question: "What did we build with AI last time?",

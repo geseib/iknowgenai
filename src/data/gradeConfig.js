@@ -20,7 +20,7 @@ export const GRADE_CONFIG = {
       // Act 1 — AI Is All Around You
       "who-is-here": 2,        // simplified
       "story-mash": 6,         // early hands-on win
-      "what-is-ai": 2,         // simplified
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
       "rules-vs-learning": 3,  // 1 pair only
       // Act 2 — How AI Learns
       "how-it-learns": 5,      // 1 robot round
@@ -28,13 +28,13 @@ export const GRADE_CONFIG = {
       "brain-vs-ai": 4,        // emotions only
       // Act 3 — What's an LLM?
       "what-is-llm": 3,        // simplified
-      "meet-models": 0,        // SKIP
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 2,         // simplified pipeline
       // Act 4 — Inside the Machine
       "numbers-words": 3,      // simplified
       "tokens": 0,             // SKIP
       "embeddings": 4,         // clusters only
-      "beyond-2d": 0,          // SKIP
+      "beyond-2d": 0,         // CUT — folded into Words in Space
       "attention": 4,          // simplified bat
       "mlp": 0,                // SKIP
       "layers": 0,             // SKIP
@@ -56,7 +56,7 @@ export const GRADE_CONFIG = {
       // Act 1 — AI Is All Around You
       "who-is-here": 3,
       "story-mash": 6,
-      "what-is-ai": 2,
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
       "rules-vs-learning": 6,
       // Act 2 — How AI Learns
       "how-it-learns": 8,
@@ -64,15 +64,15 @@ export const GRADE_CONFIG = {
       "brain-vs-ai": 8,
       // Act 3 — What's an LLM?
       "what-is-llm": 5,
-      "meet-models": 2,
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 3,
       // Act 4 — Inside the Machine
       "numbers-words": 5,
       "tokens": 0,             // SKIP
       "embeddings": 8,
-      "beyond-2d": 0,          // SKIP
+      "beyond-2d": 0,         // CUT — folded into Words in Space
       "attention": 7,
-      "mlp": 4,
+      "mlp": 5,                // + "facts are stored" intro
       "layers": 2,
       // Act 5 — How AI Writes
       "predict": 5,
@@ -92,7 +92,7 @@ export const GRADE_CONFIG = {
       // Act 1 — AI Is All Around You
       "who-is-here": 3,
       "story-mash": 6,
-      "what-is-ai": 2,
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
       "rules-vs-learning": 6,
       // Act 2 — How AI Learns
       "how-it-learns": 8,
@@ -100,15 +100,15 @@ export const GRADE_CONFIG = {
       "brain-vs-ai": 8,
       // Act 3 — What's an LLM?
       "what-is-llm": 5,
-      "meet-models": 2,
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 3,
       // Act 4 — Inside the Machine
       "numbers-words": 5,
       "tokens": 7,
       "embeddings": 8,
-      "beyond-2d": 6,
+      "beyond-2d": 0,         // CUT — folded into Words in Space
       "attention": 7,
-      "mlp": 4,
+      "mlp": 5,                // + "facts are stored" intro
       "layers": 2,
       // Act 5 — How AI Writes
       "predict": 5,
