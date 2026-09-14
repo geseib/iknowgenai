@@ -71,8 +71,8 @@ export const SECTIONS = [
   { id: "the-bridge",      Component: SectionTheBridge,      title: "The Big Question",          color: "#9b5de5", group: ACTS.LLM },
 
   // ── Act 4: Inside the Machine (the underlying technology) ──
-  { id: "numbers-words",   Component: SectionHook,           title: "Numbers & Words",           color: "#fee440", group: ACTS.INSIDE },
-  { id: "tokens",          Component: SectionTokens,         title: "Tokens — Not Quite Words",  color: "#fb5607", group: ACTS.INSIDE },
+  { id: "tokens",          Component: SectionTokens,         title: "Tokens — Not Quite Words",  color: "#fb5607", group: ACTS.INSIDE },  // 7-8 only: chop text into pieces first…
+  { id: "numbers-words",   Component: SectionHook,           title: "Numbers & Words",           color: "#fee440", group: ACTS.INSIDE },  // …then each piece becomes 12,288 numbers
   { id: "embeddings",      Component: SectionEmbeddings,     title: "Words in Space",            color: "#06d6a0", group: ACTS.INSIDE },
   { id: "beyond-2d",       Component: SectionBeyond2D,       title: "Beyond 2D",                 color: "#00bbf9", group: ACTS.INSIDE },
   { id: "attention",       Component: SectionAttention,      title: "Attention!",                color: "#fb5607", group: ACTS.INSIDE },
