@@ -11,6 +11,8 @@ import {
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
 import MathMoment from "./MathMoment";
+import { PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 import { useGrade } from "../data/GradeContext";
 
 const ICON_MAP = {
@@ -54,8 +56,15 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
+const LARGE_OPTIONS = [
+  { id: "books", label: "A few hundred books" },
+  { id: "library", label: "A whole city library" },
+  { id: "lifetimes", label: "More than you could read in 10,000 lifetimes" },
+];
+
 export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
   const grade = useGrade();
+  const largeVote = useTally(LARGE_OPTIONS.length);
   // Band-aware presentation-slide remap. Authored slides: 0 intro (shows all
   // three L-L-M boxes), 1 L=Large, 2 L=Language, 3 M=Model + the "massive
   // mathematical system" synthesis takeaway, 4 bonus (not just text).
@@ -151,27 +160,26 @@ export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
       const p = parts[0];
       return (
         <PresSlide>
-          <div style={{
-            fontFamily: "'Fredoka',sans-serif",
-            fontSize: 64,
-            fontWeight: 700,
-            color,
-            textAlign: "center",
-            lineHeight: 1,
-            marginBottom: 16,
-          }}>
-            {p.letter}
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 64, fontWeight: 700, color, lineHeight: 1 }}>{p.letter}</div>
+            <div style={{ fontSize: 32, color: "white", fontFamily: "'Fredoka',sans-serif" }}>= {p.word}</div>
+            <Books size={32} weight="duotone" color={color} />
           </div>
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <Books size={28} weight="duotone" color={color} />
-          </div>
-          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
-            {p.word}
-          </div>
-          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
-            {p.reveal}
-          </div>
-          <MathMoment id="wikipedias" compact />
+          <PredictGate
+            prompt="To learn language, how much text did it read?"
+            options={LARGE_OPTIONS}
+            correct="lifetimes"
+            tally={largeVote}
+            color={color}
+            roomId="llm-large"
+            revealLabel="Show us"
+            dense
+          >
+            <div style={{ fontSize: 26, color: "rgba(255,255,255,.7)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
+              {p.reveal}
+            </div>
+            <MathMoment id="wikipedias" compact />
+          </PredictGate>
         </PresSlide>
       );
     }

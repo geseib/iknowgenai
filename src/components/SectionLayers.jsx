@@ -13,6 +13,8 @@ import {
 } from "@phosphor-icons/react";
 import { Label, H1, TriviaBox, TeacherNote, ModelNote, KidNote, PresSlide, PresText } from "./shared";
 import MathMoment from "./MathMoment";
+import { PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 
 const LAYER_CARDS = [
   { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
@@ -163,6 +165,19 @@ const LAYER_QUESTIONS = {
   ],
 };
 
+// The one slow layer at the start: four questions, each tagged with what kind of thing the MLP is checking
+const FIRST_PASS_QUESTIONS = [
+  { cat: "Spelling", q: "Is 'cat' spelled right?" },
+  { cat: "Grammar", q: "Is 'sat' a verb?" },
+  { cat: "Facts", q: "Does a cat have fur?" },
+  { cat: "Meaning", q: "What usually comes after 'on the'?" },
+];
+
+const BUCKET_LABELS = [[16, "Letters & spelling"], [32, "Words & grammar"], [48, "Facts & knowledge"], [64, "Context & tone"], [80, "Logic & reasoning"], [96, "Deep understanding"]];
+function getBucketLabel(layer) {
+  return (BUCKET_LABELS.find(([max]) => layer <= max) || BUCKET_LABELS[5])[1];
+}
+
 function getLayerQuestion(layer) {
   let bucket;
   if (layer <= 16) bucket = LAYER_QUESTIONS.early;
@@ -174,9 +189,17 @@ function getLayerQuestion(layer) {
   return bucket[layer % bucket.length];
 }
 
-function LayerAnimation({ color, onDone, pres }) {
+// gate: run ONE slow layer, then pause and hand control back via onPaused(resume)
+// so the class can predict how many more layers there are before the rest runs.
+function LayerAnimation({ color, onDone, pres, gate = false, onPaused }) {
   // scrollSub: "attn" or "mlp" — which half of the layer we're showing during scroll
-  const [phase, setPhase] = useState("idle"); // idle | attention | mlp | scrolling | output
+  const [phase, setPhase] = useState("idle"); // idle | attention | mlp | paused | scrolling | output
+  const [resumed, setResumed] = useState(false);
+  const [firstQ, setFirstQ] = useState(0);
+  const resume = useCallback(() => setResumed(true), []);
+  // Callbacks live in refs so a parent re-render (new inline functions) never restarts the run
+  const onDoneRef = useRef(onDone); const onPausedRef = useRef(onPaused);
+  useEffect(() => { onDoneRef.current = onDone; onPausedRef.current = onPaused; }, [onDone, onPaused]);
   const [layerNum, setLayerNum] = useState(1);
   const [activeBeams, setActiveBeams] = useState([]);
   const [mlpNodes, setMlpNodes] = useState([]);
@@ -204,37 +227,43 @@ function LayerAnimation({ color, onDone, pres }) {
       return new Promise(r => { timeout = setTimeout(r, ms); });
     }
 
-    async function runAnimation() {
-      // Phase 1: Show attention beams one by one (layer 1)
+    async function firstPass() {
+      // Phase 1: attention beams one by one (layer 1) — slow enough to read the callout
       setPhase("attention");
+      setActiveBeams([]);
       for (let i = 0; i < ATTENTION_PAIRS.length; i++) {
         if (cancelled) return;
         setActiveBeams(prev => [...prev, ATTENTION_PAIRS[i]]);
-        await sleep(300);
+        await sleep(350);
       }
-      await sleep(600);
+      await sleep(900);
 
-      // Phase 2: MLP thinking (layer 1)
+      // Phase 2: MLP thinking (layer 1) — cycle four tagged questions
       if (cancelled) return;
       setPhase("mlp");
       setActiveBeams([]);
+      setMlpNodes([]);
       for (let i = 0; i < 5; i++) {
         if (cancelled) return;
         setMlpNodes(prev => [...prev, i]);
-        await sleep(200);
+        await sleep(180);
       }
-      await sleep(600);
+      for (let q = 0; q < FIRST_PASS_QUESTIONS.length; q++) {
+        if (cancelled) return;
+        setFirstQ(q);
+        await sleep(1150);
+      }
+      await sleep(400);
+    }
 
-      // Phase 3: Fast scroll through layers 2-96 with visible attention/MLP alternation
-      if (cancelled) return;
+    async function rest() {
+      // Phase 3: fast scroll through layers 2-96 with visible attention/MLP alternation
       setPhase("scrolling");
-
       for (let layer = 2; layer <= 96; layer++) {
         if (cancelled) return;
         setLayerNum(layer);
 
         // Speed curve — each value is time per sub-phase (attn or mlp)
-        // so total time per layer = delay * 2
         let delay;
         if (layer <= 4) delay = 400;       // slow start — let kids see the pattern
         else if (layer <= 8) delay = 300;
@@ -245,7 +274,6 @@ function LayerAnimation({ color, onDone, pres }) {
         else if (layer <= 92) delay = 200;
         else delay = 350;                   // slow finish
 
-        // Attention sub-phase: show beams
         const beamPattern = BEAM_PATTERNS[layer % BEAM_PATTERNS.length];
         setScrollSub("attn");
         setActiveBeams(beamPattern);
@@ -254,7 +282,6 @@ function LayerAnimation({ color, onDone, pres }) {
         await sleep(delay);
         if (cancelled) return;
 
-        // MLP sub-phase: show nodes + question
         const nodesForLayer = [0, 1, 2, 3, 4].filter((_, idx) => ((layer + idx) % 3) !== 0);
         setScrollSub("mlp");
         setActiveBeams([]);
@@ -262,22 +289,36 @@ function LayerAnimation({ color, onDone, pres }) {
         setCurrentQuestion(getLayerQuestion(layer));
         await sleep(delay);
       }
-
       await sleep(400);
 
-      // Phase 4: Output word
+      // Phase 4: output word
       if (cancelled) return;
       setActiveBeams([]);
       setMlpNodes([]);
       setCurrentQuestion("");
       setPhase("output");
       await sleep(2000);
-      if (onDone) onDone();
+      onDoneRef.current?.();
+    }
+
+    async function runAnimation() {
+      if (gate && !resumed) {
+        await firstPass();
+        if (cancelled) return;
+        setPhase("paused");
+        onPausedRef.current?.(resume);
+        return;
+      }
+      if (gate && resumed) { await rest(); return; }
+      await firstPass();
+      if (cancelled) return;
+      await rest();
     }
 
     runAnimation();
     return () => { cancelled = true; clearTimeout(timeout); };
-  }, [started, onDone]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, resumed, gate]);
 
   // Calculate SVG beam positions from word elements
   const getWordCenter = (idx) => {
@@ -293,10 +334,11 @@ function LayerAnimation({ color, onDone, pres }) {
   };
 
   const showBeams = phase === "attention" || (phase === "scrolling" && scrollSub === "attn");
-  const showMlp = phase === "mlp" || (phase === "scrolling" && scrollSub === "mlp");
+  const showMlp = phase === "mlp" || phase === "paused" || (phase === "scrolling" && scrollSub === "mlp");
 
-  const phaseLabel = phase === "attention" ? "Looking — words check in with each other"
-    : phase === "mlp" ? "Thinking — asking questions about what it sees"
+  const phaseLabel = phase === "attention" ? "Step 1 · LOOKING"
+    : phase === "mlp" ? "Step 2 · THINKING"
+    : phase === "paused" ? "That was ONE layer: look, then think."
     : phase === "scrolling" && scrollSub === "attn" ? "Looking"
     : phase === "scrolling" && scrollSub === "mlp" ? "Thinking"
     : phase === "output" ? "Done!"
@@ -439,13 +481,14 @@ function LayerAnimation({ color, onDone, pres }) {
           marginTop: 12,
           animation: "fadeUp .3s ease",
         }}>
-          <ChatCircleDots size={pres ? 36 : 24} weight="duotone" color={color} />
+          <ChatCircleDots size={pres ? 44 : 24} weight="duotone" color={color} />
           <span style={{
             fontFamily: "'Fredoka',sans-serif",
-            fontSize: pres ? 26 : 18,
-            color: "rgba(255,255,255,.5)",
+            fontSize: pres ? 34 : 18,
+            color: "white",
+            lineHeight: 1.2,
           }}>
-            Looking — words checking in with each other...
+            <strong style={{ color }}>Attention:</strong> every word looks at the <em>other</em> words
           </span>
         </div>
       )}
@@ -453,7 +496,7 @@ function LayerAnimation({ color, onDone, pres }) {
       {/* MLP nodes — visible during mlp phase AND scrolling mlp sub-phase */}
       {showMlp && (
         <div style={{ marginTop: 12, paddingBottom: 8 }}>
-          {phase === "mlp" && (
+          {(phase === "mlp" || phase === "paused") && (
             <div style={{
               display: "flex",
               justifyContent: "center",
@@ -461,13 +504,14 @@ function LayerAnimation({ color, onDone, pres }) {
               gap: 10,
               marginBottom: 20,
             }}>
-              <Brain size={pres ? 36 : 24} weight="duotone" color={color} />
+              <Brain size={pres ? 44 : 24} weight="duotone" color={color} />
               <span style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: pres ? 26 : 18,
-                color: "rgba(255,255,255,.5)",
+                fontSize: pres ? 34 : 18,
+                color: "white",
+                lineHeight: 1.2,
               }}>
-                Thinking — asking questions about what it sees...
+                <strong style={{ color }}>MLP:</strong> asks questions about spelling, grammar, facts, meaning
               </span>
             </div>
           )}
@@ -504,7 +548,7 @@ function LayerAnimation({ color, onDone, pres }) {
               key={currentQuestion}
               style={{
                 fontFamily: "'Fredoka',sans-serif",
-                fontSize: pres ? 40 : 22,
+                fontSize: pres ? 46 : 22,
                 color: `${color}`,
                 textAlign: "center",
                 marginTop: pres ? 24 : 14,
@@ -516,23 +560,19 @@ function LayerAnimation({ color, onDone, pres }) {
                 minHeight: pres ? 56 : 32,
               }}
             >
+              <div style={{ fontSize: pres ? 16 : 12, letterSpacing: 3, textTransform: "uppercase", fontStyle: "normal", fontWeight: 600, color: "rgba(255,255,255,.4)", marginBottom: 6 }}>{getBucketLabel(layerNum)}</div>
               "{currentQuestion}"
             </div>
           )}
-          {/* Show question during initial slow MLP phase too */}
-          {phase === "mlp" && (
-            <div style={{
-              fontFamily: "'Fredoka',sans-serif",
-              fontSize: pres ? 36 : 20,
-              color,
-              textAlign: "center",
-              marginTop: pres ? 20 : 12,
-              fontStyle: "italic",
-              fontWeight: 600,
-              animation: "fadeUp .3s ease",
-              minHeight: pres ? 50 : 28,
-            }}>
-              "Is this spelled right?"
+          {/* The slow first layer: four tagged questions, one at a time */}
+          {(phase === "mlp" || phase === "paused") && (
+            <div key={firstQ} style={{ textAlign: "center", marginTop: pres ? 20 : 12, animation: "fadeUp .3s ease", minHeight: pres ? 90 : 50 }}>
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 18 : 12, letterSpacing: 3, textTransform: "uppercase", fontWeight: 700, color: `${color}cc`, marginBottom: 6 }}>
+                {FIRST_PASS_QUESTIONS[firstQ].cat}
+              </div>
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: pres ? 44 : 22, color, fontStyle: "italic", fontWeight: 600, lineHeight: 1.15 }}>
+                "{FIRST_PASS_QUESTIONS[firstQ].q}"
+              </div>
             </div>
           )}
         </div>
@@ -643,31 +683,82 @@ function LayerAnimation({ color, onDone, pres }) {
   );
 }
 
+const MORE_OPTIONS = [
+  { id: "1", label: "1 more" },
+  { id: "3", label: "3 more" },
+  { id: "12", label: "12 more" },
+  { id: "93", label: "93 more" },
+  { id: "3200", label: "3,200 more" },
+];
+
 export default function SectionLayers({ color, mode, slide }) {
   const [step, setStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [moreRevealed, setMoreRevealed] = useState(false);
+  const resumeRef = useRef(null);
+  const runRest = useCallback(() => { resumeRef.current?.(); setPaused(false); }, []);
+  // After the reveal, Enter runs the remaining layers (same key that revealed)
+  useEffect(() => {
+    if (!paused || !moreRevealed) return;
+    const onKey = (e) => { if (e.key === "Enter") { e.preventDefault(); runRest(); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [paused, moreRevealed, runRest]);
+  const moreVote = useTally(MORE_OPTIONS.length);
+  const handlePaused = useCallback((resume) => { resumeRef.current = resume; setPaused(true); }, []);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
   const step3Ref = useRef(null);
 
   if (mode === "presentation") {
+    /* Slide 0: ONE slow layer (look, then think), then the class predicts how many more */
     if (slide === 0) {
+      return (
+        <PresSlide>
+          <LayerAnimation color={color} onDone={() => {}} pres gate onPaused={handlePaused} />
+          {paused && (
+            <PredictGate
+              prompt="Doing that once isn't enough. How many MORE times does a big AI do it — just to add ONE word?"
+              roomPrompt="How many MORE times does a big AI look-then-think to add one word?"
+              options={MORE_OPTIONS}
+              correct="93"
+              tally={moreVote}
+              color={color}
+              roomId="layers-more"
+              revealLabel="Tell us"
+              onReveal={() => setMoreRevealed(true)}
+              dense
+            >
+              <PresText size={30} color="white">
+                Today's biggest models: about <strong style={{ color }}>50–100</strong> layers.
+              </PresText>
+              <PresText size={26} color="rgba(255,255,255,.65)">
+                Our example does it <strong style={{ color: "white" }}>93 more times</strong> — all to add <strong style={{ color }}>one word</strong>.
+              </PresText>
+              <button
+                onClick={runRest}
+                className="cta-btn"
+                style={{ background: color, color: "#000", fontSize: 22, padding: "12px 30px", border: "none", borderRadius: 999, cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700 }}
+              >
+                Run the other 93 layers ▶ <span style={{ fontSize: 14, fontWeight: 500, opacity: .7 }}>· Enter</span>
+              </button>
+            </PredictGate>
+          )}
+        </PresSlide>
+      );
+    }
+    /* Slide 1: the takeaway */
+    if (slide === 1) {
       return (
         <PresSlide>
           <PresText color="white" size={36}>One round isn't enough.</PresText>
           <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 72, fontWeight: 700, color, lineHeight: 1 }}>96</div>
           <PresText size={28}>TIMES</PresText>
           <PresText size={24}>
-            <em>Each pass makes the understanding richer.</em>
+            <em>Look, then think. Look, then think. Each pass makes the understanding richer.</em>
           </PresText>
           <MathMoment id="layer-passes" compact />
-          <KidNote color={color}>96 is the layer count of one famous model. Some models use 32, some more than 100.</KidNote>
-        </PresSlide>
-      );
-    }
-    if (slide === 1) {
-      return (
-        <PresSlide>
-          <LayerAnimation color={color} onDone={() => {}} pres />
+          <KidNote color={color}>96 is the layer count of one famous model. Today's big ones use roughly 50–100; small ones far fewer.</KidNote>
         </PresSlide>
       );
     }
