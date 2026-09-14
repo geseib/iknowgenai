@@ -114,8 +114,8 @@ function LiveDemo({ accent }) {
           <ProbBars candidates={result.candidates} accent={accent} />
           <Prose muted style={{ fontSize: 13, marginTop: 12 }}>
             Percentages are renormalized among the top candidates shown — the
-            model actually scores its entire vocabulary, on the order of a
-            hundred thousand options, all at once.
+            model actually scores its entire vocabulary — one to two hundred
+            thousand options, depending on the model — all at once.
           </Prose>
         </Card>
       )}

@@ -12,6 +12,10 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Tally } from "./classroom";
+import { useTallySet } from "./useTally";
+
+const VOTE_OPTIONS = [{ id: "ai", label: "AI" }, { id: "regular", label: "Regular" }];
 import { useGrade } from "../data/GradeContext";
 
 const scenarios = [
@@ -146,6 +150,7 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
   // "AI or regular program?" framing). 3-5 / 7-8 (6 slides) are unchanged.
   const K2_PRES_SLIDES = [1, 2, 5];
   const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
+  const cardVotes = useTallySet(scenarios.length, 2); // one AI/Regular tally per scenario (projector mode)
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState(new Set());
   const step1Ref = useRef(null);
@@ -239,15 +244,26 @@ export default function SectionProgramsVsAI({ color, mode, slide: slideProp }) {
       return (
         <PresSlide>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 700 }}>
-            {[scenarios[a], scenarios[b]].map((s, i) => (
-              <div key={i} style={{ animation: `fadeUp .4s ${i * 0.12}s ease both` }}>
-                <ScenarioCard scenario={s} color={color} revealed={isRevealed} onReveal={() => {}} pres />
+            {[a, b].map((gi, i) => (
+              <div key={gi} style={{ animation: `fadeUp .4s ${i * 0.12}s ease both`, display: "flex", flexDirection: "column", gap: 10 }}>
+                <ScenarioCard scenario={scenarios[gi]} color={color} revealed={isRevealed} onReveal={() => {}} pres />
+                <div style={{ display: "flex", justifyContent: "flex-end", paddingRight: 8 }}>
+                  <Tally
+                    compact
+                    options={VOTE_OPTIONS}
+                    tally={cardVotes[gi]}
+                    color={color}
+                    hotkeys={i === 0 ? ["1", "2"] : ["3", "4"]}
+                    correct={scenarios[gi].answer}
+                    resolved={isRevealed}
+                  />
+                </div>
               </div>
             ))}
           </div>
           {!isRevealed && (
             <PresText size={22} color="rgba(255,255,255,.3)">
-              What do you think? AI or regular program?
+              Hands up: AI or regular program? Teacher taps + once per hand (keys 1–2 for the top card, 3–4 for the bottom).
             </PresText>
           )}
         </PresSlide>

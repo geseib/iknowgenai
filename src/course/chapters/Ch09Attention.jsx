@@ -556,8 +556,8 @@ export default function Ch09Attention({ accent, slide }) {
           <Heading size="h2">The lookup table can't see the sentence.</Heading>
           <Card>
             <div style={{ fontFamily: FONTS.mono, fontSize: 15, lineHeight: 2.1 }}>
-              <div><span style={{ color: COLORS.muted }}>“I swung the </span><span style={{ color: accent }}>bat</span><span style={{ color: COLORS.muted }}>…”</span> → embedding <span style={{ color: accent }}>#42871</span></div>
-              <div><span style={{ color: COLORS.muted }}>“The </span><span style={{ color: accent }}>bat</span><span style={{ color: COLORS.muted }}> flew…”</span> → embedding <span style={{ color: accent }}>#42871</span></div>
+              <div><span style={{ color: COLORS.muted }}>“I swung the </span><span style={{ color: accent }}>bat</span><span style={{ color: COLORS.muted }}>…”</span> → token <span style={{ color: accent }}>#9059</span> → the same 12,288 numbers</div>
+              <div><span style={{ color: COLORS.muted }}>“The </span><span style={{ color: accent }}>bat</span><span style={{ color: COLORS.muted }}> flew…”</span> → token <span style={{ color: accent }}>#9059</span> → the same 12,288 numbers</div>
             </div>
           </Card>
           <Prose>

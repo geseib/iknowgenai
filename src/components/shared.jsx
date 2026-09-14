@@ -250,6 +250,33 @@ export function DiscussionGate({ question, hint, color, mode, children }) {
   );
 }
 
+/**
+ * KidNote — the kid-facing honesty line. Unlike ModelNote/TriviaBox it renders
+ * in EVERY mode, including projected presentation slides, so the "this number
+ * is one famous model's number" caveat reaches students, not just teacher notes.
+ */
+export function KidNote({ color, children }) {
+  return (
+    <div style={{
+      display: "inline-flex",
+      gap: 8,
+      alignItems: "flex-start",
+      textAlign: "left",
+      maxWidth: 640,
+      padding: "8px 14px",
+      borderRadius: 999,
+      background: "rgba(255,255,255,.04)",
+      border: `1px solid ${color ? color + "40" : "rgba(255,255,255,.1)"}`,
+      fontSize: 15,
+      lineHeight: 1.45,
+      color: "rgba(255,255,255,.5)",
+    }}>
+      <Info size={16} weight="duotone" color={color || "rgba(255,255,255,.4)"} style={{ flexShrink: 0, marginTop: 3 }} />
+      <span><strong style={{ color: color || "white", fontWeight: 600 }}>Honest note:</strong> {children}</span>
+    </div>
+  );
+}
+
 export function ModelNote({ color, children, mode }) {
   if (mode === "minimal" || mode === "presentation") return null;
   return (

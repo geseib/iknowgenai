@@ -8,14 +8,18 @@ import {
   ArrowDown,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Tally } from "./classroom";
+import { useTallySet } from "./useTally";
+
+const SAME_DIFF = [{ id: "same", label: "Similar" }, { id: "diff", label: "Different" }];
 import { useGrade } from "../data/GradeContext";
 
 const rows = [
   { topic: "How it learns",       brain: "From experience and practice",          ai: "From millions of training examples",     match: true },
   { topic: "Can make mistakes",   brain: "Yes — humans get things wrong",    ai: "Yes — AI gets things wrong too!",    match: true },
-  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "It can act like it — but doesn't actually feel",  match: false },
+  { topic: "Has emotions",        brain: "Yes — fear, joy, love, boredom",   ai: "It can sound like it — whether it truly feels is still debated",  match: false },
   { topic: "Gets tired",          brain: "Yes — needs sleep and rest",        ai: "No — it can run 24/7",               match: false },
-  { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Only what it was trained on",             match: false },
+  { topic: "Remembers everything",brain: "No — we forget lots of things",    ai: "Its training, plus what you tell it in this chat",             match: false },
   { topic: "Understands meaning", brain: "Deeply — we live in the world",    ai: "Sort of — in a very different way",   match: false },
   { topic: "Can be creative",     brain: "Yes — art, music, stories",        ai: "Sort of — by remixing patterns",      match: true },
 ];
@@ -150,6 +154,7 @@ export default function SectionBrainVsAI({ color, mode, slide: slideProp }) {
   // to intro + the emotions pair + takeaway. 3-5 / 7-8 (8 slides) are unchanged.
   const K2_PRES_SLIDES = [0, 3, 4, 7];
   const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
+  const rowVotes = useTallySet(3, 2); // one Similar/Different tally per presented comparison
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -245,7 +250,7 @@ export default function SectionBrainVsAI({ color, mode, slide: slideProp }) {
               What do you think? Same or different?
             </PresText>
 
-            {/* Skip button */}
+            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} />
 
           </PresSlide>
         );
@@ -320,6 +325,9 @@ export default function SectionBrainVsAI({ color, mode, slide: slideProp }) {
             </div>
           </div>
 
+          {rowVotes[selIdx].total > 0 && (
+            <Tally options={SAME_DIFF} tally={rowVotes[selIdx]} color={color} correct={row.match ? "same" : "diff"} resolved />
+          )}
         </PresSlide>
       );
     }

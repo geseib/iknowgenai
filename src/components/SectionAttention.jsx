@@ -6,6 +6,8 @@ import {
   Lightbulb,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, Body, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
+import { Tally, PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 import { BAT_S1, BAT_S2, BAT_A1, BAT_A2 } from "../data/attention";
 import { useGrade } from "../data/GradeContext";
 
@@ -283,6 +285,10 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
   // 3-5 / 7-8 (7 slides) are unchanged.
   const K2_PRES_SLIDES = [0, 1, 4, 6];
   const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
+  // Projector-mode votes: what the room pictures for "bat", and which words it calls as clues
+  const batVote = useTally(2);
+  const clueVote1 = useTally(4);
+  const clueVote2 = useTally(4);
   const [step, setStep] = useState(0);
   const [guess, setGuess] = useState(null);
   const [s1words, setS1words] = useState(0);
@@ -370,6 +376,11 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
         <PresText size={36}>
           When you see this word — what do you picture?
         </PresText>
+        <Tally
+          options={[{ id: "baseball", label: "A baseball bat", color: "#fee440" }, { id: "animal", label: "A flying animal", color: "#9b5de5" }]}
+          tally={batVote}
+          color={color}
+        />
       </PresSlide>
     );
 
@@ -431,6 +442,15 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
     /* Slide 4: Sentence 1 — animated attention from bat, baseball wins */
     if (slide === 4) return (
       <PresSlide>
+        <PredictGate
+          prompt={<>"I swung the bat and hit the ball!" — which words are the clues?</>}
+          options={["I", "swung", "hit", "ball"].map(w => ({ id: w, label: w }))}
+          correct={["swung", "hit", "ball"]}
+          tally={clueVote1}
+          color={color}
+          revealLabel="Watch the AI look"
+          dense
+        >
         <BatAttentionAnim
           key="bat-baseball"
           words={BAT_S1}
@@ -443,12 +463,22 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
           loseLabel="Flying animal"
           color={color}
         />
+        </PredictGate>
       </PresSlide>
     );
 
     /* Slide 5: Sentence 2 — animated attention from bat, animal wins */
     if (slide === 5) return (
       <PresSlide>
+        <PredictGate
+          prompt={<>"The bat flew out of the cave at dusk." — which words are the clues?</>}
+          options={["The", "flew", "cave", "dusk"].map(w => ({ id: w, label: w }))}
+          correct={["flew", "cave", "dusk"]}
+          tally={clueVote2}
+          color={color}
+          revealLabel="Watch the AI look"
+          dense
+        >
         <BatAttentionAnim
           key="bat-animal"
           words={BAT_S2}
@@ -461,6 +491,7 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
           loseLabel="Baseball bat"
           color={color}
         />
+        </PredictGate>
       </PresSlide>
     );
 
@@ -765,8 +796,8 @@ export default function SectionAttention({ color, mode, slide: slideProp }) {
         </div>
       )}
 
-      <TriviaBox mode={mode} visible={step === 4} color={color} number="96" label="attention heads at once"
-        fact="Claude runs 96 different spotlights at the same time — each one looking for different types of relationships. It's like 96 readers, each hunting for something different in the same sentence." />
+      <TriviaBox mode={mode} visible={step === 4} color={color} number="96" label="spotlights at once (in one famous model)"
+        fact="Big models run dozens of spotlights at the same time — one well-known model used 96 in every layer. Each spotlight hunts for a different kind of relationship, like 96 readers each looking for something different in the same sentence." />
       {step === 4 && (
         <ModelNote color={color} mode={mode}>
           Different models use different numbers of attention heads — some use 32, some 96, some even more. The idea is the same: multiple spotlights working together.

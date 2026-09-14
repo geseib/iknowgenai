@@ -303,7 +303,7 @@ function CapacityDemo({ accent }) {
           : dim === 4096 && !beyondAtoms
             ? "4,096 is a real embedding width (mid-size open models use it) — and here the exponent ignites. Capacity grows like e^(k·d), so doubling the dimensions SQUARES the capacity. Step up to 12,288 and watch."
             : beyondAtoms
-              ? "More directions than there are atoms in the observable universe — from twelve thousand dimensions and a tolerance smaller than your eye could see on a protractor."
+              ? "More directions than there are atoms in the observable universe. Be honest about the price: this needs a tolerance of about 15° off perpendicular — easy to see on a protractor. Tighten it to 5° and the count collapses to about ten billion. Still far more than 12,288, still every word in every language, but the headline only holds when you let 'nearly perpendicular' be generous."
               : "Now the exponent is doing the work: capacity grows exponentially in dimensions — doubling d squares the count. This is why the loophole belongs to high dimensions alone.";
 
   return (

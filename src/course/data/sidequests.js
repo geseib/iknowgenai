@@ -40,10 +40,10 @@ export const SIDEQUESTS = [
     slug: "gradient-descent",
     title: "How Networks Learn",
     blurb:
-      "Loss, slopes, and the two-line update rule — walk a tiny model downhill by hand, break the learning rate on purpose, and see why real training needs backpropagation.",
+      "Loss, slopes, and the two-line update rule — walk a tiny model downhill in the fog, break the learning rate on purpose, and see why real training needs backpropagation.",
     minutes: 12,
     accent: ACT_ACCENTS[2], // teal — it deepens Act II material (Ch4's learning loop)
-    slideCount: 10,
+    slideCount: 11,
     Component: SqGradientDescent,
   },
   {

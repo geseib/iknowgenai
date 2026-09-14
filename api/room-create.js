@@ -1,4 +1,4 @@
-import { redis, redisPipeline } from "./_redis.js";
+import { redis, redisPipeline, redisConfigured } from "./_redis.js";
 
 // Characters that are easy to read aloud / type on a phone (no O/0/I/1/L)
 const CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -19,9 +19,9 @@ export default async function handler(req, res) {
   }
 
   // Fail fast with a clear message if Upstash env vars aren't configured
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  if (!redisConfigured()) {
     return res.status(500).json({
-      error: "Backend not configured: UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN missing in Vercel environment",
+      error: "Backend not configured: KV_REST_API_URL / KV_REST_API_TOKEN (or UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN) missing in Vercel environment",
     });
   }
 

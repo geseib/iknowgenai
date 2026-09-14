@@ -23,7 +23,7 @@ export const TEACHER_NOTES = [
       },
       {
         keyPoints: ["AI is everywhere — not just robots", "Kids already use AI daily"],
-        narrative: "'Keep your hand up if YouTube or Netflix has ever suggested something you actually liked.' This almost always gets every hand up — great moment to say that's AI at work.",
+        narrative: "'Keep your hand up if YouTube or Netflix has ever suggested something you actually liked.' This almost always gets every hand up — great moment to say that's AI at work. Tidbit for your back pocket: every 'I'm not a robot' checkbox is a CAPTCHA — coined at Carnegie Mellon in 2003, the acronym literally contains 'Turing test' (Completely Automated Public Turing test to tell Computers and Humans Apart). It's a reverse Turing test: you proving to a computer that you're the human.",
         definitions: [],
         discussion: ["What other apps do you think use AI?"],
       },
@@ -47,7 +47,7 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Generative AI is AI that creates new things", "This is what changed recently — AI went from sorting and recommending to creating"],
-        narrative: "Until recently, the AI we talked about — Siri, Netflix, YouTube — was good at recognizing and recommending things. But around 2017, researchers invented a new kind of AI architecture called the Transformer. By November 2022, ChatGPT brought this to the world — 100 million people used it in just 2 months. This new AI doesn't just sort or recommend — it creates. Stories, pictures, music, code. That's called Generative AI, or GenAI.",
+        narrative: "Until recently, the AI we talked about — Siri, Netflix, YouTube — was good at recognizing and recommending things. But around 2017, researchers invented a new kind of AI architecture called the Transformer. By November 2022, ChatGPT brought this to the world — 100 million people used it in just 2 months. This new AI doesn't just sort or recommend — it creates. Stories, pictures, music, code. That's called Generative AI, or GenAI. Deeper hook for you: the term 'artificial intelligence' itself is older than most people guess — John McCarthy coined it for a 1956 summer workshop at Dartmouth College, where a handful of researchers optimistically proposed that a single summer of work could make major progress on machine intelligence. It took about 70 more years.",
         definitions: [{ term: "Generative AI (GenAI)", def: "AI that can create new content — text, images, music, code — rather than just recognizing or recommending existing things" }],
         discussion: ["What's the difference between AI that recommends a video and AI that writes a story?", "Can you think of anything you've seen that was created by AI?"],
         simplification: "We're saying 'AI learned to create' which is a simplification. GenAI models don't truly understand or create with intent — they generate outputs based on patterns learned from massive datasets. The Transformer architecture (2017) and scale of training data are the real breakthroughs.",
@@ -119,13 +119,13 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Get the class guessing before revealing", "All three answers are partly right"],
-        narrative: "Ask the class to vote by raising hands for each option. Robot, smart program, digital brain — they're all a little right. The key question: what makes AI SPECIAL compared to all of these?",
+        narrative: "Ask the class to vote by raising hands for each option. Robot, smart program, digital brain — they're all a little right. The key question: what makes AI SPECIAL compared to all of these? If kids vote 'robot': the word is barely a century old — Czech playwright Karel Čapek introduced it in his 1920 play R.U.R., from 'robota' (forced labor). His brother Josef actually suggested the word; Karel had been planning to call them 'labori'.",
         definitions: [{ term: "AI", def: "Artificial Intelligence — software that learns from examples instead of following fixed rules" }],
         discussion: ["What do you think AI actually is?", "What do all three answers have in common?"],
       },
       {
         keyPoints: ["AI learns patterns from data", "Regular programs follow rules; AI learns rules itself"],
-        narrative: "The real answer: regular programs follow rules someone wrote. AI learns the rules itself — from millions of examples. Just like you learned to talk by hearing people talk.",
+        narrative: "The real answer: regular programs follow rules someone wrote. AI learns the rules itself — from millions of examples. Just like you learned to talk by hearing people talk. Fun aside for you: computer scientist Larry Tesler observed that 'intelligence is whatever machines haven't done yet' — the so-called AI effect. Autocorrect, GPS routing, and spam filters were all once called AI; once they worked, we just called them software.",
         definitions: [],
         discussion: ["What do you think ALL three answers are missing?"],
       },
@@ -143,7 +143,7 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Traditional programming = explicit rules", "AI = learns patterns from data"],
-        narrative: "The key concept: traditional programming is explicit — every rule must be written out. AI is implicit — the rules emerge from patterns in data.",
+        narrative: "The key concept: traditional programming is explicit — every rule must be written out. AI is implicit — the rules emerge from patterns in data. Great example for older kids: Deep Blue, the chess machine that beat world champion Garry Kasparov in 1997, was the RULES approach at its peak — it checked about 200 million positions per second using chess knowledge hand-tuned by programmers and grandmasters, but it couldn't learn or improve on its own. Modern AI took the opposite path.",
         definitions: [{ term: "Program", def: "A set of instructions a computer follows step by step" }],
         discussion: [],
       },
@@ -176,7 +176,7 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Brains and AI are different, not better/worse", "AI processes differently from humans"],
-        narrative: "Kids often ask 'does AI think like us?' — be honest: we don't fully know. What we do know is that it processes very differently. We'll look at 3 key areas.",
+        narrative: "Kids often ask 'does AI think like us?' — be honest: we don't fully know. What we do know is that it processes very differently. We'll look at 3 key areas. Historical hook: Alan Turing hit this exact wall in 1950. In his paper 'Computing Machinery and Intelligence' he argued 'Can machines think?' was too fuzzy to answer, so he swapped it for a testable game — can a machine's conversation pass as a human's? That 'imitation game' is what we now call the Turing test.",
         definitions: [],
         discussion: ["Does AI think like us?"],
       },
@@ -190,20 +190,20 @@ export const TEACHER_NOTES = [
       empty, // Has emotions — question
       {
         keyPoints: ["AI can sound emotional but doesn't feel anything"],
-        narrative: "AI can say 'I'm excited!' but it's predicting words, not feeling things. Like an actor who can cry on cue without being sad.",
+        narrative: "AI can say 'I'm excited!' but it's predicting words, not feeling things. Like an actor who can cry on cue without being sad. This effect is older than you'd think: the first chatbot, ELIZA (MIT, 1966), did little more than rephrase your words back as questions — yet its creator Joseph Weizenbaum was shaken when his own secretary asked him to leave the room so she could talk to it privately. He spent the rest of his career warning how easily people bond with machines.",
         definitions: [],
         discussion: ["If AI can write a sad poem, does that mean it's sad?"],
       },
       empty, // Can be creative — question
       {
         keyPoints: ["AI remixes patterns — is that creativity?"],
-        narrative: "AI combines and remixes patterns from training data. Is that 'real' creativity? Great open question for the class.",
+        narrative: "AI combines and remixes patterns from training data. Is that 'real' creativity? Great open question for the class. Depth for you: cognitive scientist Margaret Boden calls this 'combinational creativity' — making unfamiliar combinations of familiar ideas — and it's the kind AI is best at. She distinguishes two others: 'exploratory' (pushing the boundaries of an existing style) and 'transformational' (changing the rules of the space itself, so ideas that were impossible before become possible). Ask older kids which kind the story mash-up was.",
         definitions: [],
         discussion: ["What would AI need before you'd say it was truly like a brain?"],
       },
       {
         keyPoints: ["AI is a giant math function", "Inspired by brains but not the same"],
-        narrative: "Key point: AI was inspired by neurons, but an AI model is ultimately a giant math function — billions of multiplication operations in sequence.",
+        narrative: "Key point: AI was inspired by neurons, but an AI model is ultimately a giant math function — billions of multiplication operations in sequence. The 'neurons as math' idea dates to 1943: neuroscientist Warren McCulloch and logician Walter Pitts showed that simplified neurons could compute logic. Pitts was a self-taught runaway who, at 12, read Bertrand Russell's dense logic masterwork and wrote to him pointing out problems — Russell wrote back.",
         definitions: [{ term: "Neuron", def: "A cell in the brain that sends electrical signals — AI 'neurons' are math operations inspired by real ones" }],
         discussion: ["What would AI need before you'd say it was truly like a brain?"],
       },
@@ -381,7 +381,7 @@ export const TEACHER_NOTES = [
       },
       {
         keyPoints: ["RLHF = Reinforcement Learning from Human Feedback", "Humans rate which responses are better"],
-        narrative: "The 'GOOD' reveal is the key moment. Being able to answer isn't enough — the AI needs to learn what a GOOD answer looks like.",
+        narrative: "The 'GOOD' reveal is the key moment. Being able to answer isn't enough — the AI needs to learn what a GOOD answer looks like. Evidence this step matters: in OpenAI's 2022 InstructGPT study, human raters preferred a small 1.3-billion-parameter model trained with RLHF over the raw 175-billion-parameter GPT-3 — feedback beat a model over 100 times bigger.",
         definitions: [{ term: "RLHF", def: "Reinforcement Learning from Human Feedback — humans rate AI responses to teach it what 'good' means" }],
         discussion: ["What makes an answer 'good' vs just 'correct'?"],
       },
@@ -452,7 +452,7 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Tokens are the actual units AI processes", "Not words, not letters — something in between"],
-        narrative: "Kids assumed AI thinks in words. This section reveals the truth: AI thinks in tokens — subword pieces.",
+        narrative: "Kids assumed AI thinks in words. This section reveals the truth: AI thinks in tokens — subword pieces. This explains a famous AI fail: ask a chatbot how many r's are in 'strawberry' and it often gets it wrong — the model never sees individual letters, only token IDs, so it's effectively spelling blindfolded.",
         definitions: [{ term: "Token", def: "A piece of a word that AI actually processes — shorter words are one token, longer words get split into pieces" }],
         discussion: ["Why wouldn't AI just use whole words?"],
       },
@@ -507,7 +507,7 @@ export const TEACHER_NOTES = [
     slides: [
       {
         keyPoints: ["Similar meanings = close together in space"],
-        narrative: "Let kids tap words freely. Ask: 'Why do you think king and queen are close together but far from pizza?'",
+        narrative: "Let kids tap words freely. Ask: 'Why do you think king and queen are close together but far from pizza?' Famous result to share: in 2013, Tomas Mikolov's team at Google (word2vec) showed you can do arithmetic on word vectors — king minus man plus woman lands remarkably close to queen. (Later researchers showed it doesn't always work that cleanly, but the demo made embeddings famous.)",
         definitions: [{ term: "Embedding Space", def: "An imaginary space where every word has a position based on its meaning" }],
         discussion: ["Why are king and queen close together?"],
       },
@@ -637,7 +637,7 @@ export const TEACHER_NOTES = [
       },
       {
         keyPoints: ["Attention = words looking at each other for clues", "Multiple attention heads work in parallel"],
-        narrative: "That's attention! Same word, completely different meaning — depending on which other words shine their spotlight on it.",
+        narrative: "That's attention! Same word, completely different meaning — depending on which other words shine their spotlight on it. Name-drop for you: this mechanism is THE breakthrough behind modern AI — the 2017 Google paper 'Attention Is All You Need' introduced the Transformer architecture, and that's the T in ChatGPT (Generative Pre-trained Transformer).",
         definitions: [{ term: "Attention Head", def: "One spotlight that focuses on different relationships — real models have many working in parallel" }],
         discussion: ["Can you think of other words that have two completely different meanings?"],
         simplification: "We show attention as simple curved beams between word pairs. Real attention is more nuanced: each 'head' computes a weighted score for every word pair simultaneously, and there are many heads per layer (32, 64, 96, or more depending on the model). The beam animation captures the essence — words influencing each other — but the actual math is far more parallel and subtle.",
@@ -734,14 +734,14 @@ export const TEACHER_NOTES = [
       },
       {
         keyPoints: ["Ranked probability list shows most likely next words", "The top word wins — unless temperature adds randomness"],
-        narrative: "The probability list shows how the model ranks candidates. 'mat' wins at 42%, but 'floor', 'rug', and others are possibilities too.",
+        narrative: "The probability list shows how the model ranks candidates. 'mat' wins at 42%, but 'floor', 'rug', and others are possibilities too. Story for older kids: in 2016, AlphaGo played its famous 'Move 37' against Go champion Lee Sedol — the system estimated only a 1-in-10,000 chance a human pro would play it, played it anyway, and won the game. Low probability doesn't always mean bad choice.",
         definitions: [{ term: "Probability", def: "How likely the model thinks each word is — shown as a percentage" }],
         discussion: ["Why might there be multiple good answers instead of just one?"],
         simplification: "The percentages shown (mat 42%, floor 18%, etc.) are illustrative, not from a real model. In practice, the model produces a probability distribution over its entire vocabulary (50,000+ tokens), not just 5-8 words. Most tokens get near-zero probability. Also, the model predicts the next token, not necessarily a complete word — 'mat' might be one token, but longer words get split into multiple tokens that are predicted one at a time.",
       },
       {
         keyPoints: ["Temperature controls creativity vs safety", "Low = predictable, High = creative"],
-        narrative: "Generate a sentence at temp 0.1 (frozen), then reset and try at temp 1.5 (wild). Show how the same prompt gives different results.",
+        narrative: "Generate a sentence at temp 0.1 (frozen), then reset and try at temp 1.5 (wild). Show how the same prompt gives different results. Why 'temperature'? The name is borrowed from physics — the same math as the Boltzmann distribution in statistical mechanics, where higher temperature means particles behave more randomly. AI researchers reused the equation for word choices, and the name stuck.",
         definitions: [{ term: "Temperature", def: "A dial that controls how adventurous the AI's word choices are — low = safe, high = creative" }],
         discussion: ["At temperature zero, if you asked the same question 100 times, would you always get the same answer?", "Why would you WANT high temperature?"],
       },
@@ -915,3 +915,39 @@ export const TEACHER_NOTES = [
     ],
   },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Id-keyed lookup. The notes above are authored in a fixed legacy order; this
+// list maps each entry (by position) to its canonical section id so the rest of
+// the app can look notes up by id and never by array position.
+// IMPORTANT: keep this list 1:1 with TEACHER_NOTES above. Do not reorder the
+// array — add the id here if you ever append a section's notes.
+// ─────────────────────────────────────────────────────────────────────────────
+const NOTE_IDS = [
+  "who-is-here",      // 0
+  "story-mash",       // 1
+  "what-is-ai",       // 2
+  "rules-vs-learning",// 3
+  "brain-vs-ai",      // 4
+  "what-is-llm",      // 5
+  "meet-models",      // 6
+  "the-bridge",       // 7
+  "how-it-learns",    // 8
+  "three-steps",      // 9
+  "numbers-words",    // 10
+  "tokens",           // 11
+  "embeddings",       // 12
+  "beyond-2d",        // 13
+  "attention",        // 14
+  "mlp",              // 15
+  "layers",           // 16
+  "predict",          // 17
+  "try-it",           // 18
+  "beyond-knowledge", // 19
+  "reasoning",        // 20
+];
+
+export const NOTES_BY_ID = Object.fromEntries(
+  TEACHER_NOTES.map((notes, i) => [NOTE_IDS[i], notes]),
+);
+

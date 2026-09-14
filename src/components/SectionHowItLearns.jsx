@@ -7,6 +7,8 @@ import {
   Question,
 } from "@phosphor-icons/react";
 import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { PredictGate } from "./classroom";
+import { useTallySet } from "./useTally";
 
 const JOKE_DISPLAY = [
   "Knock knock.",
@@ -263,15 +265,11 @@ function ReadingPrompt({ text, reading, color, size = 32 }) {
   );
 }
 
-/* ── Presentation: single round with auto-reveal ─────────────────────── */
-function RobotRoundSlide({ round, roundIdx, color }) {
-  const [revealed, setRevealed] = useState(false);
+/* ── Presentation: single round — the class calls the winning robot, then the teacher reveals ── */
+const ROBOT_OPTIONS = [0, 1, 2].map(i => ({ id: String(i), label: `Robot ${i + 1}` }));
 
-  useEffect(() => {
-    setRevealed(false);
-    const timer = setTimeout(() => setRevealed(true), 2500);
-    return () => clearTimeout(timer);
-  }, [roundIdx]);
+function RobotRoundSlide({ round, roundIdx, color, tally }) {
+  const [revealed, setRevealed] = useState(false); // remounted per round via key={roundIdx}
 
   const jokeCompletedUpTo = roundIdx + (revealed ? 1 : 0);
 
@@ -308,17 +306,29 @@ function RobotRoundSlide({ round, roundIdx, color }) {
         ))}
       </div>
 
-      {revealed && (
-        <PresText size={22} color="rgba(255,255,255,.4)">
-          Wrong robots adjust their weights and try again next round!
-        </PresText>
-      )}
+      <PredictGate
+        prompt="Which robot will get it right?"
+        options={ROBOT_OPTIONS}
+        correct={String(round.robots.findIndex(r => r.correct))}
+        tally={tally}
+        color={color}
+        revealed={revealed}
+        onReveal={() => setRevealed(true)}
+        dense
+      >
+        {(isRevealed) => isRevealed && (
+          <PresText size={22} color="rgba(255,255,255,.4)">
+            Wrong robots adjust their weights and try again next round!
+          </PresText>
+        )}
+      </PredictGate>
     </PresSlide>
   );
 }
 
 /* ── Main Section ────────────────────────────────────────────────────── */
 export default function SectionHowItLearns({ color, mode, slide }) {
+  const robotVotes = useTallySet(ROUNDS.length, 3); // projector-mode: which robot will be right, per round
   const [step, setStep] = useState(0);
   const [roundRevealed, setRoundRevealed] = useState([false, false, false]);
   const stepRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -472,9 +482,11 @@ export default function SectionHowItLearns({ color, mode, slide }) {
       const roundIdx = slide - 4;
       return (
         <RobotRoundSlide
+          key={roundIdx}
           round={ROUNDS[roundIdx]}
           roundIdx={roundIdx}
           color={color}
+          tally={robotVotes[roundIdx]}
         />
       );
     }
@@ -500,10 +512,10 @@ export default function SectionHowItLearns({ color, mode, slide }) {
             every <strong style={{ color: "white" }}>book</strong>,{" "}
             every <strong style={{ color: "white" }}>paper</strong>,{" "}
             <strong style={{ color: "white" }}>magazine</strong>,{" "}
-            <strong style={{ color: "white" }}>Instagram post</strong>,{" "}
-            <strong style={{ color: "white" }}>social media conversation</strong>,{" "}
-            <strong style={{ color: "white" }}>email</strong>,{" "}
-            <strong style={{ color: "white" }}>text</strong>...
+            <strong style={{ color: "white" }}>Wikipedia article</strong>,{" "}
+            <strong style={{ color: "white" }}>public forum post</strong>,{" "}
+            <strong style={{ color: "white" }}>recipe</strong>,{" "}
+            <strong style={{ color: "white" }}>song lyric</strong>...
           </PresText>
           <PresText size={28} color="rgba(255,255,255,.65)">
             Reading a word and predicting the next word.<br />
@@ -673,9 +685,9 @@ export default function SectionHowItLearns({ color, mode, slide }) {
               <strong style={{ color }}>book</strong>,{" "}
               <strong style={{ color }}>paper</strong>,{" "}
               <strong style={{ color }}>magazine</strong>,{" "}
-              <strong style={{ color }}>Instagram post</strong>,{" "}
-              <strong style={{ color }}>social media conversation</strong>,{" "}
-              <strong style={{ color }}>email</strong>, and <strong style={{ color }}>text</strong>.
+              <strong style={{ color }}>Wikipedia article</strong>,{" "}
+              <strong style={{ color }}>public forum post</strong>,{" "}
+              <strong style={{ color }}>recipe</strong>, and <strong style={{ color }}>song lyric</strong> that's out on the public internet.
               Reading a word and predicting the next word. Sentence after sentence. That's training.
             </div>
           </div>

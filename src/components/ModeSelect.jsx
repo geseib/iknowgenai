@@ -36,8 +36,9 @@ const SESSION_ICONS = [MagnifyingGlass, Compass, PaintBrush];
 
 export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags, session, onSessionChange }) {
   const gc = GRADE_CONFIG[grade];
-  const totalSlides = gc.presentationSlides.reduce((a, b) => a + b, 0);
-  const activeSections = gc.presentationSlides.filter(n => n > 0).length;
+  const slideCounts = Object.values(gc.slides);
+  const totalSlides = slideCounts.reduce((a, b) => a + b, 0);
+  const activeSections = slideCounts.filter(n => n > 0).length;
 
   const stars = Array.from({ length: 60 }, (_, i) => ({
     x: ((i * 137.508) % 100).toFixed(1),
@@ -197,10 +198,10 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
           </button>
           <button onClick={() => onSelect("flags")} className="ghost-btn" style={{
             display: "flex", alignItems: "center", gap: 6, fontSize: 14, padding: "8px 16px",
-            borderColor: (flags?.flowVersion || flags?.multiSession) ? "#fb560740" : "rgba(255,255,255,.12)",
-            background: (flags?.flowVersion || flags?.multiSession) ? "#fb560712" : undefined,
+            borderColor: flags?.multiSession ? "#fb560740" : "rgba(255,255,255,.12)",
+            background: flags?.multiSession ? "#fb560712" : undefined,
           }}>
-            <Flag size={18} weight="duotone" color={(flags?.flowVersion || flags?.multiSession) ? "#fb5607" : undefined} /> Flags
+            <Flag size={18} weight="duotone" color={flags?.multiSession ? "#fb5607" : undefined} /> Flags
             {flags?.multiSession ? (
               <span style={{
                 fontSize: 10,
@@ -211,16 +212,6 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
                 fontWeight: 700,
                 fontFamily: "'Fredoka',sans-serif",
               }}>v3</span>
-            ) : flags?.flowVersion ? (
-              <span style={{
-                fontSize: 10,
-                background: "#fb5607",
-                color: "#000",
-                borderRadius: 8,
-                padding: "2px 6px",
-                fontWeight: 700,
-                fontFamily: "'Fredoka',sans-serif",
-              }}>v2</span>
             ) : null}
           </button>
         </div>

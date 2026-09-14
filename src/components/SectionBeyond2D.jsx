@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { PresSlide, PresText, Card } from "./shared";
+import { PresSlide, PresText, Card, KidNote } from "./shared";
 
 const CUBE_WORDS = [
   { word: "cat", x: -35, y: -40, z: 30, color: "#fee440" },
@@ -353,7 +353,7 @@ export default function SectionBeyond2D({ color, mode, slide }) {
     const pairs = [
       { w1: "King", w2: "Queen", score: "0.92", similar: true },
       { w1: "Cat", w2: "Dog", score: "0.85", similar: true },
-      { w1: "Cat", w2: "Pizza", score: "0.12", similar: false },
+      { w1: "Cat", w2: "Pizza", score: "0.25", similar: false },
     ];
     return (
       <PresSlide>
@@ -408,8 +408,9 @@ export default function SectionBeyond2D({ color, mode, slide }) {
           ))}
         </div>
         <PresText size={20} color="rgba(255,255,255,.3)">
-          1.0 = identical meaning &nbsp;&nbsp;|&nbsp;&nbsp; 0.0 = completely unrelated
+          1.0 = identical meaning &nbsp;&nbsp;|&nbsp;&nbsp; near 0 = unrelated
         </PresText>
+        <KidNote color={color}>These scores are rounded examples. Real ones vary by model, and even unrelated words rarely score exactly 0 — every word shares a little "I am a word" in common.</KidNote>
       </PresSlide>
     );
   }

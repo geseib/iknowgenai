@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { ArrowClockwise } from "@phosphor-icons/react";
 import { PresSlide, PresText } from "./shared";
+import { Tally } from "./classroom";
+import { useTallySet } from "./useTally";
 
 const mascotUrl = `${import.meta.env.BASE_URL}robotcomputerbrain.png`;
 
@@ -82,16 +84,15 @@ function MiniDial({ spinning, color }) {
 function ChoiceCard({ text, label, selected, other, onClick, color, side }) {
   const isWinner = selected === true;
   const isLoser = selected === false && other === true;
-  const waiting = selected === null && other === null;
 
   return (
     <div
-      onClick={waiting ? onClick : undefined}
+      onClick={onClick}
       style={{
         flex: 1,
         padding: "20px 22px",
         borderRadius: 18,
-        cursor: waiting ? "pointer" : "default",
+        cursor: "pointer",
         background: isWinner ? `${color}15` : "rgba(255,255,255,.04)",
         border: isWinner ? `2px solid ${color}` : `2px solid rgba(255,255,255,.12)`,
         boxShadow: isWinner ? `0 0 24px ${color}30` : "none",
@@ -124,11 +125,14 @@ function ChoiceCard({ text, label, selected, other, onClick, color, side }) {
 
 /* ── Main Section ────────────────────────────────────────────────────── */
 export default function SectionThreeSteps({ color, mode, slide }) {
-  const [choices, setChoices] = useState([null, null, null]); // null = not chosen, "a" or "b"
+  // One A/B tally per round; the round's "choice" is whichever side leads (null on a tie / no votes).
+  const roundVotes = useTallySet(RLHF_ROUNDS.length, 2);
+  const choices = roundVotes.map(t => (t.leader == null ? null : t.leader === 0 ? "a" : "b"));
 
-  // Reset choices when entering slide 5
+  // Reset votes when entering slide 5
   useEffect(() => {
-    if (slide === 5) setChoices([null, null, null]);
+    if (slide === 5) roundVotes.resetAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slide]);
 
   if (mode !== "presentation") return null;
@@ -143,7 +147,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
         Real AI doesn't just read <em>one</em> joke...
       </PresText>
       <PresText size={48} color={color}>
-        It reads the ENTIRE internet.
+        It reads a HUGE slice of the internet.
       </PresText>
       <PresText size={24} color="rgba(255,255,255,.35)">
         But raw reading isn't enough to be helpful.
@@ -305,13 +309,8 @@ export default function SectionThreeSteps({ color, mode, slide }) {
     const round = RLHF_ROUNDS[roundIdx];
     const choice = choices[roundIdx];
 
-    const pick = (side) => {
-      setChoices(prev => {
-        const next = [...prev];
-        next[roundIdx] = side;
-        return next;
-      });
-    };
+    // Clicking a card = one vote for that side (so a passed-around tablet works too)
+    const pick = (side) => roundVotes[roundIdx].inc(side === "a" ? 0 : 1);
 
     return (
       <PresSlide>
@@ -326,7 +325,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
           Prompt: "{round.prompt}"
         </PresText>
         <PresText size={24} color="rgba(255,255,255,.35)">
-          Which response is better? Click to pick!
+          Which response is better? Hands up for A, then B.
         </PresText>
 
         <div style={{
@@ -353,14 +352,21 @@ export default function SectionThreeSteps({ color, mode, slide }) {
           />
         </div>
 
+        <Tally
+          options={[{ id: "a", label: "A" }, { id: "b", label: "B" }]}
+          tally={roundVotes[roundIdx]}
+          color={color}
+          hint="Teacher: tap a card (or +) once per hand — keys 1 and 2 work too."
+        />
+
         {choice && (
           <div className="fade-up" style={{
             fontFamily: "'Fredoka',sans-serif", fontSize: 22,
             color: "rgba(255,255,255,.5)",
           }}>
             {roundIdx < 2
-              ? "Great pick! Next round →"
-              : "All 3 rounds complete! Let's see how the AI changed →"}
+              ? `The class picks ${choice.toUpperCase()}. Next round →`
+              : `The class picks ${choice.toUpperCase()}. All 3 rounds done — let's see how the AI changed →`}
           </div>
         )}
       </PresSlide>
@@ -528,7 +534,7 @@ export default function SectionThreeSteps({ color, mode, slide }) {
         {/* Retry button */}
         <button
           onClick={() => {
-            setChoices([null, null, null]);
+            roundVotes.resetAll();
             // Signal to go back to slide 5 (first RLHF round)
             // We dispatch a custom event that App.jsx listens for
             window.dispatchEvent(new CustomEvent("jumpToSlide", { detail: 5 }));

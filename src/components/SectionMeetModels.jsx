@@ -28,7 +28,7 @@ const models = [
     facts: [
       "Made by Meta — the company behind Facebook and Instagram",
       "It's 'open source' — like sharing the recipe, so anyone can use or modify it",
-      "Named after the animal — yes, seriously",
+      "Meta shares the trained model so schools and companies can run it on their own computers",
     ],
   },
   {
@@ -36,7 +36,7 @@ const models = [
     facts: [
       "Made by Google DeepMind",
       "Built into Google Search, Gmail, and Google Docs",
-      "Named after the zodiac twins — it was designed to be multi-talented",
+      "Can read text, pictures, and video in the same conversation",
     ],
   },
 ];
@@ -241,7 +241,7 @@ export default function SectionMeetModels({ color, mode, slide }) {
             lineHeight: 1.3,
             marginBottom: 24,
           }}>
-            BILLIONS of words...
+            TRILLIONS of words...
           </div>
           <div style={{
             fontFamily: "'Fredoka',sans-serif",

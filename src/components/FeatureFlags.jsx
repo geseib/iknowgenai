@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Flag,
   ArrowLeft,
-  Shuffle,
   DeviceMobile,
   ChalkboardTeacher,
   Eye,
@@ -11,15 +10,6 @@ import {
 } from "@phosphor-icons/react";
 
 const FLAGS = [
-  {
-    key: "flowVersion",
-    label: "Proposed Flow (v2)",
-    desc: "Reorganized section order with 5 groups: What Is AI?, Meet the LLMs, Inside the Machine, How AI Writes, Try It!",
-    Icon: Shuffle,
-    color: "#9b5de5",
-    type: "toggle",
-    defaultValue: true,
-  },
   {
     key: "teacherDrawerPush",
     label: "Teacher Drawer Pushes Content",
@@ -50,11 +40,11 @@ const FLAGS = [
   {
     key: "multiSession",
     label: "Multi-Session Mode (v3)",
-    desc: "Split the lesson into 3 bite-sized sessions: Discover, Explore, Create. Each starts with an animated review of what was learned before.",
+    desc: "Split the lesson into 3 bite-sized sessions: Discover, Explore, Create. Each starts with an animated review of what was learned before. Off by default — the baseline is the full single-flow lesson.",
     Icon: SplitVertical,
     color: "#fb5607",
     type: "toggle",
-    defaultValue: true,
+    defaultValue: false,
   },
   {
     key: "roamingCat",

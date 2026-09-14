@@ -16,7 +16,7 @@ import {
   Confetti,
   ArrowDown,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TriviaBox, TeacherNote, PresSlide, PresText } from "./shared";
+import { Card, Label, H1, TriviaBox, TeacherNote, KidNote, PresSlide, PresText } from "./shared";
 import {
   WORD_MAP,
   GROUP_COLORS as GC,
@@ -488,6 +488,7 @@ export default function SectionEmbeddings({ color, mode, slide }) {
             <PresText size={22} color="rgba(255,255,255,.35)">
               ...and 12,283 more dimensions just like these!
             </PresText>
+            <KidNote color={color}>Real dimensions don't have neat names like "Has Fur" — nobody labels them. These are our cartoon of what the numbers capture.</KidNote>
           </PresSlide>
         );
       }
@@ -705,7 +706,7 @@ export default function SectionEmbeddings({ color, mode, slide }) {
       )}
 
       <TriviaBox mode={mode} visible={part2Done} color={color} number="~100,000" label="tokens in AI's vocabulary"
-        fact="Large language models like Claude know around 100,000 word-pieces (tokens). That's roughly 3× more than the average adult's vocabulary of about 20,000–35,000 words — and every single token gets its own unique set of 12,288 coordinates in meaning space." />
+        fact="Large language models know around 100,000–200,000 word-pieces (tokens). That's roughly 3–6× more than the average adult's vocabulary of about 20,000–35,000 words — and every single token gets its own long list of coordinates in meaning space (12,288 of them in the famous model this lesson uses as its example)." />
     </div>
   );
 }

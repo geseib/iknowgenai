@@ -492,16 +492,8 @@ export default function SectionReasoning({ color, mode, slide }) {
     if (step < maxStep) setStep(s => s + 1);
   }, [step, maxStep]);
 
-  // Staggered reveal of science steps: first at 30s, rest at 5s each (ArrowDown skips)
-  useEffect(() => {
-    if (step !== 1) return;
-    setScienceRevealed(0);
-    const delays = scienceSteps.map((_, i) => i === 0 ? 30000 : 30000 + i * 5000);
-    const timers = delays.map((d, i) =>
-      setTimeout(() => setScienceRevealed(i + 1), d)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [step, scienceSteps.length]);
+  // Science steps reveal one at a time on demand (button or ArrowDown) — no clock.
+  // Let the class propose each step out loud before it appears.
 
   // Animate essay diagram when step 3 appears
   useEffect(() => {
@@ -699,7 +691,7 @@ export default function SectionReasoning({ color, mode, slide }) {
             })}
           </div>
           <PresText size={20} color="rgba(255,255,255,.35)">
-            Models like <strong>o1</strong>, <strong>o3</strong> and <strong>Claude</strong> with extended thinking use this approach
+            Today's chatbots from OpenAI, Google and Anthropic all have a <strong>"thinking" mode</strong> that works this way
           </PresText>
         </PresSlide>
       );
@@ -786,7 +778,13 @@ export default function SectionReasoning({ color, mode, slide }) {
             ))}
           </div>
 
-          {scienceRevealed >= scienceSteps.length && (
+          {scienceRevealed < scienceSteps.length ? (
+            <ContinueButton
+              onClick={() => setScienceRevealed(s => s + 1)}
+              color={color}
+              label={scienceRevealed === 0 ? "What would you do first?" : "What's the next step?"}
+            />
+          ) : (
             <div style={{ animation: "fadeUp .4s ease" }}>
               <ContinueButton onClick={advance} color={color} label="Now ask AI the same question" />
             </div>

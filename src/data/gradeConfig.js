@@ -1,89 +1,129 @@
+// Per-grade configuration.
+//
+// `slides` maps a section id → how many slides that section shows for this grade.
+// A count of 0 means the section is SKIPPED for that grade. The keys are listed
+// in canonical course order (see src/data/sections.js) so this file reads as the
+// lesson plan it is — what you edit here is exactly what kids see, in order.
+//
+// Bands share one narrative arc; they differ in depth, pacing, and framing:
+//   K-2  — playful wonder; tap-only; the machine internals are stripped back
+//   3-5  — "how AI learns"; wonder-driven, hands-on, full arc
+//   7-8  — "how AI works AND why it matters"; full depth + critical-thinking beats
+
 export const GRADE_CONFIG = {
   "K-2": {
     label: "Ages 5-8",
     subtitle: "A fun introduction to AI for early learners",
     duration: "~20 minutes",
     presTextSizeMultiplier: 1.15,
-    presentationSlides: [
-      2,  // 0: Who's Used AI? — simplified
-      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
-      3,  // 3: Rules vs Learning — 1 pair only
-      4,  // 4: Brain vs AI — emotions only
-      3,  // 5: What's an LLM? — simplified
-      0,  // 6: Meet the Models — SKIP
-      2,  // 7: The Big Question — simplified pipeline
-      5,  // 8: How AI Learns — 1 robot round
-      0,  // 9: Three Steps to Helpful AI — SKIP
-      3,  // 10: Numbers & Words — simplified
-      0,  // 11: Tokens — Not Quite Words — SKIP
-      4,  // 12: Words in Space — clusters only
-      0,  // 13: Beyond 2D — SKIP
-      4,  // 14: Attention — simplified bat
-      0,  // 15: The Thinking Layer — SKIP
-      0,  // 16: Rinse & Repeat — SKIP
-      3,  // 17: Predict! — simplified voting
-      1,  // 18: Try It! — preset prompts only
-      0,  // 19: Beyond What AI Knows — SKIP
-      3,  // 20: Think First! (Reasoning) — simplified
-    ],
+    slides: {
+      // Act 1 — AI Is All Around You
+      "who-is-here": 2,        // simplified
+      "story-mash": 6,         // early hands-on win
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
+      "rules-vs-learning": 3,  // 1 pair only
+      // Act 2 — How AI Learns
+      "how-it-learns": 5,      // 1 robot round
+      "three-steps": 0,        // SKIP (RLHF — too advanced for now)
+      "brain-vs-ai": 4,        // emotions only
+      // Act 3 — What's an LLM?
+      "what-is-llm": 3,        // simplified
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
+      "the-bridge": 2,         // simplified pipeline
+      // Act 4 — Inside the Machine
+      "numbers-words": 3,      // simplified
+      "tokens": 0,             // SKIP
+      "embeddings": 4,         // clusters only
+      "beyond-2d": 0,         // CUT — folded into Words in Space
+      "attention": 4,          // simplified bat
+      "mlp": 0,                // SKIP
+      "layers": 0,             // SKIP
+      // Act 5 — How AI Writes
+      "predict": 3,            // simplified voting
+      "reasoning": 3,          // simplified
+      // Act 6 — Your Turn
+      "try-it": 1,             // preset prompts only
+      "beyond-knowledge": 0,   // SKIP
+      "wrap-up": 2,            // closing + wonder
+    },
   },
   "3-5": {
     label: "Ages 8-11",
     subtitle: "An interactive lesson for 3rd & 4th graders",
     duration: "~45 minutes",
     presTextSizeMultiplier: 1.0,
-    presentationSlides: [
-      3,  // 0: Who's Used AI?
-      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
-      6,  // 3: Rules vs Learning
-      8,  // 4: Brain vs AI
-      5,  // 5: What's an LLM?
-      0,  // 6: Meet the Models — CUT (folded into §5 What's an LLM)
-      3,  // 7: The Big Question
-      8,  // 8: How AI Learns
-      0,  // 9: Three Steps to Helpful AI — SKIP
-      5,  // 10: Numbers & Words
-      0,  // 11: Tokens — Not Quite Words — SKIP
-      8,  // 12: Words in Space
-      0,  // 13: Beyond 2D — SKIP
-      7,  // 14: Attention
-      5,  // 15: The Thinking Layer (+ Michael Jordan facts-are-stored intro)
-      2,  // 16: Rinse & Repeat
-      5,  // 17: Predict!
-      2,  // 18: Try It!
-      0,  // 19: Beyond What AI Knows — SKIP
-      5,  // 20: Think First! (Reasoning)
-    ],
+    slides: {
+      // Act 1 — AI Is All Around You
+      "who-is-here": 3,
+      "story-mash": 6,
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
+      "rules-vs-learning": 6,
+      // Act 2 — How AI Learns
+      "how-it-learns": 8,
+      "three-steps": 0,        // SKIP for now (simplified RLHF is a follow-on)
+      "brain-vs-ai": 8,
+      // Act 3 — What's an LLM?
+      "what-is-llm": 5,
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
+      "the-bridge": 3,
+      // Act 4 — Inside the Machine
+      "numbers-words": 5,
+      "tokens": 0,             // SKIP
+      "embeddings": 8,
+      "beyond-2d": 0,         // CUT — folded into Words in Space
+      "attention": 7,
+      "mlp": 5,                // + "facts are stored" intro
+      "layers": 2,
+      // Act 5 — How AI Writes
+      "predict": 5,
+      "reasoning": 5,
+      // Act 6 — Your Turn
+      "try-it": 2,
+      "beyond-knowledge": 0,   // SKIP
+      "wrap-up": 2,
+    },
   },
   "7-8": {
     label: "Ages 12-14",
     subtitle: "How AI really works — from embeddings to transformers",
     duration: "~55 minutes",
     presTextSizeMultiplier: 0.95,
-    presentationSlides: [
-      3,  // 0: Who's Used AI?
-      6,  // 1: Story Mash-Up! — genai intro + title + interactive + explain
-      0,  // 2: What IS AI? — CUT (merged into §3 Rules vs Learning)
-      6,  // 3: Rules vs Learning
-      8,  // 4: Brain vs AI
-      5,  // 5: What's an LLM?
-      0,  // 6: Meet the Models — CUT (folded into §5 What's an LLM)
-      3,  // 7: The Big Question
-      8,  // 8: How AI Learns
-      9,  // 9: Three Steps to Helpful AI
-      5,  // 10: Numbers & Words
-      7,  // 11: Tokens — Not Quite Words
-      8,  // 12: Words in Space
-      0,  // 13: Beyond 2D — CUT (folded into §12 Words in Space)
-      7,  // 14: Attention
-      5,  // 15: The Thinking Layer (+ Michael Jordan facts-are-stored intro)
-      2,  // 16: Rinse & Repeat
-      5,  // 17: Predict!
-      2,  // 18: Try It!
-      7,  // 19: Beyond What AI Knows — bonus: RAG, tools, agents
-      6,  // 20: Think First! (Reasoning) — full + deeper dive
-    ],
+    slides: {
+      // Act 1 — AI Is All Around You
+      "who-is-here": 3,
+      "story-mash": 6,
+      "what-is-ai": 0,        // CUT — merged into Rules vs Learning (its intro slide carries the framing)
+      "rules-vs-learning": 6,
+      // Act 2 — How AI Learns
+      "how-it-learns": 8,
+      "three-steps": 9,        // full RLHF
+      "brain-vs-ai": 8,
+      // Act 3 — What's an LLM?
+      "what-is-llm": 5,
+      "meet-models": 0,       // CUT — model brands folded into What's an LLM
+      "the-bridge": 3,
+      // Act 4 — Inside the Machine
+      "numbers-words": 5,
+      "tokens": 7,
+      "embeddings": 8,
+      "beyond-2d": 0,         // CUT — folded into Words in Space
+      "attention": 7,
+      "mlp": 5,                // + "facts are stored" intro
+      "layers": 2,
+      // Act 5 — How AI Writes
+      "predict": 5,
+      "reasoning": 6,          // full + deeper dive
+      // Act 6 — Your Turn
+      "try-it": 2,
+      "beyond-knowledge": 7,   // bonus: RAG, tools, agents
+      "wrap-up": 2,
+    },
   },
 };
+
+// Slide count for a section in a grade (0 = skipped, default 1 if unspecified).
+export function slidesFor(gradeKey, sectionId) {
+  const g = GRADE_CONFIG[gradeKey] || GRADE_CONFIG["3-5"];
+  const n = g.slides[sectionId];
+  return n === undefined ? 1 : n;
+}

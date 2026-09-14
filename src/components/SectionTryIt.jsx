@@ -23,13 +23,13 @@ import { GRADE_EXAMPLES } from "../data/gradeContent";
 const PREDICT_FACTS = [
   "AI doesn't actually \"know\" the answer — it ranks every word in its vocabulary and picks the most likely one, just like you saw!",
   "At temperature 0, the AI always picks the #1 word. That's why low-temperature answers sound robotic — there's no surprise.",
-  "The AI considers about 50,000 possible next tokens for every single position in a sentence. You just saw the top few!",
+  "The AI considers around 100,000–200,000 possible next tokens for every single position in a sentence. You just saw the top few!",
   "ChatGPT generates its answers one token at a time — the same predict-and-pick process you're using right now.",
   "When you click a word to continue, you're doing exactly what the AI does: pick one word, then predict the next one. Over and over.",
   "The AI doesn't read your sentence like you do — it processes all the words at once using attention, then predicts the next one.",
   "Higher temperature doesn't make the AI \"smarter\" — it just makes it more willing to pick lower-ranked words, which can seem creative or weird.",
-  "The probabilities you see add up to 100%. The AI always has to pick something — even if nothing fits perfectly.",
-  "Real AI models run through 96 layers of attention and thinking before producing each prediction you see here.",
+  "Across ALL possible tokens, the probabilities add up to 100% — the top few you see here are only part of that. The AI always has to pick something, even if nothing fits perfectly.",
+  "Real AI models run through dozens of layers of attention and thinking before each prediction you see here — the famous example in this lesson uses 96.",
   "The word the AI picks becomes part of the input for the next prediction — that's why AI can write whole paragraphs, one word at a time.",
 ];
 
@@ -47,7 +47,7 @@ const TOKENIZE_FACTS = [
 ];
 
 const EMBED_FACTS = [
-  "The 2D plot you see squishes 1,536 dimensions down to just 2 — imagine flattening a globe into a map. Lots of detail gets lost!",
+  "The 2D plot you see squishes 1,536 dimensions down to just 2 — imagine flattening a globe into a map. Lots of detail gets lost! (This demo's model uses 1,536 numbers per word; the big example model in this lesson uses 12,288. Same idea, different size.)",
   "AI discovered that \"king\" minus \"man\" plus \"woman\" equals \"queen\" — just from reading text, nobody programmed that relationship.",
   "Words that appear in similar sentences end up close together in embedding space — that's how the AI learns meaning without a dictionary.",
   "The embedding model maps every word to a point in 1,536-dimensional space — way more than the 3 dimensions we can see.",
@@ -56,16 +56,16 @@ const EMBED_FACTS = [
   "Embeddings capture surprising connections: \"doctor\" and \"hospital\" are close together even though they're totally different types of words.",
   "The distance between words in embedding space is measured using cosine similarity — basically how much two arrows point in the same direction.",
   "These embeddings are what allow AI to understand that \"happy\" and \"joyful\" mean similar things even though they share no letters.",
-  "Every one of the ~50,000 tokens in the AI's vocabulary has its own unique set of 1,536 coordinates — like a GPS position for meaning.",
+  "Every one of the ~100,000+ tokens in the AI's vocabulary has its own unique set of coordinates — like a GPS position for meaning. This demo's model uses 1,536 of them per token.",
 ];
 
 const GENERATE_FACTS = [
   "Everything you see streaming in was generated one token at a time — the AI has no plan for the full sentence before it starts writing.",
   "The AI doesn't actually understand what it writes — it's predicting the most likely next token based on patterns from its training data.",
   "If you give the same prompt twice, you might get different answers! That's because temperature adds a bit of randomness to each pick.",
-  "The AI was trained on hundreds of billions of words — roughly the equivalent of reading every book in 1,000 libraries.",
+  "The AI was trained on trillions of words — more than the equivalent of every book in thousands of libraries.",
   "AI writes about 50-100 tokens per second. A human types about 40 words per minute. AI is roughly 100x faster at producing text!",
-  "The AI doesn't \"think\" and then \"write\" — the writing IS the thinking. Each token choice is shaped by all 96 layers of processing.",
+  "The AI doesn't \"think\" and then \"write\" — the writing IS the thinking. Each token choice is shaped by every layer of processing (96 of them in this lesson's example model).",
   "AI can write in many styles because it trained on everything from Shakespeare to Reddit comments to scientific papers.",
   "When AI writes something that seems creative, it's actually remixing patterns it saw in training — like a DJ mixing familiar songs into something new.",
   "The AI doesn't remember your previous conversations — each session starts fresh. It's predicting, not recalling.",

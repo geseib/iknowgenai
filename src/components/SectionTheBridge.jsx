@@ -13,7 +13,7 @@ import {
   ChatCircleDots,
   Lightning,
 } from "@phosphor-icons/react";
-import { Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Label, H1, TeacherNote, KidNote, PresSlide, PresText } from "./shared";
 
 const STEP_ICONS = [HashStraight, MapTrifold, Flashlight, Brain, MagicWand];
 
@@ -35,7 +35,7 @@ const notes = [
 /* ── Training pipeline rows for slide 0 ── */
 const TRAINING_ROWS = [
   { icon: HashStraight, label: "Turned words into numbers", sub: "every word becomes a list of numbers" },
-  { icon: Books, label: "Read the entire internet", sub: "trillions of words" },
+  { icon: Books, label: "Read a huge slice of the internet", sub: "trillions of words — websites, books, code" },
   { icon: TextAa, label: "Learned spelling & grammar", sub: "every rule of language" },
   { icon: Brain, label: "Learned facts & knowledge", sub: "history, science, everything" },
   { icon: Lightbulb, label: "Learned how to reason", sub: "cause and effect, logic" },
@@ -861,6 +861,7 @@ export default function SectionTheBridge({ color, mode, slide }) {
           <PresText size={20} color={`${color}99`}>
             Word by word. That's how AI writes.
           </PresText>
+          <KidNote color={color}>96 is one famous model's number. Other models use 32 layers, or 120, or more — the idea is the same.</KidNote>
         </PresSlide>
       );
     }
@@ -897,7 +898,7 @@ export default function SectionTheBridge({ color, mode, slide }) {
           lineHeight: 1.3,
           marginBottom: 24,
         }}>
-          BILLIONS of words...
+          TRILLIONS of words...
         </div>
 
         <div style={{

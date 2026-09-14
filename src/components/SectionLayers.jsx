@@ -11,7 +11,7 @@ import {
   Brain,
   Lightning,
 } from "@phosphor-icons/react";
-import { Label, H1, TriviaBox, TeacherNote, ModelNote, PresSlide, PresText } from "./shared";
+import { Label, H1, TriviaBox, TeacherNote, ModelNote, KidNote, PresSlide, PresText } from "./shared";
 
 const LAYER_CARDS = [
   { range: "1–16",  label: "Letters & Spelling",    desc: "Roughly where the model starts recognizing individual letters, punctuation, and simple character patterns.", Icon: TextAa },
@@ -658,6 +658,7 @@ export default function SectionLayers({ color, mode, slide }) {
           <PresText size={24}>
             <em>Each pass makes the understanding richer.</em>
           </PresText>
+          <KidNote color={color}>96 is the layer count of one famous model. Some models use 32, some more than 100.</KidNote>
         </PresSlide>
       );
     }
@@ -853,7 +854,7 @@ export default function SectionLayers({ color, mode, slide }) {
             fact="The biggest AI models perform over 400 billion math calculations just to predict a single word. A person doing one calculation per second would need over 12,000 years to do what the model does in a fraction of a second." />
 
           <ModelNote color={color} mode={mode}>
-            Some models have 32 layers, some have 96, some have even more. The exact number changes as researchers find better designs — it's not always bigger! But the idea of stacking layers to build deeper understanding is how all these models work.
+            Some models have 32 layers, some have 96, some have even more. The exact number changes as researchers find better designs — it's not always bigger! And the neat "layers 1–16 do spelling" bands above are a cartoon: real layers blend jobs together and the hand-off is gradual. But the idea of stacking layers to build deeper understanding is how all these models work.
           </ModelNote>
         </div>
       )}

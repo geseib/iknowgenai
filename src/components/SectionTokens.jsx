@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PresSlide, PresText } from "./shared";
+import { PresSlide, PresText, KidNote } from "./shared";
 
 /* ── Simple token lookup ─────────────────────────────────────────────── */
 const TOKEN_MAP = {
@@ -89,7 +89,7 @@ export default function SectionTokens({ color, mode, slide }) {
   if (slide === 1) {
     const markers = [
       { pos: 5, label: "95", desc: "Individual characters", delay: 0 },
-      { pos: 50, label: "50,000", desc: "Sweet spot ✓", delay: 0.15 },
+      { pos: 50, label: "~100,000", desc: "Sweet spot ✓", delay: 0.15 },
       { pos: 95, label: "1,000,000+", desc: "Every word ever", delay: 0.3 },
     ];
     return (
@@ -234,7 +234,7 @@ export default function SectionTokens({ color, mode, slide }) {
     return (
       <PresSlide>
         <PresText size={28} color="rgba(255,255,255,.45)">
-          The sweet spot: ~50,000 tokens
+          The sweet spot: about 100,000 tokens
         </PresText>
         <div style={{
           display: "flex", gap: split ? 16 : 0, justifyContent: "center",
@@ -329,7 +329,7 @@ export default function SectionTokens({ color, mode, slide }) {
   if (slide === 6) return (
     <PresSlide>
       <PresText size={32} color="rgba(255,255,255,.6)">
-        50,000 tokens means...
+        100,000 tokens means...
       </PresText>
       <PresText size={40} color={color}>
         One student in a packed stadium
@@ -371,8 +371,9 @@ export default function SectionTokens({ color, mode, slide }) {
         </div>
       </div>
       <PresText size={24} color="rgba(255,255,255,.45)">
-        For every single position in a sentence, AI chooses from all 50,000 tokens.
+        For every single position in a sentence, AI chooses from all ~100,000 tokens.
       </PresText>
+      <KidNote color={color}>The exact size depends on the model — older ones used about 50,000, the newest around 200,000.</KidNote>
     </PresSlide>
   );
 

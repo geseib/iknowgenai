@@ -85,6 +85,21 @@ Where a full gate is too heavy (free-play sliders), use the lighter form:
 the intro prose ends with a one-line prediction prompt ("Before you drag:
 which knob do you think is useless here?") and the outcome copy resolves it.
 
+> **The legible-controls rule: a control's meaning must be visible before
+> its lesson can land.** The learner has to know what the knob *is* —
+> semantically, in the story — before watching what the knob *does* teaches
+> anything. A dial that "reduces wrongness" is opaque until the learner can
+> see what it trades away (show the competing outcome shrinking as the
+> favored one grows). Corollaries: (1) every gate option is phrased in
+> concrete observable terms ("starts rising again past a point"), never
+> abstractions ("comes back up"); (2) when a gate resolves, the correct
+> option is visibly marked (✓/✗ on the pills — built into `PredictGate` via
+> `correct` + `resolved`); (3) the resolution copy must explain *why* the
+> outcome happens — the why is usually the slide's actual lesson, and the
+> moment it occurs should be visible in the demo itself (e.g., the loss
+> readout turning warm exactly where it starts rising).
+> *(Learned from course-owner review of the gradient-descent pilot.)*
+
 ### A2. The math on-ramp (payoff → picture → words → symbols)
 
 For every mathematical idea in a sidequest, this exact ladder, in order:
@@ -468,6 +483,12 @@ they already did.
 9. Payoff: own-words sentences (the built recap is already close); refused
    topics; blessing to stop.
 
+*As-built note (v2 shipped):* the outline gained one slide, "Cash it out"
+(between zoom-out and the backprop bridge) — an explicit bridge back into
+the main course: Ch4's GUESS/CHECK/ADJUST loop mapped line-by-line onto
+what the learner's hands just did, closing with "re-read Ch4/Ch5; '175
+billion dials' should have stopped being a slogan." Total 11 slides.
+
 **(7) Worth keeping:** the arc itself (it's correct); the bicycle model and
 all its live math; LossCurve/trail/tangent machinery; the step-size
 break-it demo verbatim; the 2-D contour demo (plus fog); ScaleSlide and
@@ -715,7 +736,7 @@ animation pattern for the backward wave.
 
 | Quest | Verdict | Why | Rough scope |
 |---|---|---|---|
-| **How Networks Learn** (`SqGradientDescent.jsx`) | **Restructure — light** | The arc already matches 3b1b's (felt problem → landscape → blind → nudge → rule → scale → honest bridge). Fixes are local: act-first hook slide, fog-by-default + LIFT THE FOG toggle, 4 Predict Gates, and demoting `e^w/(e^w+e⁰)` and `−ln(p)` from intro prose into optional disclosures. No demo is discarded. | ~1 day incl. building the shared `PredictGate` + disclosure primitives here first (this quest is the cheapest proving ground). Slide count 10 (was 10). |
+| **How Networks Learn** (`SqGradientDescent.jsx`) | **Restructure — light** | The arc already matches 3b1b's (felt problem → landscape → blind → nudge → rule → scale → honest bridge). Fixes are local: act-first hook slide, fog-by-default + LIFT THE FOG toggle, 4 Predict Gates, and demoting `e^w/(e^w+e⁰)` and `−ln(p)` from intro prose into optional disclosures. No demo is discarded. | ~1 day incl. building the shared `PredictGate` + disclosure primitives here first (this quest is the cheapest proving ground). Slide count 11 (was 10) — as built, the zoom-out's LLM-training cash-out got its own slide (see §B3 note below). |
 | **Inside Attention** (`SqAttention.jsx`) | **Restructure — medium** | The skeleton is right (three-needs slide, softmax staging, mask confession, values payoff, heads zoom-out) but the *surface* is the violation: vectors as digit lists, 16-decimal grids, notation in intro prose, no persistent picture, zero predictions. Needs the meaning-map + arrow layer over the existing live math, one new hook slide, one slide split (current slide 2), and 4 gates. All toy numbers, softmax demo, and HonestNotes survive underneath. | ~2 days. New shared arrow/alignment component (also needed by MLP quest — build it here). Slide count 10 (was 9). |
 | **What Is a Neural Network?** (`SqNeuralNetwork.jsx`) | **Rewrite** (salvaging two demos) | The failure is *ordering*, and ordering is the file's spine: it runs component-order (neuron → collapse → ReLU → layer → network) instead of question-order, its best visual (the pen) arrives last instead of driving from slide 0, the x² slide motivates ReLU with a curve the learner has no stake in, and two late slides (layer-as-matrix, universal approximation) are reference material, not story. Reordering + reskinning every slide onto the map is more work than rebuilding around the map. Salvage intact: the neuron knob game (re-skinned), the pen canvas demo (near-verbatim), the "name it"/parameter-count copy, all HonestNote content. Cut: x² approximation slide, standalone UAT slide, LayerSlide (compresses into a disclosure). | ~2–3 days. Slide count 10 (was 10). Also remove the 8d²/12d² MLP arithmetic from its main flow once the MLP quest exists (single source of truth). |
 
@@ -736,3 +757,47 @@ per the course-design skill checklist.
 - `ArrowPair` / alignment visual — two labeled arrows on a shared origin
   with a live alignment readout (dot size), the reusable geometric face of
   the dot product for attention and MLP quests.
+
+(Shipped in the gradient-descent rebuild as `src/course/ui/quest.jsx`:
+`PredictGate` + `CalledIt` + `GateLock`, `MathDoor`, and `useFogMask` — the
+generalized "headlamp in the fog" SVG mask. `ArrowPair` lands with the
+attention rebuild, per the build order above.)
+
+---
+
+## D. Visual language (addendum — binding on all rebuilds)
+
+Written during the gradient-descent pilot; every future sidequest rebuild
+inherits these rules alongside sections A–C.
+
+1. **Motion carries meaning.** Nothing animates for decoration. Every moving
+   pixel is *bound to a live computed value*: when the knob changes, the
+   ball/terrain/glow moves because the loss moved, not because a timeline
+   said so. If you can't name the quantity a motion expresses, delete the
+   motion.
+2. **Brightness and thickness replace numbers.** Magnitudes read visually —
+   glow radius, bar heat, stroke thickness, height — and decimals retreat to
+   optional labels and MathDoors. This is how the number diet (§A3) is
+   *implemented*, not just obeyed: the main surface shows light, the door
+   shows digits.
+3. **One camera, no cuts.** States morph (CSS transitions /
+   requestAnimationFrame on SVG) rather than scene-swap. The SAME persistent
+   visual survives and evolves across the whole quest — across slides too:
+   slides remount on navigation, so cross-slide continuity (e.g. the ball
+   staying where the learner left it) lives in a module-level variable, the
+   Ch1 `lastStory` pattern.
+4. **One focal element per frame.** Non-focal elements drop to low opacity.
+   Dark theme; the act accent is the single light source in the frame.
+5. **The fog is a first-class citizen.** Where a quest's truth is "the model
+   can't see X," draw that literally: hide X behind `useFogMask` and let a
+   headlamp circle around the focal element reveal only what the model
+   genuinely has access to. Give the learner a `LIFT THE FOG` ghost toggle —
+   the toggle itself teaches ("this view is a cheat; training never gets
+   it"). Gradient descent's night terrain is the reference implementation:
+   the ball only ever illuminates the slope underfoot, breadcrumbs mark the
+   walk, and a too-big learning rate reads as a visible ricochet.
+6. **Implementation constraints.** Hand-rolled SVG + CSS transitions / rAF.
+   No new dependencies. Primitives that generalize go in
+   `src/course/ui/quest.jsx` (NOT `shared.jsx`, which is chapter furniture);
+   quest-specific terrain stays in the quest file until a second quest
+   needs it.
