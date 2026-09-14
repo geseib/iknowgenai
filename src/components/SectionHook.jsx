@@ -108,7 +108,7 @@ function VectorTicker({ color, pres }) {
         marginTop: 14,
         lineHeight: 1.5,
       }}>
-        No pictures. No feelings. Just <strong style={{ color }}>12,288 numbers</strong> for every single word — about 25 pages of nothing but numbers.
+        No pictures. No feelings. Just <strong style={{ color }}>12,288 numbers</strong> for every single word (every token, really) — about 25 pages of nothing but numbers.
       </div>
     </div>
   );

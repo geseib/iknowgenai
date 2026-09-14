@@ -322,7 +322,7 @@ export default function SectionTokens({ color, mode, slide }) {
               <strong style={{ color }}>12,288 numbers</strong> that describe what it means.
             </PresText>
             <PresText size={18} color="rgba(255,255,255,.35)">
-              (A token is the piece. The 12,288 numbers are its meaning. That list is what "Words in Space" is about next.)
+              (A token is the piece. The 12,288 numbers are its meaning. That list is what comes next.)
             </PresText>
           </>
         )}
@@ -382,7 +382,7 @@ export default function SectionTokens({ color, mode, slide }) {
         For every single position in a sentence, AI chooses from all ~100,000 tokens.
       </PresText>
       <PresText size={24} color="rgba(255,255,255,.55)">
-        And every one of those tokens carries its own list of <strong style={{ color }}>12,288 numbers</strong>. Next: what those numbers mean.
+        And every one of those tokens gets its own list of <strong style={{ color }}>12,288 numbers</strong>. Next: those numbers.
       </PresText>
       <KidNote color={color}>The exact size depends on the model — older ones used about 50,000, the newest around 200,000.</KidNote>
     </PresSlide>
