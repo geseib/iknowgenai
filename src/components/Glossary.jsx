@@ -41,6 +41,7 @@ const GLOSSARY_GROUPS = [
       { term: "Temperature", def: "A dial that controls how creative or predictable the AI's word choices are." },
       { term: "Probability", def: "The chance (as a percentage) that a word comes next." },
       { term: "Multimodal", def: "An AI that can work with images and other things, not just text." },
+      { term: "Hallucination", def: "When an AI says something false as if it were true — a confident mistake. It predicts words that sound right; it doesn't look things up." },
       { term: "Bias", def: "Bad patterns an AI learns if its training data has bad examples." },
     ],
   },

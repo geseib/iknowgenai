@@ -37,6 +37,19 @@ import SectionReasoning from "../components/SectionReasoning";
 import SectionTryIt from "../components/SectionTryIt";
 import SectionBeyondKnowledge from "../components/SectionBeyondKnowledge";
 import SectionWrapUp from "../components/SectionWrapUp";
+import SectionConfidentlyWrong from "../components/SectionConfidentlyWrong";
+import SectionWhereLearned from "../components/SectionWhereLearned";
+import SectionClassQuiz from "../components/SectionClassQuiz";
+import { makePoll } from "../components/SectionPoll";
+import { slidesFor } from "./gradeConfig";
+import { quizFor } from "./quiz";
+
+// Lesson-builder gates: a quick poll after each act when Checks includes polls; the
+// class quiz (one slide per question + the own-words closer) when it includes the quiz.
+const pollsOn = (lesson) => lesson?.checks === "polls" || lesson?.checks === "both";
+const quizOn = (lesson) => lesson?.checks === "quiz" || lesson?.checks === "both";
+const pollSlides = (grade, lesson) => (pollsOn(lesson) ? 1 : 0);
+const quizSlides = (grade, lesson) => (quizOn(lesson) ? quizFor(grade).length + 1 : 0);
 
 // Act labels (shown as group headers in the nav drawer).
 export const ACTS = {
@@ -49,6 +62,7 @@ export const ACTS = {
 };
 
 // id            — stable key everything else references (NEVER reuse/rename casually)
+// slides(grade, lesson) — optional override of the per-grade slide count (polls, class quiz)
 // Component     — the section component
 // title         — display title (nav, teacher drawer)
 // color         — accent color threaded through the slide
@@ -59,16 +73,19 @@ export const SECTIONS = [
   { id: "story-mash",      Component: SectionStoryMash,      title: "Story Mash-Up!",            color: "#fee440", group: ACTS.AROUND },
   { id: "what-is-ai",      Component: SectionWhatIsAI,       title: "What IS AI?",               color: "#00bbf9", group: ACTS.AROUND },
   { id: "rules-vs-learning", Component: SectionProgramsVsAI, title: "Rules vs Learning",         color: "#f15bb5", group: ACTS.AROUND },
+  { id: "poll-1",          Component: makePoll("poll-1"),     title: "Quick check",               color: "#00f5d4", group: ACTS.AROUND, slides: pollSlides, poll: true },
 
   // ── Act 2: How AI Learns (the heart — moved up front) ──
   { id: "how-it-learns",   Component: SectionHowItLearns,    title: "How AI Learns",             color: "#9b5de5", group: ACTS.LEARNS },
   { id: "three-steps",     Component: SectionThreeSteps,     title: "Teaching AI to Be Helpful", color: "#fb5607", group: ACTS.LEARNS },
   { id: "brain-vs-ai",     Component: SectionBrainVsAI,      title: "Brain vs AI",               color: "#06d6a0", group: ACTS.LEARNS },
+  { id: "poll-2",          Component: makePoll("poll-2"),     title: "Quick check",               color: "#9b5de5", group: ACTS.LEARNS, slides: pollSlides, poll: true },
 
   // ── Act 3: What's an LLM? ──
   { id: "what-is-llm",     Component: SectionWhatIsLLM,      title: "What's an LLM?",            color: "#00bbf9", group: ACTS.LLM },
   { id: "meet-models",     Component: SectionMeetModels,     title: "Meet the Models",           color: "#f15bb5", group: ACTS.LLM },
   { id: "the-bridge",      Component: SectionTheBridge,      title: "The Big Question",          color: "#9b5de5", group: ACTS.LLM },
+  { id: "poll-3",          Component: makePoll("poll-3"),     title: "Quick check",               color: "#00bbf9", group: ACTS.LLM, slides: pollSlides, poll: true },
 
   // ── Act 4: Inside the Machine (the underlying technology) ──
   { id: "tokens",          Component: SectionTokens,         title: "Tokens — Not Quite Words",  color: "#fb5607", group: ACTS.INSIDE },  // 7-8 only: chop text into pieces first…
@@ -78,16 +95,28 @@ export const SECTIONS = [
   { id: "attention",       Component: SectionAttention,      title: "Attention!",                color: "#fb5607", group: ACTS.INSIDE },
   { id: "mlp",             Component: SectionMLP,            title: "The Thinking Layer",        color: "#06d6a0", group: ACTS.INSIDE },
   { id: "layers",          Component: SectionLayers,         title: "Rinse & Repeat",            color: "#fee440", group: ACTS.INSIDE },
+  { id: "poll-4",          Component: makePoll("poll-4"),     title: "Quick check",               color: "#fb5607", group: ACTS.INSIDE, slides: pollSlides, poll: true },
 
   // ── Act 5: How AI Writes ──
   { id: "predict",         Component: SectionPredict,        title: "Predict!",                  color: "#f15bb5", group: ACTS.WRITES },
   { id: "reasoning",       Component: SectionReasoning,      title: "Think First!",              color: "#9b5de5", group: ACTS.WRITES },
+  { id: "poll-5",          Component: makePoll("poll-5"),     title: "Quick check",               color: "#f15bb5", group: ACTS.WRITES, slides: pollSlides, poll: true },
 
   // ── Act 6: Your Turn ──
   { id: "try-it",          Component: SectionTryIt,          title: "Try It Yourself!",          color: "#00f5d4", group: ACTS.YOURS },
+  { id: "confidently-wrong", Component: SectionConfidentlyWrong, title: "When AI Is Confidently Wrong", color: "#fb5607", group: ACTS.YOURS },
+  { id: "where-learned",   Component: SectionWhereLearned,   title: "Where Did It Learn That?",  color: "#9b5de5", group: ACTS.YOURS },
   { id: "beyond-knowledge", Component: SectionBeyondKnowledge, title: "Beyond What AI Knows",    color: "#00bbf9", group: ACTS.YOURS },
   { id: "wrap-up",         Component: SectionWrapUp,         title: "You Know GenAI!",           color: "#00f5d4", group: ACTS.YOURS },
+  { id: "class-quiz",      Component: SectionClassQuiz,      title: "Class Quiz",                color: "#9b5de5", group: ACTS.YOURS, slides: quizSlides },
 ];
+
+/** Slide count for a section in a grade, honoring lesson-builder gates (polls, class quiz). */
+export function slideCountFor(grade, id, lesson) {
+  const s = SECTION_BY_ID[id];
+  if (s?.slides) return s.slides(grade, lesson);
+  return slidesFor(grade, id);
+}
 
 // Fast lookups by id.
 export const SECTION_BY_ID = Object.fromEntries(SECTIONS.map(s => [s.id, s]));

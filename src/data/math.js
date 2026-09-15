@@ -42,7 +42,7 @@ export const MATH_MOMENTS = {
     tier: "light", section: "how-it-learns",
     topic: { "K-2": "one out of three", "3-5": "chance", "7-8": "probability" },
     grades: {
-      "K-2": () => ({ big: "3 robots. 1 got it right. That's 1 out of 3.", note: "If they just guessed every time, how often would they be right? Not very!" }),
+      "K-2": () => ({ big: "3 robots guessed. 1 was right. That's 1 out of 3.", note: "If a robot just guesses with 3 choices, it's right about 1 time out of 3. A robot that's right MORE than that has learned something!" }),
       "3-5": () => ({ big: "A blind guess among 3 answers: 1 in 3 → 1⁄3 → about 33%", note: "So a robot that's right more often than 1 out of 3 must have learned something. That's what training does." }),
       "7-8": () => ({ big: "Luck alone: ⅓ × ⅓ × ⅓ = 1⁄27 ≈ 4% to get all three rounds", note: "Independent chances multiply. Getting all three by guessing is rare — so three right answers in a row is evidence of learning, not luck." }),
     },

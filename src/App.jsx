@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowCounterClockwise, ArrowRight, ArrowLeft, FastForward, List, CaretLeft, CheckCircle } from "@phosphor-icons/react";
 import { ALL_CSS } from "./styles/global";
-import { SECTIONS as ALL_SECTIONS, SECTION_BY_ID, buildGroups } from "./data/sections";
+import { SECTIONS as ALL_SECTIONS, SECTION_BY_ID, buildGroups, slideCountFor } from "./data/sections";
 import { NOTES_BY_ID } from "./data/teacherNotes";
 import { GRADE_CONFIG, slidesFor } from "./data/gradeConfig";
 import { GradeContext, GRADES } from "./data/GradeContext";
@@ -291,13 +291,13 @@ export default function App() {
   let PRESENTATION_SLIDES;
   if (isV3) {
     const sessionSections = v3SessionConfig?.sections || []; // ids
-    const sectionSlides = sessionSections.map(id => slidesFor(grade, id) || 1);
+    const sectionSlides = sessionSections.map(id => slideCountFor(grade, id, lesson) || 1);
     // Prepend review slides, append teaser
     const reviewSlides = v3HasReview ? Array(v3ReviewSlideCount).fill(1) : [];
     const teaserSlides = v3HasTeaser ? [1] : [];
     PRESENTATION_SLIDES = [...reviewSlides, ...sectionSlides, ...teaserSlides];
   } else {
-    PRESENTATION_SLIDES = ALL_SECTIONS.map(s => slidesFor(grade, s.id));
+    PRESENTATION_SLIDES = ALL_SECTIONS.map(s => slideCountFor(grade, s.id, lesson));
   }
 
   // In v3, map logical sec index to what kind of slot it is
@@ -409,7 +409,7 @@ export default function App() {
   if (!mode) return <ModeSelect onSelect={enterMode} grade={grade} onGradeChange={setGrade} allCss={ALL_CSS} flags={flags} session={session} onSessionChange={setSession} lesson={lesson} onLessonChange={setLesson} room={roomCtx} />;
   if (mode === "flags") return <FeatureFlags onBack={() => { setFlags(loadFlags()); setMode(null); }} allCss={ALL_CSS} />;
   if (mode === "glossary") return <><style>{ALL_CSS}</style><Glossary onBack={() => setMode(null)} /></>;
-  if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} flags={flags} /></>;
+  if (mode === "quiz") return <><style>{ALL_CSS}</style><KnowledgeCheck onBack={() => setMode(null)} flags={flags} grade={grade} /></>;
 
   // In v3 mode, review/teaser slides use the session color; content slides use section colors
   const v3SessionColor = isV3 ? SESSION_COLORS[session] : null;
@@ -636,7 +636,7 @@ export default function App() {
                         const isDone = isCurrentSession && done.has(secSlot);
                         const sColor = SECTION_BY_ID[secId]?.color || "#fff";
                         const title = SECTION_BY_ID[secId]?.title || secId;
-                        const totalSlidesInSec = slidesFor(grade, secId) || 1;
+                        const totalSlidesInSec = slideCountFor(grade, secId, lesson) || 1;
                         const slidesDone = isActive ? slide + 1 : (isDone ? totalSlidesInSec : 0);
                         const pct = (slidesDone / totalSlidesInSec) * 100;
                         const dimmed = !isCurrentSession;

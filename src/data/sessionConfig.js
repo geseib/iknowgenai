@@ -44,7 +44,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: ["embeddings", "attention", "predict", "reasoning", "try-it"],
+        sections: ["embeddings", "attention", "predict", "reasoning", "try-it", "confidently-wrong", "where-learned"],
         review: [
           {
             question: "How does AI see words?",
@@ -99,7 +99,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "AI in action",
-        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it"],
+        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it", "confidently-wrong", "where-learned"],
         review: [
           {
             question: "How does AI see the word 'cat'?",
@@ -160,7 +160,7 @@ export const SESSION_CONFIG = {
       {
         name: "Create",
         subtitle: "The full pipeline",
-        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it", "beyond-knowledge"],
+        sections: ["attention", "mlp", "layers", "predict", "reasoning", "try-it", "confidently-wrong", "where-learned", "beyond-knowledge"],
         review: [
           {
             question: "How does AI see the word 'cat'?",

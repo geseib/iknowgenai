@@ -3,7 +3,7 @@
 //
 //   interaction  projector | tablet | phones   — how the room answers (see src/data/room.js)
 //   math         off | light | full            — reserved for the math-moments phase
-//   checks       none | polls | quiz | both    — reserved for the checks phase
+//   checks       none | polls | quiz | both    — quick polls after each act / class quiz at the end
 
 import { createContext, useContext } from "react";
 
@@ -23,8 +23,9 @@ export const MATH_LEVELS = [
 
 export const CHECK_LEVELS = [
   { id: "none", label: "None" },
-  { id: "polls", label: "Quick polls", soon: true },
-  { id: "quiz", label: "End quiz", soon: true },
+  { id: "polls", label: "Quick polls", desc: "One predict-then-reveal question at the end of each act." },
+  { id: "quiz", label: "End quiz", desc: "The Knowledge Check as a class: one vote per question on the projector, then 'in your own words'." },
+  { id: "both", label: "Both", desc: "Quick polls between acts and the class quiz at the end." },
 ];
 
 const DEFAULTS = { interaction: "projector", math: "off", checks: "none" };
