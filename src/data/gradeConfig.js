@@ -43,6 +43,8 @@ export const GRADE_CONFIG = {
       "reasoning": 3,          // simplified
       // Act 6 — Your Turn
       "try-it": 1,             // preset prompts only
+      "confidently-wrong": 2,  // trap + why (no "what to do" grid)
+      "where-learned": 2,      // draw a doctor + copies what it saw
       "beyond-knowledge": 0,   // SKIP
       "wrap-up": 2,            // closing + wonder
     },
@@ -79,6 +81,8 @@ export const GRADE_CONFIG = {
       "reasoning": 5,
       // Act 6 — Your Turn
       "try-it": 2,
+      "confidently-wrong": 3,
+      "where-learned": 3,
       "beyond-knowledge": 0,   // SKIP
       "wrap-up": 2,
     },
@@ -115,6 +119,8 @@ export const GRADE_CONFIG = {
       "reasoning": 6,          // full + deeper dive
       // Act 6 — Your Turn
       "try-it": 2,
+      "confidently-wrong": 3,
+      "where-learned": 3,
       "beyond-knowledge": 7,   // bonus: RAG, tools, agents
       "wrap-up": 2,
     },

@@ -914,6 +914,69 @@ export const TEACHER_NOTES = [
       },
     ],
   },
+
+  // ── 21: SectionConfidentlyWrong (2–3 slides) ──
+  {
+    title: "When AI Is Confidently Wrong",
+    connections: [
+      { subject: "ELA", note: "Fact vs opinion, and checking sources — the same habit applies to an AI answer" },
+      { subject: "Math", note: "Estimation as a sanity check: 847 × 293 should be a bit under 850 × 300 = 255,000" },
+      { subject: "Social Studies", note: "Media literacy — confident-sounding isn't the same as reliable" },
+    ],
+    slides: [
+      {
+        keyPoints: ["Let the confident wrong answer sit before the vote", "Sounding sure ≠ being right"],
+        narrative: "Read the AI's answer aloud in a confident voice. Take the vote: trust it, check it, or not sure? Reveal. Grade 3-5: have a student check the multiplication on a calculator live. Grade 7-8: search the book title together — nothing comes up.",
+        definitions: [],
+        discussion: ["What made the answer sound trustworthy?", "How could you tell it was wrong without being told?"],
+        simplification: "The examples are staged, but the failure is real: language models produce fluent text that isn't checked against anything. Newer models hallucinate less often, and tools (calculators, search) reduce it further, but no model is at zero.",
+      },
+      {
+        keyPoints: ["It predicts words that sound right; it doesn't look things up", "Name it: hallucination"],
+        narrative: "Connect it to everything they learned: the whole machine predicts the next word. Usually 'sounds right' and 'is right' agree. When they don't, sounds right wins — and it will say it just as confidently.",
+        definitions: [{ term: "Hallucination", def: "When an AI states something false as if it were true — a confident mistake" }],
+        discussion: ["Why doesn't the AI just say 'I don't know'?"],
+        simplification: "'Doesn't look things up' is true of the base model. Some assistants now search the web or run code before answering, which helps — but the text they write is still prediction, and citations can be wrong too.",
+      },
+      {
+        keyPoints: ["Math → calculator", "Facts, names, dates → a trusted source", "Not sure → ask a person"],
+        narrative: "Make it a routine, not a warning. AI is a great helper for ideas, drafts and explanations; it is not the referee for facts. For 7-8: 'ask it for the source, then open the source yourself.'",
+        definitions: [],
+        discussion: ["What's something you'd happily let AI help with? What's something you'd always double-check?"],
+      },
+    ],
+  },
+
+  // ── 22: SectionWhereLearned (2–3 slides) ──
+  {
+    title: "Where Did It Learn That?",
+    connections: [
+      { subject: "Social Studies", note: "Representation — who is in the picture and who isn't" },
+      { subject: "Math", note: "Sampling — a lopsided set of examples gives a lopsided result" },
+      { subject: "ELA", note: "Point of view — every source has one, including a pile of internet pictures" },
+    ],
+    slides: [
+      {
+        keyPoints: ["Predict first, then reveal", "AI copies what its examples showed most"],
+        narrative: "Take the vote before saying anything. The finding is real: asked for 'a doctor', image models drew men far more often than real doctors are men, and skewed on skin color too. Nobody programmed that — the training pictures leaned that way.",
+        definitions: [],
+        discussion: ["Where do you think all those example pictures came from?"],
+        simplification: "Studies of text-to-image models (2023 onward) found strong skews by gender and skin tone for many professions. Companies have since adjusted training data and added fairness checks, so results vary by model and date — the mechanism is the durable lesson, not any one statistic.",
+      },
+      {
+        keyPoints: ["The internet isn't everyone", "Bias = answers lean the way the examples leaned"],
+        narrative: "Keep it non-accusatory: the machine isn't mean, it's a mirror with a lopsided reflection. Ask: 'Who shows up a lot online? Who doesn't?' Languages, countries, ages, jobs.",
+        definitions: [{ term: "Bias", def: "When an AI's answers lean one way because the examples it learned from leaned that way" }],
+        discussion: ["Would a kid in another country get a different answer? Why?"],
+      },
+      {
+        keyPoints: ["Who's missing?", "Would someone else get a different answer?", "Where did the examples come from?"],
+        narrative: "Three pocket questions the class can ask of any AI answer — or any picture, story, or news feed. End on agency: people are fixing this, and noticing is step one.",
+        definitions: [],
+        discussion: ["Pick one AI answer you've seen. Ask the three questions about it."],
+      },
+    ],
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -945,6 +1008,8 @@ const NOTE_IDS = [
   "try-it",           // 18
   "beyond-knowledge", // 19
   "reasoning",        // 20
+  "confidently-wrong", // 21
+  "where-learned",    // 22
 ];
 
 export const NOTES_BY_ID = Object.fromEntries(

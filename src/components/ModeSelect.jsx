@@ -14,6 +14,8 @@ import { SESSION_CONFIG, SESSION_COLORS } from "../data/sessionConfig";
 import RoamingCat from "./catai/cat_runner_react_component";
 import LessonMenu from "./LessonMenu";
 import { mathMomentsFor } from "../data/math";
+import { SECTIONS as ALL_SECTIONS, slideCountFor } from "../data/sections";
+import { quizFor } from "../data/quiz";
 
 const modes = [
   {
@@ -38,7 +40,9 @@ const SESSION_ICONS = [MagnifyingGlass, Compass, PaintBrush];
 
 export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, flags, session, onSessionChange, lesson, onLessonChange, room }) {
   const gc = GRADE_CONFIG[grade];
-  const slideCounts = Object.values(gc.slides);
+  const slideCounts = ALL_SECTIONS.map(s => slideCountFor(grade, s.id, lesson));
+  const pollCount = ALL_SECTIONS.filter(s => s.poll && slideCountFor(grade, s.id, lesson) > 0).length;
+  const quizCount = lesson && (lesson.checks === "quiz" || lesson.checks === "both") ? quizFor(grade).length : 0;
   const totalSlides = slideCounts.reduce((a, b) => a + b, 0);
   const activeSections = slideCounts.filter(n => n > 0).length;
   const mathCount = lesson ? mathMomentsFor(grade, lesson.math, id => gc.slides[id] ?? 1).length : 0;
@@ -238,7 +242,7 @@ export default function ModeSelect({ onSelect, grade, onGradeChange, allCss, fla
         </div>
 
         <p style={{ color: "rgba(255,255,255,.2)", fontSize: 12, marginTop: 18 }}>
-          {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}{mathCount > 0 && <> &middot; {mathCount} math moments</>}
+          {activeSections} sections &middot; {totalSlides} slides &middot; {gc.duration} &middot; {gc.label}{mathCount > 0 && <> &middot; {mathCount} math moments</>}{pollCount > 0 && <> &middot; {pollCount} quick polls</>}{quizCount > 0 && <> &middot; {quizCount}-question class quiz</>}
         </p>
 
         {/* The 14+ course — styled deliberately unlike the kids' app */}
