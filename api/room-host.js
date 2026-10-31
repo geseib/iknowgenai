@@ -92,12 +92,15 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, frozen: Boolean(body.frozen) });
       }
       case "pair": {
-        let pending = null;
-        try { pending = JSON.parse(room.pairing || "null"); } catch { pending = null; }
+        let pending = {};
+        try { pending = JSON.parse(room.pairing || "{}") || {}; } catch { pending = {}; }
+        if (pending.code) pending = { [pending.code]: pending }; // legacy single-request shape
         const typed = String(body.pairing || "").trim();
-        if (!pending || !typed || pending.code !== typed) return res.status(400).json({ error: "wrong_code" });
-        if (Date.now() - (pending.at || 0) > 10 * 60 * 1000) return res.status(400).json({ error: "expired_code" });
-        await redis("HSET", key, "tablet", pending.deviceId, "pairing", "");
+        const match = typed ? pending[typed] : null;
+        if (!match) return res.status(400).json({ error: "wrong_code" });
+        if (Date.now() - (match.at || 0) > 10 * 60 * 1000) return res.status(400).json({ error: "expired_code" });
+        // Only the device whose number the TEACHER typed becomes the tablet; all other requests are dropped.
+        await redis("HSET", key, "tablet", match.deviceId, "pairing", "");
         return res.status(200).json({ ok: true });
       }
       case "unpair": {
@@ -118,7 +121,7 @@ export default async function handler(req, res) {
           mode: room.mode,
           frozen: room.frozen === "1",
           tabletPaired: Boolean(room.tablet),
-          pendingPairing: Boolean(room.pairing),
+          pendingPairing: Boolean(room.pairing && room.pairing !== "{}"),
           storymash: room.storymash === "1",
           joined: Number(joinedRaw) || 0,
           questions: tally,

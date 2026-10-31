@@ -35,8 +35,20 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, mode: room.mode });
       }
       case "requestTablet": {
-        const pairing = String(Math.floor(10 + Math.random() * 90)); // two digits, never starts with 0
-        await redis("HSET", key, "pairing", JSON.stringify({ deviceId, code: pairing, at: Date.now() }));
+        // Pending requests are a map code → { deviceId, at }, so a second device asking
+        // (a curious kid) can't overwrite the real tablet's number. Codes are unique per room.
+        let pending = {};
+        try { pending = JSON.parse(room.pairing || "{}") || {}; } catch { pending = {}; }
+        if (pending.code) pending = {}; // legacy single-request shape
+        const now = Date.now();
+        for (const [c, p] of Object.entries(pending)) if (now - (p.at || 0) > 10 * 60 * 1000) delete pending[c];
+        // One pending code per device: re-tapping reuses it
+        let pairing = Object.keys(pending).find(c => pending[c].deviceId === deviceId);
+        if (!pairing) {
+          do { pairing = String(Math.floor(10 + Math.random() * 90)); } while (pending[pairing]); // two digits, never starts with 0
+          pending[pairing] = { deviceId, at: now };
+        }
+        await redis("HSET", key, "pairing", JSON.stringify(pending));
         return res.status(200).json({ ok: true, pairing });
       }
       case "vote": {
