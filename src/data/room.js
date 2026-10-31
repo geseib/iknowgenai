@@ -14,17 +14,22 @@ export const STATUS_POLL_MS = 2000;
 
 /* ── persistence ─────────────────────────────────────────────────────── */
 
+// Per-TAB identity (sessionStorage), not per browser: two tabs on one laptop are two
+// devices, so a projector tab can never share the class tablet's identity, and a
+// paired tablet can't lend its identity to another tab. Survives a reload of its own tab.
+let memoryId = null;
 export function getDeviceId() {
   try {
-    let id = localStorage.getItem(DEVICE_KEY);
+    let id = sessionStorage.getItem(DEVICE_KEY);
     if (!id) {
       id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).replace(/[^A-Za-z0-9_-]/g, "").slice(0, 40);
       if (id.length < 8) id = id.padEnd(8, "x");
-      localStorage.setItem(DEVICE_KEY, id);
+      sessionStorage.setItem(DEVICE_KEY, id);
     }
     return id;
   } catch {
-    return "anon-" + Math.random().toString(36).slice(2, 12);
+    if (!memoryId) memoryId = "anon-" + Math.random().toString(36).slice(2, 14);
+    return memoryId;
   }
 }
 
