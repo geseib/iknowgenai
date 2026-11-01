@@ -35,6 +35,7 @@ export default function PresenterBar({ lesson, onLessonChange }) {
   const submitPair = async () => {
     setPairMsg(null);
     const res = await pair(pairCode.trim());
+    clearError(); // pairMsg below says it in plain words; don't also show the raw "wrong_code"
     if (res?.ok) { setPairMsg({ ok: true, text: "Tablet paired." }); setPairCode(""); }
     else setPairMsg({ ok: false, text: "That code didn't match. Check the tablet's screen and try again." });
   };
