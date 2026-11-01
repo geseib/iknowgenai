@@ -53,12 +53,13 @@ export default function JoinRoom({ code }) {
           if (statusRes.ok) setStatus(await statusRes.json());
           return;
         }
-        throw new Error(data.error);
+        throw new Error(data.error === "tablet_only" ? "This round runs on the class tablet. Look up!" : data.error);
       }
       setRole(roleKey);
       setPhase("input");
     } catch (err) {
       setError(err.message);
+      setPhase("error"); // otherwise a rejected tap (e.g. tablet-only) fails silently
     }
   };
 

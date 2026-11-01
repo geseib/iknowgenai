@@ -64,10 +64,12 @@ export default function StudentView({ code }) {
     } catch { /* ignore */ }
   };
 
-  // Story Mash-Up takes over the whole page while it's running
-  if (status?.storymash) return <JoinRoom code={code} />;
-
   const isTablet = Boolean(status?.isTablet);
+
+  // Story Mash-Up takes over the whole page while it's running — but in pass-around
+  // mode only on the paired tablet. Every other phone keeps seeing "Look up!".
+  if (status?.storymash && (status.mode !== "tablet" || isTablet)) return <JoinRoom code={code} />;
+
   const big = isTablet;
 
   let body;
@@ -140,7 +142,7 @@ export default function StudentView({ code }) {
           )}
         </div>
         {body}
-        {status && !isTablet && !pairing && status.mode === "tablet" && (
+        {status && !isTablet && !pairing && status.mode === "tablet" && !status.tabletPaired && (
           <button onClick={requestTablet} style={{ marginTop: 28, background: "none", border: "1px dashed rgba(255,255,255,.2)", borderRadius: 12, color: "rgba(255,255,255,.45)", padding: "10px 16px", fontFamily: FONT, fontSize: 14, cursor: "pointer", width: "100%" }}>
             Teacher: make this device the class tablet
           </button>
