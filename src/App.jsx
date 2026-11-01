@@ -386,6 +386,12 @@ export default function App() {
       }
       // T toggles teacher drawer
       if (e.key === "t" || e.key === "T") { setTeacherOpen(o => !o); return; }
+      // F toggles fullscreen (the projector usually wants it)
+      if (e.key === "f" || e.key === "F") {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+        else document.documentElement.requestFullscreen?.().catch(() => {});
+        return;
+      }
       // Suppress navigation while nav drawer is open (but NOT teacher drawer)
       if (navOpen) return;
       // Right, Down, Space advance; Left goes back

@@ -411,7 +411,12 @@ export default function TeacherDrawer({ open, onToggle, notes, sectionTitle, sli
               borderRadius: 4,
               background: "rgba(255,255,255,.08)",
               fontSize: 10,
-            }}>T</kbd> to toggle
+            }}>T</kbd> to toggle · <kbd style={{
+              padding: "2px 6px",
+              borderRadius: 4,
+              background: "rgba(255,255,255,.08)",
+              fontSize: 10,
+            }}>F</kbd> fullscreen
           </div>
         </div>
       </div>
