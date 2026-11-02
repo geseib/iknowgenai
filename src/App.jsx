@@ -89,8 +89,8 @@ const CAT_SECTIONS = {
       "Bat? I prefer to attend to the tuna nearby.",
     ],
   },
-  "what-is-llm": {  // the "companies build LLMs" slide
-    slide: 3,
+  "what-is-llm": {  // the Model slide (companies build LLMs)
+    slide: 2,
     quotes: [
       "Where's MY model card?",
       "ChatGPT, Claude, Gemini, Llama... and ME!",

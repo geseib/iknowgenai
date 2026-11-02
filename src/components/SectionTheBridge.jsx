@@ -14,6 +14,8 @@ import {
   Lightning,
 } from "@phosphor-icons/react";
 import { Label, H1, TeacherNote, KidNote, PresSlide, PresText } from "./shared";
+import { PredictGate } from "./classroom";
+import { useTally } from "./useTally";
 
 const STEP_ICONS = [HashStraight, MapTrifold, Flashlight, Brain, MagicWand];
 
@@ -39,6 +41,12 @@ const TRAINING_ROWS = [
   { icon: TextAa, label: "Learned spelling & grammar", sub: "every rule of language" },
   { icon: Brain, label: "Learned facts & knowledge", sub: "history, science, everything" },
   { icon: Lightbulb, label: "Learned how to reason", sub: "cause and effect, logic" },
+];
+
+const TRAINING_TIME_OPTIONS = [
+  { id: "hour", label: "About an hour" },
+  { id: "weekend", label: "One weekend" },
+  { id: "months", label: "Months, on thousands of computers" },
 ];
 
 const EXAMPLE_WORDS = ["The", "cat", "sat", "on", "the"];
@@ -723,6 +731,7 @@ function ContinueButton({ onClick, color, label }) {
 export default function SectionTheBridge({ color, mode, slide }) {
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
+  const timeVote = useTally(TRAINING_TIME_OPTIONS.length);
 
   const advance = () => {
     if (step < 1) setStep(s => s + 1);
@@ -758,57 +767,59 @@ export default function SectionTheBridge({ color, mode, slide }) {
 
   /* ── Presentation mode — 3 slides ── */
   if (mode === "presentation") {
-    // Slide 0: Training overview
+    // Slide 0: Training overview — the room guesses how long it took, then sees what happened
     if (slide === 0) {
       return (
         <PresSlide>
-          <PresText color="white" size={42}>
+          <PresText color="white" size={36}>
             Before AI can help you, it has to <span style={{ color }}>learn</span>
           </PresText>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 16, width: "100%", maxWidth: 600 }}>
-            {TRAINING_ROWS.map((row, i) => {
-              const Icon = row.icon;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 16,
-                    padding: "14px 20px",
-                    borderRadius: 14,
-                    background: "rgba(255,255,255,.05)",
-                    border: "1px solid rgba(255,255,255,.1)",
-                    animation: `fadeUp .45s ${i * 0.12}s ease both`,
-                  }}
-                >
-                  <Icon size={32} weight="duotone" color={color} style={{ flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontFamily: "'Fredoka',sans-serif",
-                      fontSize: 20,
-                      color: "white",
-                      lineHeight: 1.3,
-                    }}>
-                      {row.label}
-                    </div>
-                    <div style={{
-                      fontFamily: "'Fredoka',sans-serif",
-                      fontSize: 15,
-                      color: `${color}bb`,
-                      lineHeight: 1.3,
-                    }}>
-                      {row.sub}
+          <PredictGate
+            prompt="How long did all that learning take?"
+            options={TRAINING_TIME_OPTIONS}
+            correct="months"
+            tally={timeVote}
+            color={color}
+            roomId="bridge-training-time"
+            revealLabel="Show what happened"
+            dense
+          >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, width: "100%", maxWidth: 820 }}>
+              {TRAINING_ROWS.map((row, i) => {
+                const Icon = row.icon;
+                const last = i === TRAINING_ROWS.length - 1;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      padding: "8px 14px",
+                      gridColumn: last ? "1 / -1" : "auto",
+                      maxWidth: last ? 400 : "none",
+                      justifySelf: last ? "center" : "stretch",
+                      width: last ? "100%" : "auto",
+                      borderRadius: 14,
+                      background: "rgba(255,255,255,.05)",
+                      border: "1px solid rgba(255,255,255,.1)",
+                      animation: `fadeUp .45s ${i * 0.12}s ease both`,
+                    }}
+                  >
+                    <Icon size={26} weight="duotone" color={color} style={{ flexShrink: 0 }} />
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 18, color: "white", lineHeight: 1.25 }}>{row.label}</div>
+                      <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 13, color: `${color}bb`, lineHeight: 1.3 }}>{row.sub}</div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-          <PresText size={20} color="rgba(255,255,255,.45)">
-            This took <span style={{ color: "white", fontWeight: 700 }}>months</span> and{" "}
-            <span style={{ color: "white", fontWeight: 700 }}>thousands</span> of computers.
-          </PresText>
+                );
+              })}
+            </div>
+            <PresText size={18} color="rgba(255,255,255,.45)">
+              All of that took <span style={{ color: "white", fontWeight: 700 }}>months</span> and{" "}
+              <span style={{ color: "white", fontWeight: 700 }}>thousands</span> of computers.
+            </PresText>
+          </PredictGate>
         </PresSlide>
       );
     }
