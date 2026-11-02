@@ -27,7 +27,7 @@ export const GRADE_CONFIG = {
       "three-steps": 0,        // SKIP (RLHF — too advanced for now)
       "brain-vs-ai": 4,        // emotions only
       // Act 3 — What's an LLM?
-      "what-is-llm": 3,        // simplified
+      "what-is-llm": 3,        // Large / Language / Model — one predict-then-reveal each
       "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 2,         // simplified pipeline
       // Act 4 — Inside the Machine
@@ -65,7 +65,7 @@ export const GRADE_CONFIG = {
       "three-steps": 0,        // SKIP for now (simplified RLHF is a follow-on)
       "brain-vs-ai": 8,
       // Act 3 — What's an LLM?
-      "what-is-llm": 5,
+      "what-is-llm": 3,        // Large / Language / Model — one predict-then-reveal each
       "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 3,
       // Act 4 — Inside the Machine
@@ -103,7 +103,7 @@ export const GRADE_CONFIG = {
       "three-steps": 9,        // full RLHF
       "brain-vs-ai": 8,
       // Act 3 — What's an LLM?
-      "what-is-llm": 5,
+      "what-is-llm": 3,        // Large / Language / Model — one predict-then-reveal each
       "meet-models": 0,       // CUT — model brands folded into What's an LLM
       "the-bridge": 3,
       // Act 4 — Inside the Machine

@@ -306,6 +306,7 @@ export function PredictGate({ prompt, options, tally: manual, color, correct, co
     else if (correctIds.length && !tally.total) outcome = "No votes were entered — next time, predict first!";
     else if (correctIds.length && calledIt) outcome = "You called it. Here's why →";
     else if (correctIds.length && verdict?.kind === "split") outcome = "Half of you called it — here's what settles it →";
+    else if (correctIds.length && leaderId != null && correctIds.includes(leaderId)) outcome = "The top pick was right — but not everyone. Here's why →";
     else if (correctIds.length) outcome = `Surprise! Most of the class said ${leaderId != null ? options[tally.leader].label : "something else"}. Here's why it's different →`;
   }
 

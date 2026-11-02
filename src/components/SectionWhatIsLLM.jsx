@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, createElement } from "react";
 import {
   ArrowDown,
   Books,
@@ -9,7 +9,7 @@ import {
   SpeakerHigh,
   VideoCamera,
 } from "@phosphor-icons/react";
-import { Card, Label, H1, TeacherNote, PresSlide, PresText } from "./shared";
+import { Card, Label, H1, TeacherNote, PresSlide } from "./shared";
 import MathMoment from "./MathMoment";
 import { PredictGate } from "./classroom";
 import { useTally } from "./useTally";
@@ -56,24 +56,77 @@ function ContinueButton({ onClick, color, label }) {
   );
 }
 
+const FREDOKA = "'Fredoka',sans-serif";
+
+/* The three L-L-M boxes, lit left-to-right as the slides unpack each word. */
+function LetterRow({ lit, color, caption }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+    <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+      {parts.map((p, i) => {
+        const on = i < lit;
+        const now = i === lit - 1;
+        return (
+          <div key={i} style={{
+            textAlign: "center", padding: "10px 18px", borderRadius: 14, minWidth: 96,
+            background: on ? `${color}18` : "rgba(255,255,255,.04)",
+            border: `2.5px solid ${on ? color : "rgba(255,255,255,.12)"}`,
+            boxShadow: now ? `0 0 24px ${color}55` : "none",
+            transition: "all .35s ease",
+          }}>
+            <div style={{ fontFamily: FREDOKA, fontSize: 34, fontWeight: 700, color: on ? color : "rgba(255,255,255,.3)", lineHeight: 1 }}>{p.letter}</div>
+            <div style={{ fontFamily: FREDOKA, fontSize: 15, color: on ? "white" : "rgba(255,255,255,.3)", marginTop: 4 }}>{p.word}</div>
+          </div>
+        );
+      })}
+    </div>
+    {caption && <div style={{ fontSize: 22, color: "rgba(255,255,255,.55)", lineHeight: 1.3 }}>{caption}</div>}
+    </div>
+  );
+}
+
+/* Reveal body under a gate: icon + text, sized to stay on the projector with the tally above it. */
+function RevealLine({ Icon, color, children, size = 22 }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", maxWidth: 720, margin: "0 auto" }}>
+      {createElement(Icon, { size: 34, weight: "duotone", color, style: { flexShrink: 0 } })}
+      <div style={{ fontSize: size, color: "rgba(255,255,255,.78)", textAlign: "left", lineHeight: 1.4 }}>{children}</div>
+    </div>
+  );
+}
+
 const LARGE_OPTIONS = [
   { id: "books", label: "A few hundred books" },
   { id: "library", label: "A whole city library" },
   { id: "lifetimes", label: "More than you could read in 10,000 lifetimes" },
 ];
+const LANGUAGE_OPTIONS = [
+  { id: "words", label: "Words in → words out" },
+  { id: "pictures", label: "Pictures in → pictures out" },
+  { id: "sounds", label: "Sounds in → sounds out" },
+];
+const MODEL_OPTIONS = [
+  { id: "answers", label: "A giant list of saved answers" },
+  { id: "person", label: "A tiny person typing really fast" },
+  { id: "numbers", label: "Billions of numbers, tuned to capture patterns" },
+];
+const OTHER_MEDIA = [
+  { Icon: Image, label: "Pictures" },
+  { Icon: SpeakerHigh, label: "Audio" },
+  { Icon: VideoCamera, label: "Video" },
+];
 
 export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
   const grade = useGrade();
   const largeVote = useTally(LARGE_OPTIONS.length);
-  // Band-aware presentation-slide remap. Authored slides: 0 intro (shows all
-  // three L-L-M boxes), 1 L=Large, 2 L=Language, 3 M=Model + the "massive
-  // mathematical system" synthesis takeaway, 4 bonus (not just text).
-  // K-2 only shows 3 slides — without a remap it would render 0-2 and end on
-  // "Language" (slide 2), never reaching the Model synthesis. Route its 3 slides
-  // to intro + Large + the Model takeaway (the intro already names all three
-  // words). 3-5 / 7-8 (5 slides) are unchanged.
-  const K2_PRES_SLIDES = [0, 1, 3];
-  const slide = grade === "K-2" ? (K2_PRES_SLIDES[slideProp] ?? slideProp) : slideProp;
+  const languageVote = useTally(LANGUAGE_OPTIONS.length);
+  const modelVote = useTally(MODEL_OPTIONS.length);
+  // Presentation: one slide per word (Large / Language / Model), each a
+  // predict-then-reveal so the room commits before the answer. All bands run
+  // the same three slides; "not just text" and the company names ride along in
+  // the Language and Model reveals.
+  const slide = slideProp;
+  const young = grade === "K-2";
   const [step, setStep] = useState(0);
   const step1Ref = useRef(null);
   const step2Ref = useRef(null);
@@ -112,60 +165,14 @@ export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
 
   /* ── Presentation mode ── */
   if (mode === "presentation") {
-    /* Slide 0: All three letter boxes — muted / unlit */
+    /* Slide 0: L = Large — how much did it read? */
     if (slide === 0) {
-      return (
-        <PresSlide>
-          <div style={{ display: "flex", gap: 18, justifyContent: "center", marginBottom: 32, flexWrap: "wrap" }}>
-            {parts.map((p, i) => (
-              <div key={i} style={{
-                textAlign: "center",
-                padding: "20px 28px",
-                borderRadius: 18,
-                minWidth: 110,
-                background: "rgba(255,255,255,.04)",
-                border: "2.5px solid rgba(255,255,255,.12)",
-              }}>
-                <div style={{
-                  fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 56,
-                  fontWeight: 700,
-                  color: "rgba(255,255,255,.3)",
-                  lineHeight: 1,
-                }}>
-                  {p.letter}
-                </div>
-                <div style={{
-                  fontFamily: "'Fredoka',sans-serif",
-                  fontSize: 20,
-                  color: "rgba(255,255,255,.3)",
-                  marginTop: 6,
-                }}>
-                  {p.word}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ fontSize: 32, color: "white", textAlign: "center", lineHeight: 1.5, marginBottom: 12 }}>
-            LLM stands for <strong style={{ color }}>Large Language Model</strong>
-          </div>
-          <div style={{ fontSize: 24, color: "rgba(255,255,255,.45)", textAlign: "center" }}>
-            Three words — let's unpack them.
-          </div>
-        </PresSlide>
-      );
-    }
-    /* Slide 1: L = Large */
-    if (slide === 1) {
       const p = parts[0];
       return (
         <PresSlide>
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 64, fontWeight: 700, color, lineHeight: 1 }}>{p.letter}</div>
-            <div style={{ fontSize: 32, color: "white", fontFamily: "'Fredoka',sans-serif" }}>= {p.word}</div>
-            <Books size={32} weight="duotone" color={color} />
-          </div>
+          <LetterRow lit={1} color={color} caption={<>LLM stands for <strong style={{ color: "white" }}>Large Language Model</strong> — three words. First up: <strong style={{ color }}>Large</strong>.</>} />
           <PredictGate
+            key="llm-large"
             prompt="To learn language, how much text did it read?"
             options={LARGE_OPTIONS}
             correct="lifetimes"
@@ -175,123 +182,99 @@ export default function SectionWhatIsLLM({ color, mode, slide: slideProp }) {
             revealLabel="Show us"
             dense
           >
-            <div style={{ fontSize: 26, color: "rgba(255,255,255,.7)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
-              {p.reveal}
-            </div>
-            <MathMoment id="wikipedias" compact />
+            {(revealed) => revealed && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%", animation: "fadeUp .45s ease" }}>
+                <RevealLine Icon={Books} color={color}>{p.reveal}</RevealLine>
+                <MathMoment id="wikipedias" compact />
+              </div>
+            )}
           </PredictGate>
         </PresSlide>
       );
     }
-    /* Slide 2: L = Language */
-    if (slide === 2) {
+    /* Slide 1: L = Language — what goes in and out? (+ the other kinds of AI) */
+    if (slide === 1) {
       const p = parts[1];
       return (
         <PresSlide>
-          <div style={{
-            fontFamily: "'Fredoka',sans-serif",
-            fontSize: 64,
-            fontWeight: 700,
-            color,
-            textAlign: "center",
-            lineHeight: 1,
-            marginBottom: 16,
-          }}>
-            {p.letter}
-          </div>
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <ChatTeardropDots size={28} weight="duotone" color={color} />
-          </div>
-          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
-            {p.word}
-          </div>
-          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto" }}>
-            {p.reveal}
-          </div>
-        </PresSlide>
-      );
-    }
-    /* Slide 3: M = Model + Lightbulb insight */
-    if (slide === 3) {
-      const p = parts[2];
-      return (
-        <PresSlide>
-          <div style={{
-            fontFamily: "'Fredoka',sans-serif",
-            fontSize: 64,
-            fontWeight: 700,
-            color,
-            textAlign: "center",
-            lineHeight: 1,
-            marginBottom: 16,
-          }}>
-            {p.letter}
-          </div>
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <HashStraight size={28} weight="duotone" color={color} />
-          </div>
-          <div style={{ fontSize: 28, color: "white", textAlign: "center", marginBottom: 12 }}>
-            {p.word}
-          </div>
-          <div style={{ fontSize: 26, color: "rgba(255,255,255,.55)", textAlign: "center", lineHeight: 1.5, maxWidth: 700, margin: "0 auto", marginBottom: 28 }}>
-            {p.reveal}
-          </div>
-          <div style={{
-            display: "flex", gap: 12, alignItems: "flex-start", justifyContent: "center",
-            padding: "20px 24px", background: `${color}12`, border: `1px solid ${color}35`,
-            borderRadius: 12, maxWidth: 700, margin: "0 auto",
-          }}>
-            <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI" style={{ width: 56, height: "auto", flexShrink: 0 }} />
-            <span style={{ fontSize: 28, color, lineHeight: 1.5 }}>
-              <strong>A massive mathematical system that learned language by reading an enormous amount of text</strong>
-            </span>
-          </div>
-          <div style={{ fontSize: 22, color: "rgba(255,255,255,.5)", textAlign: "center", lineHeight: 1.5, maxWidth: 720, margin: "22px auto 0" }}>
-            Lots of companies build their own: <strong style={{ color: "#00f5d4" }}>OpenAI</strong> makes ChatGPT,{" "}
-            <strong style={{ color: "#fb5607" }}>Anthropic</strong> makes Claude,{" "}
-            <strong style={{ color: "#f15bb5" }}>Google</strong> makes Gemini,{" "}
-            <strong style={{ color: "#00bbf9" }}>Meta</strong> makes Llama — all LLMs.
-          </div>
-        </PresSlide>
-      );
-    }
-    /* Slide 4: Not just text — pictures & audio too */
-    if (slide === 4) {
-      return (
-        <PresSlide>
-          <PresText size={40} color="white">
-            But it's not <em>just</em> words...
-          </PresText>
-          <div style={{
-            display: "flex", gap: 28, justifyContent: "center", marginTop: 8, marginBottom: 8,
-          }}>
-            {[
-              { Icon: Image, label: "Pictures" },
-              { Icon: SpeakerHigh, label: "Audio" },
-              { Icon: VideoCamera, label: "Video" },
-            ].map(({ Icon, label }) => (
-              <div key={label} style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-                padding: "20px 28px", borderRadius: 18,
-                background: `${color}10`, border: `2px solid ${color}30`,
-              }}>
-                <Icon size={48} weight="duotone" color={color} />
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: 24, color: "white" }}>{label}</div>
+          <LetterRow lit={2} color={color} />
+          <PredictGate
+            key="llm-language"
+            prompt="An LLM's job: what goes in, and what comes out?"
+            options={LANGUAGE_OPTIONS}
+            correct="words"
+            tally={languageVote}
+            color={color}
+            roomId="llm-language"
+            revealLabel="Show us"
+            dense
+          >
+            {(revealed) => revealed && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%", animation: "fadeUp .45s ease" }}>
+                <RevealLine Icon={ChatTeardropDots} color={color}>{p.reveal}</RevealLine>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center", maxWidth: 760 }}>
+                  {OTHER_MEDIA.map(({ Icon, label }) => (
+                    <div key={label} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 999, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.14)" }}>
+                      {createElement(Icon, { size: 20, weight: "duotone", color: "rgba(255,255,255,.6)" })}
+                      <span style={{ fontFamily: FREDOKA, fontSize: 16, color: "rgba(255,255,255,.7)" }}>{label}</span>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 18, color: "rgba(255,255,255,.5)", lineHeight: 1.35 }}>
+                    {young
+                      ? "Picture AIs and voice AIs exist too. Today is all about the words one!"
+                      : <>— picture, voice and video AIs exist too. Today we're on the <strong style={{ color: "white" }}>language</strong> part.</>}
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          <PresText size={26} color="rgba(255,255,255,.55)">
-            AI can also generate images, understand speech, and even create video — using a very similar approach.
-          </PresText>
-          <PresText size={28} color={color}>
-            But that's a lesson for another day!
-          </PresText>
-          <PresText size={24} color="rgba(255,255,255,.35)">
-            Today we're focusing on the <strong style={{ color: "white" }}>language</strong> part.
-          </PresText>
+            )}
+          </PredictGate>
         </PresSlide>
       );
     }
+    /* Slide 2: M = Model — what's inside? + the synthesis takeaway */
+    if (slide === 2) {
+      return (
+        <PresSlide>
+          <LetterRow lit={3} color={color} />
+          <PredictGate
+            key="llm-model"
+            prompt="Open it up — what's actually inside the model?"
+            options={MODEL_OPTIONS}
+            correct="numbers"
+            tally={modelVote}
+            color={color}
+            roomId="llm-model"
+            revealLabel="Open it up"
+            dense
+          >
+            {(revealed) => revealed && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%", animation: "fadeUp .45s ease" }}>
+                <RevealLine Icon={HashStraight} color={color}>
+                  Billions of numbers, arranged so the patterns of language get captured — like a very complex recipe. No saved answers inside: it builds every reply from those patterns.
+                </RevealLine>
+                <div style={{
+                  display: "flex", gap: 12, alignItems: "center", justifyContent: "center",
+                  padding: "12px 20px", background: `${color}12`, border: `1px solid ${color}35`,
+                  borderRadius: 12, maxWidth: 720,
+                }}>
+                  <img src={`${import.meta.env.BASE_URL}robotcomputerbrain.png`} alt="AI" style={{ width: 48, height: "auto", flexShrink: 0 }} />
+                  <span style={{ fontSize: 24, color, lineHeight: 1.35, textAlign: "left" }}>
+                    <strong>A massive mathematical system that learned language by reading an enormous amount of text.</strong>
+                  </span>
+                </div>
+                <div style={{ fontSize: 18, color: "rgba(255,255,255,.5)", lineHeight: 1.4, maxWidth: 760 }}>
+                  Lots of companies build their own: <strong style={{ color: "#00f5d4" }}>OpenAI</strong> (ChatGPT) ·{" "}
+                  <strong style={{ color: "#fb5607" }}>Anthropic</strong> (Claude) ·{" "}
+                  <strong style={{ color: "#f15bb5" }}>Google</strong> (Gemini) ·{" "}
+                  <strong style={{ color: "#00bbf9" }}>Meta</strong> (Llama) — all LLMs.
+                </div>
+              </div>
+            )}
+          </PredictGate>
+        </PresSlide>
+      );
+    }
+    return null;
   }
 
   return (
